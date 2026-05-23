@@ -2,7 +2,7 @@ import Foundation
 
 struct TestCase {
     let name: String
-    let run: () throws -> Void
+    let run: @MainActor () async throws -> Void
 }
 
 enum TestFailure: Error, CustomStringConvertible {
@@ -22,12 +22,12 @@ func expect(_ condition: @autoclosure () -> Bool, _ message: String) throws {
     }
 }
 
-func runTests(_ tests: [TestCase]) {
+func runTests(_ tests: [TestCase]) async {
     var failures: [String] = []
 
     for test in tests {
         do {
-            try test.run()
+            try await test.run()
             print("PASS \(test.name)")
         } catch {
             failures.append("FAIL \(test.name): \(error)")

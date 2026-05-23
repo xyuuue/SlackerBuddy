@@ -1,3 +1,3 @@
 import Foundation
 
-runTests(settingsStoreTests + petStateMachineTests)
+await runTests(settingsStoreTests + petStateMachineTests)

@@ -1,6 +1,7 @@
 import Foundation
+import Observation
 
-public final class PetStateMachine {
+@MainActor @Observable public final class PetStateMachine {
     public private(set) var state: PetState = .idle
     public private(set) var bubbleText: String?
 
