@@ -36,8 +36,8 @@ final class AppRuntime {
         self.petWindowController = petWindowController ?? PetWindowController()
         self.notificationClient = notificationClient
 
-        self.petWindowController.onMoved = { [weak stateMachine] in
-            stateMachine?.handle(.dragged)
+        self.petWindowController.onMoved = { [weak self] in
+            self?.handlePetWindowMoved()
         }
     }
 
@@ -155,6 +155,15 @@ final class AppRuntime {
     private func completeTransientAnimationIfNeeded() {
         if stateMachine.state == .waking || stateMachine.state == .petting {
             stateMachine.handle(.animationCompleted)
+        }
+    }
+
+    private func handlePetWindowMoved() {
+        if stateMachine.state == .reminding {
+            scheduler.dismissActiveReminder()
+            stateMachine.handle(.dismissedReminder)
+        } else {
+            stateMachine.handle(.dragged)
         }
     }
 }

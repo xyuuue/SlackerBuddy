@@ -23,6 +23,9 @@ let appLifecycleSourceTests: [TestCase] = [
         try expect(controllerSource.contains("public var onMoved: (() -> Void)?"), "PetWindowController should expose a movement callback")
         try expect(controllerSource.contains("self?.onMoved?()"), "PetWindowController should invoke movement callback after window moves")
         try expect(runtimeSource.contains("petWindowController.onMoved"), "AppRuntime should bind window movement to pet state")
-        try expect(runtimeSource.contains("handle(.dragged)"), "Window movement should reset pet inactivity through dragged event")
+        try expect(runtimeSource.contains("handlePetWindowMoved()"), "AppRuntime should route window movement through reminder-aware handler")
+        try expect(runtimeSource.contains("scheduler.dismissActiveReminder()"), "Dragging during a reminder should restart the reminder scheduler")
+        try expect(runtimeSource.contains("handle(.dismissedReminder)"), "Dragging during a reminder should dismiss reminder state")
+        try expect(runtimeSource.contains("handle(.dragged)"), "Window movement should reset pet inactivity through dragged event outside reminders")
     }
 ]
