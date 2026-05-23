@@ -1,11 +1,23 @@
 import SwiftUI
+import MacPetCore
 
 @main
 struct MacPetApp: App {
+    @State private var settings = SettingsStore()
+    @State private var stateMachine = PetStateMachine()
+    @State private var scheduler = ReminderScheduler()
+
     var body: some Scene {
         WindowGroup("Mac Pet") {
-            Text("Mac Pet is starting up.")
-                .frame(width: 320, height: 180)
+            PetView(
+                settings: settings,
+                stateMachine: stateMachine,
+                scheduler: scheduler
+            )
+        }
+
+        Settings {
+            SettingsView(settings: settings)
         }
     }
 }

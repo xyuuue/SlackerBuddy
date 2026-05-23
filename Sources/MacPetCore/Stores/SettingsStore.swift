@@ -1,8 +1,10 @@
 import Foundation
+import Observation
 
-public final class SettingsStore {
+@MainActor @Observable public final class SettingsStore {
     public private(set) var preferences: PetPreferences
 
+    @ObservationIgnored
     private let defaults: UserDefaults
 
     public init(defaults: UserDefaults = .standard) {
