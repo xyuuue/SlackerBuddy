@@ -10,7 +10,6 @@ public struct PetView: View {
     private let animator = SpriteAnimator()
 
     @State private var animationStartedAt = Date()
-    @State private var schedulerStarted = false
 
     public init(
         settings: SettingsStore,
@@ -49,39 +48,9 @@ public struct PetView: View {
             }
             .padding(12)
             .fixedSize()
-            .onChange(of: context.date) { _, date in
-                tick(at: date)
-            }
-        }
-        .onAppear(perform: startSchedulerIfNeeded)
-        .onChange(of: settings.preferences.reminderIntervalMinutes) { _, minutes in
-            scheduler.updateInterval(minutes: minutes)
         }
         .onChange(of: stateMachine.state) { _, _ in
             animationStartedAt = Date()
-        }
-    }
-
-    private func startSchedulerIfNeeded() {
-        scheduler.onReminder = {
-            stateMachine.handle(.reminderFired)
-        }
-
-        guard !schedulerStarted else {
-            return
-        }
-
-        scheduler.start(intervalMinutes: settings.preferences.reminderIntervalMinutes)
-        schedulerStarted = true
-    }
-
-    private func tick(at date: Date) {
-        scheduler.tick()
-        stateMachine.tick(preferences: settings.preferences)
-
-        let elapsed = date.timeIntervalSince(animationStartedAt)
-        if elapsed >= 0.5, stateMachine.state == .waking || stateMachine.state == .petting {
-            stateMachine.handle(.animationCompleted)
         }
     }
 

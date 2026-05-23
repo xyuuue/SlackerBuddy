@@ -1,12 +1,12 @@
 import Foundation
 import UserNotifications
 
-public protocol NotificationClientProtocol {
+public protocol NotificationClientProtocol: Sendable {
     func requestAuthorization() async throws -> Bool
     func sendRestReminder()
 }
 
-public struct NotificationClient: NotificationClientProtocol {
+public struct NotificationClient: NotificationClientProtocol, Sendable {
     public init() {}
 
     public func requestAuthorization() async throws -> Bool {

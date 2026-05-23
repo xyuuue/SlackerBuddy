@@ -4,9 +4,20 @@ import MacPetCore
 
 public struct SettingsView: View {
     @Bindable private var settings: SettingsStore
+    private let onPetScaleChanged: ((Double) -> Void)?
+    private let onReminderIntervalChanged: ((Int) -> Void)?
+    private let onSystemNotificationsEnabledChanged: ((Bool) -> Void)?
 
-    public init(settings: SettingsStore) {
+    public init(
+        settings: SettingsStore,
+        onPetScaleChanged: ((Double) -> Void)? = nil,
+        onReminderIntervalChanged: ((Int) -> Void)? = nil,
+        onSystemNotificationsEnabledChanged: ((Bool) -> Void)? = nil
+    ) {
         self.settings = settings
+        self.onPetScaleChanged = onPetScaleChanged
+        self.onReminderIntervalChanged = onReminderIntervalChanged
+        self.onSystemNotificationsEnabledChanged = onSystemNotificationsEnabledChanged
     }
 
     public var body: some View {
@@ -47,7 +58,13 @@ public struct SettingsView: View {
     private var petScale: Binding<Double> {
         Binding(
             get: { settings.preferences.petScale },
-            set: { settings.updatePetScale($0) }
+            set: { value in
+                if let onPetScaleChanged {
+                    onPetScaleChanged(value)
+                } else {
+                    settings.updatePetScale(value)
+                }
+            }
         )
     }
 
@@ -68,7 +85,13 @@ public struct SettingsView: View {
     private var reminderIntervalMinutes: Binding<Int> {
         Binding(
             get: { settings.preferences.reminderIntervalMinutes },
-            set: { settings.updateReminderInterval(minutes: $0) }
+            set: { value in
+                if let onReminderIntervalChanged {
+                    onReminderIntervalChanged(value)
+                } else {
+                    settings.updateReminderInterval(minutes: value)
+                }
+            }
         )
     }
 
@@ -82,7 +105,13 @@ public struct SettingsView: View {
     private var systemNotificationsEnabled: Binding<Bool> {
         Binding(
             get: { settings.preferences.systemNotificationsEnabled },
-            set: { settings.updateSystemNotificationsEnabled($0) }
+            set: { value in
+                if let onSystemNotificationsEnabledChanged {
+                    onSystemNotificationsEnabledChanged(value)
+                } else {
+                    settings.updateSystemNotificationsEnabled(value)
+                }
+            }
         )
     }
 }
