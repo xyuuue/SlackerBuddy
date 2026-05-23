@@ -27,5 +27,26 @@ let appLifecycleSourceTests: [TestCase] = [
         try expect(runtimeSource.contains("scheduler.dismissActiveReminder()"), "Dragging during a reminder should restart the reminder scheduler")
         try expect(runtimeSource.contains("handle(.dismissedReminder)"), "Dragging during a reminder should dismiss reminder state")
         try expect(runtimeSource.contains("handle(.dragged)"), "Window movement should reset pet inactivity through dragged event outside reminders")
+    },
+    TestCase(name: "settings can reset pet position") {
+        let settingsSource = try String(
+            contentsOf: URL(fileURLWithPath: "Sources/MacPet/Views/SettingsView.swift"),
+            encoding: .utf8
+        )
+        let runtimeSource = try String(
+            contentsOf: URL(fileURLWithPath: "Sources/MacPet/App/AppRuntime.swift"),
+            encoding: .utf8
+        )
+        let windowSource = try String(
+            contentsOf: URL(fileURLWithPath: "Sources/MacPet/Windowing/PetWindowController.swift"),
+            encoding: .utf8
+        )
+
+        try expect(settingsSource.contains("Button(\"Reset pet position\")"), "Settings should expose reset pet position action")
+        try expect(settingsSource.contains("onResetPetPosition?()"), "Settings reset action should call its runtime callback")
+        try expect(runtimeSource.contains("func resetPetPosition()"), "AppRuntime should expose reset position action")
+        try expect(runtimeSource.contains("petWindowController.resetPosition"), "AppRuntime should delegate reset position to window controller")
+        try expect(windowSource.contains("func resetPosition"), "PetWindowController should support resetting persisted position")
+        try expect(windowSource.contains("defaults.removeObject(forKey: frameDefaultsKey)"), "Reset should clear persisted pet frame")
     }
 ]

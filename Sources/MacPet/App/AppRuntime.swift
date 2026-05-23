@@ -132,6 +132,10 @@ final class AppRuntime {
         requestNotificationAuthorizationIfNeeded()
     }
 
+    func resetPetPosition() {
+        petWindowController.resetPosition(scale: settings.preferences.petScale)
+    }
+
     private func requestNotificationAuthorizationIfNeeded() {
         guard settings.preferences.systemNotificationsEnabled, !notificationAuthorizationRequested else {
             return

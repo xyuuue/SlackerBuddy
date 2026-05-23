@@ -46,7 +46,8 @@ struct MacPetApp: App {
                 settings: runtime.settings,
                 onPetScaleChanged: { runtime.updatePetScale($0) },
                 onReminderIntervalChanged: { runtime.updateReminderInterval(minutes: $0) },
-                onSystemNotificationsEnabledChanged: { runtime.updateSystemNotificationsEnabled($0) }
+                onSystemNotificationsEnabledChanged: { runtime.updateSystemNotificationsEnabled($0) },
+                onResetPetPosition: { runtime.resetPetPosition() }
             )
         }
     }

@@ -7,17 +7,20 @@ public struct SettingsView: View {
     private let onPetScaleChanged: ((Double) -> Void)?
     private let onReminderIntervalChanged: ((Int) -> Void)?
     private let onSystemNotificationsEnabledChanged: ((Bool) -> Void)?
+    private let onResetPetPosition: (() -> Void)?
 
     public init(
         settings: SettingsStore,
         onPetScaleChanged: ((Double) -> Void)? = nil,
         onReminderIntervalChanged: ((Int) -> Void)? = nil,
-        onSystemNotificationsEnabledChanged: ((Bool) -> Void)? = nil
+        onSystemNotificationsEnabledChanged: ((Bool) -> Void)? = nil,
+        onResetPetPosition: (() -> Void)? = nil
     ) {
         self.settings = settings
         self.onPetScaleChanged = onPetScaleChanged
         self.onReminderIntervalChanged = onReminderIntervalChanged
         self.onSystemNotificationsEnabledChanged = onSystemNotificationsEnabledChanged
+        self.onResetPetPosition = onResetPetPosition
     }
 
     public var body: some View {
@@ -36,6 +39,10 @@ public struct SettingsView: View {
 
                 Toggle("Show pet on launch", isOn: showPetOnLaunch)
                 Toggle("Lower-distraction mode", isOn: lowerDistractionMode)
+
+                Button("Reset pet position") {
+                    onResetPetPosition?()
+                }
             }
 
             Section("Reminders") {

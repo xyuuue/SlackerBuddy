@@ -78,6 +78,16 @@ public final class PetWindowController {
         saveFrame()
     }
 
+    public func resetPosition(scale: Double) {
+        defaults.removeObject(forKey: frameDefaultsKey)
+        let frame = defaultFrame(scale: scale)
+
+        if let window {
+            window.setFrame(frame, display: true, animate: false)
+            saveFrame()
+        }
+    }
+
     public func saveFrame() {
         guard let window else {
             return
