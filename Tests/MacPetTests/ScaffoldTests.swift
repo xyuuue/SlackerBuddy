@@ -1,5 +1,5 @@
-struct ScaffoldTests {
-    func testTestTargetIsDiscoverable() -> Bool {
-        true
-    }
+import Testing
+
+@Test func testTestTargetIsDiscoverable() {
+    #expect(true)
 }
