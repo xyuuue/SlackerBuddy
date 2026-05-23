@@ -35,6 +35,10 @@ final class AppRuntime {
         self.scheduler = scheduler ?? ReminderScheduler()
         self.petWindowController = petWindowController ?? PetWindowController()
         self.notificationClient = notificationClient
+
+        self.petWindowController.onMoved = { [weak stateMachine] in
+            stateMachine?.handle(.dragged)
+        }
     }
 
     deinit {

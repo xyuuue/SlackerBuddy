@@ -4,6 +4,7 @@ import SwiftUI
 @MainActor
 public final class PetWindowController {
     public private(set) var window: NSWindow?
+    public var onMoved: (() -> Void)?
 
     private let defaults: UserDefaults
     private let frameDefaultsKey: String
@@ -97,6 +98,7 @@ public final class PetWindowController {
             ) { [weak self] _ in
                 Task { @MainActor in
                     self?.saveFrame()
+                    self?.onMoved?()
                 }
             },
             center.addObserver(
