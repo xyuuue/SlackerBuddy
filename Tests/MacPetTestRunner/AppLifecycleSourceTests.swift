@@ -134,6 +134,24 @@ let appLifecycleSourceTests: [TestCase] = [
         try expect(localizedStringsSource.contains("case minuteSuffix"), "Localized strings should include minute suffix")
         try expect(localizedStringsSource.contains("case systemLanguageOption"), "Localized strings should include system language option")
     },
+    TestCase(name: "settings exposes reminder and automatic action controls") {
+        let settingsSource = try String(
+            contentsOf: URL(fileURLWithPath: "Sources/MacPet/Views/SettingsView.swift"),
+            encoding: .utf8
+        )
+
+        try expect(settingsSource.contains("Toggle(strings.text(.enableRestReminders)"), "Settings should expose rest reminder toggle")
+        try expect(settingsSource.contains("Stepper(value: reminderIntervalMinutes"), "Settings should expose rest interval stepper")
+        try expect(settingsSource.contains("Toggle(strings.text(.restBlockingEnabled)"), "Settings should expose blocking toggle")
+        try expect(settingsSource.contains("Stepper(value: restBlockingDurationSeconds"), "Settings should expose blocking duration stepper")
+        try expect(settingsSource.contains("Stepper(value: restBlockingScalePercent"), "Settings should expose blocking scale stepper")
+        try expect(settingsSource.contains("Toggle(strings.text(.enableWaterReminders)"), "Settings should expose water toggle")
+        try expect(settingsSource.contains("Stepper(value: waterIntervalMinutes"), "Settings should expose water interval stepper")
+        try expect(settingsSource.contains("Stepper(value: bubbleDurationSeconds"), "Settings should expose bubble duration stepper")
+        try expect(settingsSource.contains("Toggle(strings.text(.enableAutomaticActions)"), "Settings should expose automatic actions toggle")
+        try expect(settingsSource.contains("Stepper(value: automaticActionIntervalMinutes"), "Settings should expose automatic frequency stepper")
+        try expect(settingsSource.contains("Toggle(strings.text(.enableAutomaticRunning)"), "Settings should expose automatic running toggle")
+    },
     TestCase(name: "Petdex sprite renderer caches atlas instead of decoding every frame") {
         let spriteViewSource = try String(
             contentsOf: URL(fileURLWithPath: "Sources/MacPet/Animation/PetSpriteSheetView.swift"),

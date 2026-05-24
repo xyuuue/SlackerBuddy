@@ -170,6 +170,76 @@ final class AppRuntime {
         }
     }
 
+    func updateRestRemindersEnabled(_ isEnabled: Bool) {
+        settings.updateRestRemindersEnabled(isEnabled)
+        if isEnabled {
+            restReminderScheduler.start(intervalMinutes: settings.preferences.reminderIntervalMinutes)
+        } else if stateMachine.activeReminderKind == .rest {
+            dismissActiveReminder()
+        }
+    }
+
+    func updateRestBlockingEnabled(_ isEnabled: Bool) {
+        settings.updateRestBlockingEnabled(isEnabled)
+        if !isEnabled, isRestBlockingOverlayActive {
+            hideRestBlockingOverlay()
+        }
+    }
+
+    func updateRestBlockingDuration(seconds: Int) {
+        settings.updateRestBlockingDuration(seconds: seconds)
+    }
+
+    func updateRestBlockingScale(percent: Int) {
+        settings.updateRestBlockingScale(percent: percent)
+        if isRestBlockingOverlayActive {
+            petWindowController.presentBlockingOverlay(scalePercent: settings.preferences.restBlockingScalePercent)
+        }
+    }
+
+    func updateWaterRemindersEnabled(_ isEnabled: Bool) {
+        settings.updateWaterRemindersEnabled(isEnabled)
+        waterReminderScheduler.update(
+            intervalMinutes: settings.preferences.waterIntervalMinutes,
+            isEnabled: settings.preferences.waterRemindersEnabled
+        )
+        if !isEnabled, stateMachine.activeReminderKind == .water {
+            dismissActiveReminder()
+        }
+    }
+
+    func updateWaterInterval(minutes: Int) {
+        settings.updateWaterInterval(minutes: minutes)
+        waterReminderScheduler.update(
+            intervalMinutes: settings.preferences.waterIntervalMinutes,
+            isEnabled: settings.preferences.waterRemindersEnabled
+        )
+    }
+
+    func updateBubbleDuration(seconds: Int) {
+        settings.updateBubbleDuration(seconds: seconds)
+    }
+
+    func updateAutomaticActionsEnabled(_ isEnabled: Bool) {
+        settings.updateAutomaticActionsEnabled(isEnabled)
+        automaticActionScheduler.update(
+            intervalMinutes: automaticActionInterval(),
+            isEnabled: settings.preferences.automaticActionsEnabled
+        )
+    }
+
+    func updateAutomaticActionInterval(minutes: Int) {
+        settings.updateAutomaticActionInterval(minutes: minutes)
+        automaticActionScheduler.update(
+            intervalMinutes: automaticActionInterval(),
+            isEnabled: settings.preferences.automaticActionsEnabled
+        )
+    }
+
+    func updateAutomaticRunningEnabled(_ isEnabled: Bool) {
+        settings.updateAutomaticRunningEnabled(isEnabled)
+    }
+
     func updateSystemNotificationsEnabled(_ isEnabled: Bool) {
         settings.updateSystemNotificationsEnabled(isEnabled)
         requestNotificationAuthorizationIfNeeded()
@@ -251,9 +321,11 @@ final class AppRuntime {
             return
         }
 
-        restReminderScheduler.tick()
-        if restReminderScheduler.isActive {
-            return
+        if settings.preferences.restRemindersEnabled {
+            restReminderScheduler.tick()
+            if restReminderScheduler.isActive {
+                return
+            }
         }
         waterReminderScheduler.tick()
     }
