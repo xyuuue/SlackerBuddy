@@ -17,11 +17,11 @@ struct MacPetApp: App {
 
     var body: some Scene {
         MenuBarExtra("Mac Pet", systemImage: "pawprint.fill") {
-            Button("Show Pet") {
+            Button(runtime.localizedStrings.text(.showPetMenu)) {
                 runtime.showPet()
             }
 
-            Button("Hide Pet") {
+            Button(runtime.localizedStrings.text(.hidePetMenu)) {
                 runtime.hidePet()
             }
 
@@ -37,7 +37,7 @@ struct MacPetApp: App {
 
             Divider()
 
-            Button("Quit") {
+            Button(runtime.localizedStrings.text(.quitMenu)) {
                 NSApp.terminate(nil)
             }
         }
@@ -54,6 +54,9 @@ struct MacPetApp: App {
                 onSelectedPetChanged: { runtime.updateSelectedPet($0) },
                 onResetPetPosition: { runtime.resetPetPosition() }
             )
+            .onAppear {
+                runtime.refreshPetCatalog()
+            }
         }
     }
 

@@ -3,6 +3,9 @@ public struct LocalizedStrings: Sendable {
         case settingsTitle
         case languageLabel
         case petLabel
+        case showPetMenu
+        case hidePetMenu
+        case quitMenu
         case petSectionTitle
         case petSizeLabel
         case showPetOnLaunch
@@ -38,6 +41,12 @@ public struct LocalizedStrings: Sendable {
             return "Language"
         case .petLabel:
             return "Pet"
+        case .showPetMenu:
+            return "Show Pet"
+        case .hidePetMenu:
+            return "Hide Pet"
+        case .quitMenu:
+            return "Quit"
         case .petSectionTitle:
             return "Pet"
         case .petSizeLabel:
@@ -69,6 +78,12 @@ public struct LocalizedStrings: Sendable {
             return "语言"
         case .petLabel:
             return "宠物"
+        case .showPetMenu:
+            return "显示宠物"
+        case .hidePetMenu:
+            return "隐藏宠物"
+        case .quitMenu:
+            return "退出"
         case .petSectionTitle:
             return "宠物"
         case .petSizeLabel:
