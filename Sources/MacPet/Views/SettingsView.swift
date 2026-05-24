@@ -5,6 +5,7 @@ import MacPetCore
 public struct SettingsView: View {
     @Bindable private var settings: SettingsStore
     private let availablePets: [PetAsset]
+    private let notificationPermissionStatus: NotificationPermissionStatus
     private let onPetScaleChanged: ((Double) -> Void)?
     private let onReminderIntervalChanged: ((Int) -> Void)?
     private let onRestRemindersEnabledChanged: ((Bool) -> Void)?
@@ -25,6 +26,7 @@ public struct SettingsView: View {
     public init(
         settings: SettingsStore,
         availablePets: [PetAsset],
+        notificationPermissionStatus: NotificationPermissionStatus = .off,
         onPetScaleChanged: ((Double) -> Void)? = nil,
         onReminderIntervalChanged: ((Int) -> Void)? = nil,
         onRestRemindersEnabledChanged: ((Bool) -> Void)? = nil,
@@ -44,6 +46,7 @@ public struct SettingsView: View {
     ) {
         self.settings = settings
         self.availablePets = availablePets
+        self.notificationPermissionStatus = notificationPermissionStatus
         self.onPetScaleChanged = onPetScaleChanged
         self.onReminderIntervalChanged = onReminderIntervalChanged
         self.onRestRemindersEnabledChanged = onRestRemindersEnabledChanged
@@ -123,7 +126,12 @@ public struct SettingsView: View {
                     Text("\(strings.text(.sleepDelayLabel)): \(settings.preferences.sleepDelayMinutes) \(strings.text(.minuteSuffix))")
                 }
 
-                Toggle(strings.text(.systemNotifications), isOn: systemNotificationsEnabled)
+                VStack(alignment: .leading, spacing: 4) {
+                    Toggle(strings.text(.systemNotifications), isOn: systemNotificationsEnabled)
+                    Text(notificationStatusText)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
             }
 
             Section(strings.text(.behaviorSectionTitle)) {
@@ -363,6 +371,21 @@ public struct SettingsView: View {
 
     private var strings: LocalizedStrings {
         LocalizedStrings(language: settings.preferences.language)
+    }
+
+    private var notificationStatusText: String {
+        switch notificationPermissionStatus {
+        case .off:
+            return strings.text(.notificationOff)
+        case .requesting:
+            return strings.text(.notificationRequesting)
+        case .enabled:
+            return strings.text(.notificationEnabled)
+        case .denied:
+            return strings.text(.notificationDenied)
+        case .failed:
+            return strings.text(.notificationFailed)
+        }
     }
 
     private func languageName(_ language: AppLanguage) -> String {

@@ -15,6 +15,7 @@ final class AppRuntime {
     let petWindowController: PetWindowController
     private(set) var availablePets: [PetAsset]
     private(set) var selectedPetAsset: PetAsset
+    private(set) var notificationPermissionStatus: NotificationPermissionStatus
 
     @ObservationIgnored
     private let notificationClient: NotificationClientProtocol
@@ -67,6 +68,7 @@ final class AppRuntime {
             from: availablePets,
             selectedPetID: settings.preferences.selectedPetID
         )
+        self.notificationPermissionStatus = settings.preferences.systemNotificationsEnabled ? .requesting : .off
         self.notificationClient = notificationClient
         self.petdexCatalog = petdexCatalog
 
@@ -259,7 +261,11 @@ final class AppRuntime {
 
     func updateSystemNotificationsEnabled(_ isEnabled: Bool) {
         settings.updateSystemNotificationsEnabled(isEnabled)
-        requestNotificationAuthorizationIfNeeded()
+        if isEnabled {
+            requestNotificationAuthorizationIfNeeded(force: true)
+        } else {
+            notificationPermissionStatus = .off
+        }
     }
 
     func refreshPetCatalog() {
@@ -296,21 +302,34 @@ final class AppRuntime {
         LocalizedStrings(language: settings.preferences.language)
     }
 
-    private func requestNotificationAuthorizationIfNeeded() {
-        guard settings.preferences.systemNotificationsEnabled, !notificationAuthorizationRequested else {
+    private func requestNotificationAuthorizationIfNeeded(force: Bool = false) {
+        guard settings.preferences.systemNotificationsEnabled else {
+            notificationPermissionStatus = .off
+            return
+        }
+        guard force || !notificationAuthorizationRequested else {
             return
         }
 
         notificationAuthorizationRequested = true
+        notificationPermissionStatus = .requesting
         Task { @MainActor [weak self] in
             guard let self else {
                 return
             }
 
             do {
-                _ = try await notificationClient.requestAuthorization()
+                switch try await notificationClient.requestAuthorization() {
+                case true:
+                    notificationPermissionStatus = .enabled
+                case false:
+                    notificationPermissionStatus = .denied
+                    notificationAuthorizationRequested = false
+                    settings.updateSystemNotificationsEnabled(false)
+                }
             } catch {
                 notificationAuthorizationRequested = false
+                notificationPermissionStatus = .failed
                 settings.updateSystemNotificationsEnabled(false)
             }
         }

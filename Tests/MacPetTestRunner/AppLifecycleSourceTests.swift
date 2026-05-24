@@ -153,6 +153,27 @@ let appLifecycleSourceTests: [TestCase] = [
         try expect(settingsSource.contains("Stepper(value: automaticActionIntervalMinutes"), "Settings should expose automatic frequency stepper")
         try expect(settingsSource.contains("Toggle(strings.text(.enableAutomaticRunning)"), "Settings should expose automatic running toggle")
     },
+    TestCase(name: "settings shows system notification feedback") {
+        let settingsSource = try String(
+            contentsOf: URL(fileURLWithPath: "Sources/MacPet/Views/SettingsView.swift"),
+            encoding: .utf8
+        )
+        let appRuntimeSource = try String(
+            contentsOf: URL(fileURLWithPath: "Sources/MacPet/App/AppRuntime.swift"),
+            encoding: .utf8
+        )
+        let macPetAppSource = try String(
+            contentsOf: URL(fileURLWithPath: "Sources/MacPet/App/MacPetApp.swift"),
+            encoding: .utf8
+        )
+
+        try expect(settingsSource.contains("notificationPermissionStatus"), "Settings should receive notification permission status")
+        try expect(settingsSource.contains("notificationStatusText"), "Settings should render notification status feedback")
+        try expect(appRuntimeSource.contains("notificationPermissionStatus"), "Runtime should track notification permission status")
+        try expect(appRuntimeSource.contains("case false"), "Runtime should handle denied notification authorization")
+        try expect(appRuntimeSource.contains("settings.updateSystemNotificationsEnabled(false)"), "Runtime should switch toggle off when authorization fails or is denied")
+        try expect(macPetAppSource.contains("notificationPermissionStatus: runtime.notificationPermissionStatus"), "App should pass runtime notification status into settings")
+    },
     TestCase(name: "Petdex sprite renderer caches atlas instead of decoding every frame") {
         let spriteViewSource = try String(
             contentsOf: URL(fileURLWithPath: "Sources/MacPet/Animation/PetSpriteSheetView.swift"),

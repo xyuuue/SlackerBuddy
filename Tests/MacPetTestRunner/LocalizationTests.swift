@@ -49,5 +49,9 @@ let localizationTests: [TestCase] = [
         try expect(en.text(.bubbleDurationLabel) == "Bubble duration", "Expected English bubble duration label")
         try expect(zh.text(.automaticActionFrequency) == "动作频率", "Expected Chinese action frequency label")
         try expect(en.text(.automaticActionFrequency) == "Action frequency", "Expected English action frequency label")
+        try expect(zh.text(.notificationRequesting) == "正在请求权限", "Expected Chinese requesting notification status")
+        try expect(en.text(.notificationEnabled) == "Notifications enabled", "Expected English enabled notification status")
+        try expect(zh.text(.notificationDenied) == "通知权限被拒绝", "Expected Chinese denied notification status")
+        try expect(en.text(.notificationFailed) == "Notification setup failed", "Expected English failed notification status")
     }
 ]

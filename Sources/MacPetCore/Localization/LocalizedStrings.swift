@@ -32,6 +32,11 @@ public struct LocalizedStrings: Sendable {
         case secondsSuffix
         case percentSuffix
         case behaviorSectionTitle
+        case notificationOff
+        case notificationRequesting
+        case notificationEnabled
+        case notificationDenied
+        case notificationFailed
     }
 
     private let language: AppLanguage
@@ -115,6 +120,16 @@ public struct LocalizedStrings: Sendable {
             return "%"
         case .behaviorSectionTitle:
             return "Behavior"
+        case .notificationOff:
+            return "Notifications off"
+        case .notificationRequesting:
+            return "Requesting permission"
+        case .notificationEnabled:
+            return "Notifications enabled"
+        case .notificationDenied:
+            return "Notifications denied"
+        case .notificationFailed:
+            return "Notification setup failed"
         }
     }
 
@@ -184,6 +199,16 @@ public struct LocalizedStrings: Sendable {
             return "%"
         case .behaviorSectionTitle:
             return "行为"
+        case .notificationOff:
+            return "通知已关闭"
+        case .notificationRequesting:
+            return "正在请求权限"
+        case .notificationEnabled:
+            return "通知已开启"
+        case .notificationDenied:
+            return "通知权限被拒绝"
+        case .notificationFailed:
+            return "通知设置失败"
         }
     }
 }

@@ -47,6 +47,7 @@ struct MacPetApp: App {
             SettingsView(
                 settings: runtime.settings,
                 availablePets: runtime.availablePets,
+                notificationPermissionStatus: runtime.notificationPermissionStatus,
                 onPetScaleChanged: { runtime.updatePetScale($0) },
                 onReminderIntervalChanged: { runtime.updateReminderInterval(minutes: $0) },
                 onRestRemindersEnabledChanged: { runtime.updateRestRemindersEnabled($0) },
