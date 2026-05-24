@@ -15,7 +15,7 @@ public struct NotificationClient: NotificationClientProtocol, Sendable {
 
     public func sendRestReminder() {
         let content = UNMutableNotificationContent()
-        content.title = "Mac Pet"
+        content.title = "SlackerBuddy"
         content.body = "休息一下吧"
         content.sound = .default
         let request = UNNotificationRequest(identifier: "mac-pet-rest-reminder-\(UUID().uuidString)", content: content, trigger: nil)

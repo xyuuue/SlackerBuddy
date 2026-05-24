@@ -16,7 +16,7 @@ struct MacPetApp: App {
     }
 
     var body: some Scene {
-        MenuBarExtra("Mac Pet", systemImage: "pawprint.fill") {
+        MenuBarExtra {
             Button(runtime.localizedStrings.text(.showPetMenu)) {
                 runtime.showPet()
             }
@@ -39,6 +39,13 @@ struct MacPetApp: App {
 
             Button(runtime.localizedStrings.text(.quitMenu)) {
                 NSApp.terminate(nil)
+            }
+        } label: {
+            if let icon = Self.menuBarIcon {
+                Image(nsImage: icon)
+                    .accessibilityLabel("SlackerBuddy")
+            } else {
+                Label("SlackerBuddy", systemImage: "pawprint.fill")
             }
         }
         .menuBarExtraStyle(.menu)
@@ -76,5 +83,16 @@ struct MacPetApp: App {
             get: { runtime.settings.preferences.lowerDistractionMode },
             set: { runtime.settings.updateLowerDistractionMode($0) }
         )
+    }
+
+    private static var menuBarIcon: NSImage? {
+        guard let url = Bundle.main.url(forResource: "SlackerBuddyMenuBarIcon", withExtension: "png"),
+              let image = NSImage(contentsOf: url) else {
+            return nil
+        }
+
+        image.isTemplate = true
+        image.size = NSSize(width: 18, height: 18)
+        return image
     }
 }

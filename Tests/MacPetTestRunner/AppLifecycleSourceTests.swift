@@ -84,6 +84,31 @@ let appLifecycleSourceTests: [TestCase] = [
         try expect(macPetAppSource.contains("Button(runtime.localizedStrings.text(.hidePetMenu))"), "Hide Pet menu label should use localized strings")
         try expect(macPetAppSource.contains("Button(runtime.localizedStrings.text(.quitMenu))"), "Quit menu label should use localized strings")
     },
+    TestCase(name: "app is branded as SlackerBuddy with custom paw icons") {
+        let macPetAppSource = try String(
+            contentsOf: URL(fileURLWithPath: "Sources/MacPet/App/MacPetApp.swift"),
+            encoding: .utf8
+        )
+        let notificationSource = try String(
+            contentsOf: URL(fileURLWithPath: "Sources/MacPetCore/Services/NotificationClient.swift"),
+            encoding: .utf8
+        )
+        let buildScript = try String(
+            contentsOf: URL(fileURLWithPath: "script/build_and_run.sh"),
+            encoding: .utf8
+        )
+
+        try expect(macPetAppSource.contains("SlackerBuddy"), "Menu bar app label should use SlackerBuddy")
+        try expect(macPetAppSource.contains("SlackerBuddyMenuBarIcon"), "Menu bar should attempt to load the custom paw toolbar icon")
+        try expect(notificationSource.contains("SlackerBuddy"), "Notification title should use SlackerBuddy")
+        try expect(buildScript.contains("APP_NAME=\"SlackerBuddy\""), "Packaged app should be named SlackerBuddy")
+        try expect(buildScript.contains("BUILD_PRODUCT=\"MacPet\""), "Build script should still copy the SwiftPM MacPet binary")
+        try expect(buildScript.contains("CFBundleIconFile"), "Packaged app should declare an app icon")
+        try expect(buildScript.contains("SlackerBuddy.icns"), "Packaged app should copy the SlackerBuddy app icon")
+        try expect(FileManager.default.fileExists(atPath: "Assets/SlackerBuddyAppIcon.png"), "Expected generated app icon asset")
+        try expect(FileManager.default.fileExists(atPath: "Assets/SlackerBuddyMenuBarIcon.png"), "Expected generated menu bar icon asset")
+        try expect(FileManager.default.fileExists(atPath: "Assets/SlackerBuddy.icns"), "Expected generated icns asset")
+    },
     TestCase(name: "settings refreshes Petdex catalog when opened") {
         let macPetAppSource = try String(
             contentsOf: URL(fileURLWithPath: "Sources/MacPet/App/MacPetApp.swift"),
