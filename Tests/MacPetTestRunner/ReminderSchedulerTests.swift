@@ -108,5 +108,21 @@ let reminderSchedulerTests: [TestCase] = [
         scheduler.tick()
 
         try expect(firedCount == 1, "expected active reminder not to fire repeatedly")
+    },
+    TestCase(name: "reminder scheduler stop prevents future fire") {
+        var current = Date(timeIntervalSince1970: 0)
+        var firedCount = 0
+        let scheduler = ReminderScheduler(now: { current })
+        scheduler.onReminder = {
+            firedCount += 1
+        }
+
+        scheduler.start(intervalMinutes: 1)
+        scheduler.stop()
+        current = Date(timeIntervalSince1970: 61)
+        scheduler.tick()
+
+        try expect(firedCount == 0, "expected stopped reminder scheduler not to fire")
+        try expect(scheduler.isReminderActive == false, "expected stopped scheduler to clear active state")
     }
 ]

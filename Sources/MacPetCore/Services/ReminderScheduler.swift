@@ -27,6 +27,10 @@ public final class ReminderScheduler {
         scheduler.update(intervalMinutes: minutes, isEnabled: true)
     }
 
+    public func stop() {
+        scheduler.stop()
+    }
+
     public func tick() {
         scheduler.tick()
     }

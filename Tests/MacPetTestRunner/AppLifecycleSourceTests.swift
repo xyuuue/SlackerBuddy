@@ -239,6 +239,7 @@ let appLifecycleSourceTests: [TestCase] = [
 
         try expect(appRuntimeSource.contains("guard stateMachine.activeReminderKind == nil else"), "Runtime should not tick reminder schedulers while another reminder is active")
         try expect(appRuntimeSource.contains("tickReminderSchedulers()"), "Runtime should separate reminder ticking from automatic action ticking")
+        try expect(appRuntimeSource.contains("restReminderScheduler.stop()"), "Disabling rest reminders should stop the legacy rest scheduler")
     },
     TestCase(name: "runtime completes automatic action animations") {
         let appRuntimeSource = try String(

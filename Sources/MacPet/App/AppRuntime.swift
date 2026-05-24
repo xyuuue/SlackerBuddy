@@ -174,8 +174,11 @@ final class AppRuntime {
         settings.updateRestRemindersEnabled(isEnabled)
         if isEnabled {
             restReminderScheduler.start(intervalMinutes: settings.preferences.reminderIntervalMinutes)
-        } else if stateMachine.activeReminderKind == .rest {
-            dismissActiveReminder()
+        } else {
+            restReminderScheduler.stop()
+            if stateMachine.activeReminderKind == .rest {
+                dismissActiveReminder()
+            }
         }
     }
 
