@@ -4,31 +4,52 @@ import MacPetCore
 
 public struct SettingsView: View {
     @Bindable private var settings: SettingsStore
+    private let availablePets: [PetAsset]
     private let onPetScaleChanged: ((Double) -> Void)?
     private let onReminderIntervalChanged: ((Int) -> Void)?
     private let onSystemNotificationsEnabledChanged: ((Bool) -> Void)?
+    private let onLanguageChanged: ((AppLanguage) -> Void)?
+    private let onSelectedPetChanged: ((String) -> Void)?
     private let onResetPetPosition: (() -> Void)?
 
     public init(
         settings: SettingsStore,
+        availablePets: [PetAsset],
         onPetScaleChanged: ((Double) -> Void)? = nil,
         onReminderIntervalChanged: ((Int) -> Void)? = nil,
         onSystemNotificationsEnabledChanged: ((Bool) -> Void)? = nil,
+        onLanguageChanged: ((AppLanguage) -> Void)? = nil,
+        onSelectedPetChanged: ((String) -> Void)? = nil,
         onResetPetPosition: (() -> Void)? = nil
     ) {
         self.settings = settings
+        self.availablePets = availablePets
         self.onPetScaleChanged = onPetScaleChanged
         self.onReminderIntervalChanged = onReminderIntervalChanged
         self.onSystemNotificationsEnabledChanged = onSystemNotificationsEnabledChanged
+        self.onLanguageChanged = onLanguageChanged
+        self.onSelectedPetChanged = onSelectedPetChanged
         self.onResetPetPosition = onResetPetPosition
     }
 
     public var body: some View {
         Form {
-            Section("Pet") {
+            Section(strings.text(.petSectionTitle)) {
+                Picker(strings.text(.languageLabel), selection: language) {
+                    ForEach(AppLanguage.allCases, id: \.self) { language in
+                        Text(languageName(language)).tag(language)
+                    }
+                }
+
+                Picker(strings.text(.petLabel), selection: selectedPetID) {
+                    ForEach(availablePets) { pet in
+                        Text(pet.displayName).tag(pet.id)
+                    }
+                }
+
                 VStack(alignment: .leading, spacing: 6) {
                     HStack {
-                        Text("Size")
+                        Text(strings.text(.petSizeLabel))
                         Spacer()
                         Text(settings.preferences.petScale, format: .number.precision(.fractionLength(1)))
                             .foregroundStyle(.secondary)
@@ -37,24 +58,24 @@ public struct SettingsView: View {
                     Slider(value: petScale, in: 0.5...3.0, step: 0.1)
                 }
 
-                Toggle("Show pet on launch", isOn: showPetOnLaunch)
-                Toggle("Lower-distraction mode", isOn: lowerDistractionMode)
+                Toggle(strings.text(.showPetOnLaunch), isOn: showPetOnLaunch)
+                Toggle(strings.text(.lowerDistractionMode), isOn: lowerDistractionMode)
 
-                Button("Reset pet position") {
+                Button(strings.text(.resetPetPosition)) {
                     onResetPetPosition?()
                 }
             }
 
-            Section("Reminders") {
+            Section(strings.text(.remindersSectionTitle)) {
                 Stepper(value: reminderIntervalMinutes, in: 1...240, step: 1) {
-                    Text("Reminder interval: \(settings.preferences.reminderIntervalMinutes) min")
+                    Text("\(strings.text(.reminderIntervalLabel)): \(settings.preferences.reminderIntervalMinutes) min")
                 }
 
                 Stepper(value: sleepDelayMinutes, in: 1...240, step: 1) {
-                    Text("Sleep delay: \(settings.preferences.sleepDelayMinutes) min")
+                    Text("\(strings.text(.sleepDelayLabel)): \(settings.preferences.sleepDelayMinutes) min")
                 }
 
-                Toggle("System notifications", isOn: systemNotificationsEnabled)
+                Toggle(strings.text(.systemNotifications), isOn: systemNotificationsEnabled)
             }
         }
         .formStyle(.grouped)
@@ -120,5 +141,46 @@ public struct SettingsView: View {
                 }
             }
         )
+    }
+
+    private var language: Binding<AppLanguage> {
+        Binding(
+            get: { settings.preferences.language },
+            set: { value in
+                if let onLanguageChanged {
+                    onLanguageChanged(value)
+                } else {
+                    settings.updateLanguage(value)
+                }
+            }
+        )
+    }
+
+    private var selectedPetID: Binding<String> {
+        Binding(
+            get: { settings.preferences.selectedPetID },
+            set: { value in
+                if let onSelectedPetChanged {
+                    onSelectedPetChanged(value)
+                } else {
+                    settings.updateSelectedPetID(value)
+                }
+            }
+        )
+    }
+
+    private var strings: LocalizedStrings {
+        LocalizedStrings(language: settings.preferences.language)
+    }
+
+    private func languageName(_ language: AppLanguage) -> String {
+        switch language {
+        case .system:
+            return "System"
+        case .chinese:
+            return "中文"
+        case .english:
+            return "English"
+        }
     }
 }

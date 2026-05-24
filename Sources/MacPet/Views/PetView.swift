@@ -7,6 +7,8 @@ public struct PetView: View {
     @Bindable private var stateMachine: PetStateMachine
 
     private let scheduler: ReminderScheduler
+    private let strings: LocalizedStrings
+    private let petAsset: PetAsset
     private let animator = SpriteAnimator()
 
     @State private var animationStartedAt = Date()
@@ -14,11 +16,15 @@ public struct PetView: View {
     public init(
         settings: SettingsStore,
         stateMachine: PetStateMachine,
-        scheduler: ReminderScheduler
+        scheduler: ReminderScheduler,
+        strings: LocalizedStrings,
+        petAsset: PetAsset
     ) {
         self.settings = settings
         self.stateMachine = stateMachine
         self.scheduler = scheduler
+        self.strings = strings
+        self.petAsset = petAsset
     }
 
     public var body: some View {
@@ -33,11 +39,11 @@ public struct PetView: View {
             VStack(spacing: 8) {
                 if let bubbleText = stateMachine.bubbleText,
                    !settings.preferences.lowerDistractionMode {
-                    BubbleView(text: bubbleText, onDismiss: dismissReminder)
+                    BubbleView(text: localizedBubbleText(fallback: bubbleText), onDismiss: dismissReminder)
                         .transition(.opacity.combined(with: .scale(scale: 0.96)))
                 }
 
-                PixelCatPlaceholderView(frameName: frame)
+                petContent(frameName: frame)
                     .frame(
                         width: 128 * settings.preferences.petScale,
                         height: 128 * settings.preferences.petScale
@@ -65,5 +71,22 @@ public struct PetView: View {
     private func dismissReminder() {
         scheduler.dismissActiveReminder()
         stateMachine.handle(.dismissedReminder)
+    }
+
+    @ViewBuilder
+    private func petContent(frameName: String) -> some View {
+        if let spriteSheetURL = petAsset.spriteSheetURL {
+            PetSpriteSheetView(
+                spriteSheetURL: spriteSheetURL,
+                state: stateMachine.state,
+                frameName: frameName
+            )
+        } else {
+            PixelCatPlaceholderView(frameName: frameName)
+        }
+    }
+
+    private func localizedBubbleText(fallback: String) -> String {
+        stateMachine.state == .reminding ? strings.text(.restReminderBubble) : fallback
     }
 }

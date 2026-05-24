@@ -42,11 +42,32 @@ let appLifecycleSourceTests: [TestCase] = [
             encoding: .utf8
         )
 
-        try expect(settingsSource.contains("Button(\"Reset pet position\")"), "Settings should expose reset pet position action")
+        try expect(settingsSource.contains("Button(strings.text(.resetPetPosition))"), "Settings should expose reset pet position action")
         try expect(settingsSource.contains("onResetPetPosition?()"), "Settings reset action should call its runtime callback")
         try expect(runtimeSource.contains("func resetPetPosition()"), "AppRuntime should expose reset position action")
         try expect(runtimeSource.contains("petWindowController.resetPosition"), "AppRuntime should delegate reset position to window controller")
         try expect(windowSource.contains("func resetPosition"), "PetWindowController should support resetting persisted position")
         try expect(windowSource.contains("defaults.removeObject(forKey: frameDefaultsKey)"), "Reset should clear persisted pet frame")
+    },
+    TestCase(name: "runtime connects settings to localized Petdex pets") {
+        let appRuntimeSource = try String(
+            contentsOf: URL(fileURLWithPath: "Sources/MacPet/App/AppRuntime.swift"),
+            encoding: .utf8
+        )
+        let petViewSource = try String(
+            contentsOf: URL(fileURLWithPath: "Sources/MacPet/Views/PetView.swift"),
+            encoding: .utf8
+        )
+        let settingsViewSource = try String(
+            contentsOf: URL(fileURLWithPath: "Sources/MacPet/Views/SettingsView.swift"),
+            encoding: .utf8
+        )
+
+        try expect(appRuntimeSource.contains("PetdexCatalog"), "Expected runtime to own PetdexCatalog")
+        try expect(appRuntimeSource.contains("refreshPetCatalog"), "Expected runtime to refresh Petdex pets")
+        try expect(appRuntimeSource.contains("selectedPetAsset"), "Expected runtime to resolve selected pet asset")
+        try expect(petViewSource.contains("PetSpriteSheetView"), "Expected PetView to render Petdex sprites")
+        try expect(settingsViewSource.contains("Picker(strings.text(.languageLabel)"), "Expected localized language picker")
+        try expect(settingsViewSource.contains("Picker(strings.text(.petLabel)"), "Expected localized pet picker")
     }
 ]

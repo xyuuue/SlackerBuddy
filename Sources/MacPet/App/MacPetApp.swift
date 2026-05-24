@@ -27,11 +27,13 @@ struct MacPetApp: App {
 
             Divider()
 
-            Toggle("Lower Distraction", isOn: lowerDistractionMode)
+            Toggle(runtime.localizedStrings.text(.lowerDistractionMode), isOn: lowerDistractionMode)
 
             Divider()
 
-            SettingsLink()
+            SettingsLink {
+                Text(runtime.localizedStrings.text(.settingsTitle))
+            }
 
             Divider()
 
@@ -44,9 +46,12 @@ struct MacPetApp: App {
         Settings {
             SettingsView(
                 settings: runtime.settings,
+                availablePets: runtime.availablePets,
                 onPetScaleChanged: { runtime.updatePetScale($0) },
                 onReminderIntervalChanged: { runtime.updateReminderInterval(minutes: $0) },
                 onSystemNotificationsEnabledChanged: { runtime.updateSystemNotificationsEnabled($0) },
+                onLanguageChanged: { runtime.updateLanguage($0) },
+                onSelectedPetChanged: { runtime.updateSelectedPet($0) },
                 onResetPetPosition: { runtime.resetPetPosition() }
             )
         }

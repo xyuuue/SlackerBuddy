@@ -10,9 +10,14 @@ final class AppRuntime {
     let stateMachine: PetStateMachine
     let scheduler: ReminderScheduler
     let petWindowController: PetWindowController
+    private(set) var availablePets: [PetAsset]
+    private(set) var selectedPetAsset: PetAsset
 
     @ObservationIgnored
     private let notificationClient: NotificationClientProtocol
+
+    @ObservationIgnored
+    private let petdexCatalog: PetdexCatalog
 
     @ObservationIgnored
     private var runtimeTask: Task<Void, Never>?
@@ -28,13 +33,23 @@ final class AppRuntime {
         stateMachine: PetStateMachine? = nil,
         scheduler: ReminderScheduler? = nil,
         petWindowController: PetWindowController? = nil,
+        petdexCatalog: PetdexCatalog = PetdexCatalog(),
         notificationClient: NotificationClientProtocol = NotificationClient()
     ) {
-        self.settings = settings ?? SettingsStore()
+        let settings = settings ?? SettingsStore()
+        let availablePets = petdexCatalog.loadPets()
+
+        self.settings = settings
         self.stateMachine = stateMachine ?? PetStateMachine()
         self.scheduler = scheduler ?? ReminderScheduler()
         self.petWindowController = petWindowController ?? PetWindowController()
+        self.availablePets = availablePets
+        self.selectedPetAsset = Self.selectedPetAsset(
+            from: availablePets,
+            selectedPetID: settings.preferences.selectedPetID
+        )
         self.notificationClient = notificationClient
+        self.petdexCatalog = petdexCatalog
 
         self.petWindowController.onMoved = { [weak self] in
             self?.handlePetWindowMoved()
@@ -108,7 +123,9 @@ final class AppRuntime {
         let rootView = PetView(
             settings: settings,
             stateMachine: stateMachine,
-            scheduler: scheduler
+            scheduler: scheduler,
+            strings: localizedStrings,
+            petAsset: selectedPetAsset
         )
         petWindowController.show(rootView: rootView, scale: settings.preferences.petScale)
     }
@@ -132,8 +149,31 @@ final class AppRuntime {
         requestNotificationAuthorizationIfNeeded()
     }
 
+    func refreshPetCatalog() {
+        availablePets = petdexCatalog.loadPets()
+        selectedPetAsset = Self.selectedPetAsset(
+            from: availablePets,
+            selectedPetID: settings.preferences.selectedPetID
+        )
+    }
+
+    func updateSelectedPet(_ petID: String) {
+        settings.updateSelectedPetID(petID)
+        selectedPetAsset = Self.selectedPetAsset(from: availablePets, selectedPetID: petID)
+        refreshPetWindowIfNeeded()
+    }
+
+    func updateLanguage(_ language: AppLanguage) {
+        settings.updateLanguage(language)
+        refreshPetWindowIfNeeded()
+    }
+
     func resetPetPosition() {
         petWindowController.resetPosition(scale: settings.preferences.petScale)
+    }
+
+    var localizedStrings: LocalizedStrings {
+        LocalizedStrings(language: settings.preferences.language)
     }
 
     private func requestNotificationAuthorizationIfNeeded() {
@@ -169,5 +209,18 @@ final class AppRuntime {
         } else {
             stateMachine.handle(.dragged)
         }
+    }
+
+    private func refreshPetWindowIfNeeded() {
+        guard petWindowController.window != nil else {
+            return
+        }
+
+        petWindowController.close()
+        showPet()
+    }
+
+    private static func selectedPetAsset(from pets: [PetAsset], selectedPetID: String) -> PetAsset {
+        pets.first { $0.id == selectedPetID } ?? PetAsset.builtin
     }
 }
