@@ -15,7 +15,9 @@ import Observation
             petScale: defaults.double(forKey: Keys.petScale, defaultValue: 1.0),
             showPetOnLaunch: defaults.bool(forKey: Keys.showPetOnLaunch, defaultValue: true),
             systemNotificationsEnabled: defaults.bool(forKey: Keys.systemNotificationsEnabled, defaultValue: false),
-            lowerDistractionMode: defaults.bool(forKey: Keys.lowerDistractionMode, defaultValue: false)
+            lowerDistractionMode: defaults.bool(forKey: Keys.lowerDistractionMode, defaultValue: false),
+            language: defaults.appLanguage(forKey: Keys.language),
+            selectedPetID: defaults.string(forKey: Keys.selectedPetID) ?? PetPreferences.defaultSelectedPetID
         )
     }
 
@@ -26,7 +28,9 @@ import Observation
             petScale: preferences.petScale,
             showPetOnLaunch: preferences.showPetOnLaunch,
             systemNotificationsEnabled: preferences.systemNotificationsEnabled,
-            lowerDistractionMode: preferences.lowerDistractionMode
+            lowerDistractionMode: preferences.lowerDistractionMode,
+            language: preferences.language,
+            selectedPetID: preferences.selectedPetID
         )
         persist()
     }
@@ -38,7 +42,9 @@ import Observation
             petScale: preferences.petScale,
             showPetOnLaunch: preferences.showPetOnLaunch,
             systemNotificationsEnabled: preferences.systemNotificationsEnabled,
-            lowerDistractionMode: preferences.lowerDistractionMode
+            lowerDistractionMode: preferences.lowerDistractionMode,
+            language: preferences.language,
+            selectedPetID: preferences.selectedPetID
         )
         persist()
     }
@@ -50,7 +56,9 @@ import Observation
             petScale: scale,
             showPetOnLaunch: preferences.showPetOnLaunch,
             systemNotificationsEnabled: preferences.systemNotificationsEnabled,
-            lowerDistractionMode: preferences.lowerDistractionMode
+            lowerDistractionMode: preferences.lowerDistractionMode,
+            language: preferences.language,
+            selectedPetID: preferences.selectedPetID
         )
         persist()
     }
@@ -70,6 +78,16 @@ import Observation
         persist()
     }
 
+    public func updateLanguage(_ language: AppLanguage) {
+        preferences.language = language
+        persist()
+    }
+
+    public func updateSelectedPetID(_ petID: String) {
+        preferences.selectedPetID = petID
+        persist()
+    }
+
     private func persist() {
         defaults.set(preferences.reminderIntervalMinutes, forKey: Keys.reminderIntervalMinutes)
         defaults.set(preferences.sleepDelayMinutes, forKey: Keys.sleepDelayMinutes)
@@ -77,6 +95,8 @@ import Observation
         defaults.set(preferences.showPetOnLaunch, forKey: Keys.showPetOnLaunch)
         defaults.set(preferences.systemNotificationsEnabled, forKey: Keys.systemNotificationsEnabled)
         defaults.set(preferences.lowerDistractionMode, forKey: Keys.lowerDistractionMode)
+        defaults.set(preferences.language.rawValue, forKey: Keys.language)
+        defaults.set(preferences.selectedPetID, forKey: Keys.selectedPetID)
     }
 
     private enum Keys {
@@ -86,6 +106,8 @@ import Observation
         static let showPetOnLaunch = "settings.showPetOnLaunch"
         static let systemNotificationsEnabled = "settings.systemNotificationsEnabled"
         static let lowerDistractionMode = "settings.lowerDistractionMode"
+        static let language = "settings.language"
+        static let selectedPetID = "settings.selectedPetID"
     }
 }
 
@@ -100,5 +122,12 @@ private extension UserDefaults {
 
     func bool(forKey key: String, defaultValue: Bool) -> Bool {
         object(forKey: key) == nil ? defaultValue : bool(forKey: key)
+    }
+
+    func appLanguage(forKey key: String) -> AppLanguage {
+        guard let rawValue = string(forKey: key) else {
+            return .system
+        }
+        return AppLanguage(rawValue: rawValue) ?? .system
     }
 }

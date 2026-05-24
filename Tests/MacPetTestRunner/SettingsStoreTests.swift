@@ -16,6 +16,20 @@ let settingsStoreTests: [TestCase] = [
         try expect(store.preferences.systemNotificationsEnabled == false, "Expected system notifications to default off")
         try expect(store.preferences.lowerDistractionMode == false, "Expected lower distraction mode to default off")
     },
+    TestCase(name: "saves language and selected pet id after reload from same suite") {
+        let suiteName = "MacPetTests.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+
+        let store = SettingsStore(defaults: defaults)
+        store.updateLanguage(.chinese)
+        store.updateSelectedPetID("siamese-cat")
+
+        let reloadedStore = SettingsStore(defaults: defaults)
+
+        try expect(reloadedStore.preferences.language == .chinese, "Expected language to persist")
+        try expect(reloadedStore.preferences.selectedPetID == "siamese-cat", "Expected selected pet id to persist")
+    },
     TestCase(name: "saves custom reminder interval and scale after reload from same suite") {
         let suiteName = "MacPetTests.\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suiteName)!

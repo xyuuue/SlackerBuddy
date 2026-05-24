@@ -1,3 +1,3 @@
 import Foundation
 
-await runTests(settingsStoreTests + petStateMachineTests + reminderSchedulerTests + spriteAnimatorTests + appLifecycleSourceTests)
+await runTests(localizationTests + settingsStoreTests + petStateMachineTests + reminderSchedulerTests + spriteAnimatorTests + appLifecycleSourceTests)
