@@ -13,8 +13,10 @@ public enum SpriteFrameMapping {
             return 4
         case .reminding, .waving:
             return 6
-        case .dragRunningLeft, .dragRunningRight, .automaticRunningLeft, .automaticRunningRight:
-            return 7
+        case .dragRunningRight, .automaticRunningRight:
+            return 1
+        case .dragRunningLeft, .automaticRunningLeft:
+            return 2
         }
     }
 }

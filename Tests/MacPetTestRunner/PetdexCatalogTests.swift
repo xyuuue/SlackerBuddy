@@ -49,6 +49,10 @@ let petdexCatalogTests: [TestCase] = [
         try expect(SpriteFrameMapping.row(for: .reminding) == 6, "Expected reminder waiting row")
         try expect(SpriteFrameMapping.row(for: .petting) == 3, "Expected petting waving row")
         try expect(SpriteFrameMapping.row(for: .waking) == 4, "Expected waking jumping row")
+        try expect(SpriteFrameMapping.row(for: .dragRunningRight) == 1, "Expected right running row")
+        try expect(SpriteFrameMapping.row(for: .automaticRunningRight) == 1, "Expected automatic right running row")
+        try expect(SpriteFrameMapping.row(for: .dragRunningLeft) == 2, "Expected left running row")
+        try expect(SpriteFrameMapping.row(for: .automaticRunningLeft) == 2, "Expected automatic left running row")
     }
 ]
 

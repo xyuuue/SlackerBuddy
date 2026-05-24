@@ -7,8 +7,9 @@ let spriteAnimatorTests: [TestCase] = [
 
         try expect(animator.frame(for: .idle, elapsed: 0, lowerDistractionMode: false) == "idle-0", "expected first idle frame")
         try expect(animator.frame(for: .idle, elapsed: 0.5, lowerDistractionMode: false) == "idle-1", "expected second idle frame")
-        try expect(animator.frame(for: .idle, elapsed: 1.0, lowerDistractionMode: false) == "tail-sway-0", "expected first tail sway frame")
-        try expect(animator.frame(for: .idle, elapsed: 2.0, lowerDistractionMode: false).hasPrefix("blink"), "expected idle cycle to blink automatically")
+        try expect(animator.frame(for: .idle, elapsed: 1.0, lowerDistractionMode: false) == "idle-2", "expected FuFu idle breathing frame")
+        try expect(animator.frame(for: .idle, elapsed: 2.0, lowerDistractionMode: false) == "idle-4", "expected FuFu idle blink frame")
+        try expect(animator.frame(for: .idle, elapsed: 2.5, lowerDistractionMode: false) == "idle-5", "expected FuFu idle blink recovery frame")
     },
     TestCase(name: "sprite animator uses sleep frames while sleeping") {
         let animator = SpriteAnimator()
@@ -43,10 +44,16 @@ let spriteAnimatorTests: [TestCase] = [
     TestCase(name: "sprite animator exposes directional running and waving frames") {
         let animator = SpriteAnimator()
 
-        try expect(animator.frame(for: .dragRunningLeft, elapsed: 0, lowerDistractionMode: false) == "running-left-0", "expected left drag running frame")
-        try expect(animator.frame(for: .dragRunningRight, elapsed: 0, lowerDistractionMode: false) == "running-right-0", "expected right drag running frame")
-        try expect(animator.frame(for: .automaticRunningLeft, elapsed: 0, lowerDistractionMode: false) == "running-left-0", "expected left automatic running frame")
-        try expect(animator.frame(for: .automaticRunningRight, elapsed: 0, lowerDistractionMode: false) == "running-right-0", "expected right automatic running frame")
+        try expect(animator.frame(for: .dragRunningLeft, elapsed: 0, lowerDistractionMode: false) == "run-left-0", "expected left drag running frame")
+        try expect(animator.frame(for: .dragRunningRight, elapsed: 0, lowerDistractionMode: false) == "run-right-0", "expected right drag running frame")
+        try expect(animator.frame(for: .automaticRunningLeft, elapsed: 0, lowerDistractionMode: false) == "run-left-0", "expected left automatic running frame")
+        try expect(animator.frame(for: .automaticRunningRight, elapsed: 0, lowerDistractionMode: false) == "run-right-0", "expected right automatic running frame")
         try expect(animator.frame(for: .waving, elapsed: 0, lowerDistractionMode: false) == "wave-0", "expected wave frame")
+    },
+    TestCase(name: "blink feedback uses FuFu idle row frames") {
+        let animator = SpriteAnimator()
+
+        try expect(animator.frame(for: .automaticBlink, elapsed: 0, lowerDistractionMode: false) == "idle-4", "expected automatic blink to use FuFu idle blink frame")
+        try expect(animator.frame(for: .blink, elapsed: 0.25, lowerDistractionMode: false) == "idle-5", "expected blink recovery to stay on FuFu idle row")
     }
 ]
