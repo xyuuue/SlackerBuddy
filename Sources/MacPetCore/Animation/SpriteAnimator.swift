@@ -24,12 +24,18 @@ public struct SpriteAnimator: Sendable {
             return ["wake-0", "wake-1"]
         case .petting:
             return ["petting-0", "petting-1"]
-        case .reminding:
-            return ["reminder-0", "reminder-1"]
-        case .automaticRunning where lowerDistractionMode:
+        case .reminding, .waving:
+            return state == .waving ? ["wave-0", "wave-1"] : ["reminder-0", "reminder-1"]
+        case .dragRunningLeft where lowerDistractionMode,
+            .automaticRunningLeft where lowerDistractionMode:
             return ["idle-0", "idle-1"]
-        case .automaticRunning:
-            return ["running-0", "running-1", "running-2", "running-3"]
+        case .dragRunningLeft, .automaticRunningLeft:
+            return ["running-left-0", "running-left-1", "running-left-2", "running-left-3"]
+        case .dragRunningRight where lowerDistractionMode,
+            .automaticRunningRight where lowerDistractionMode:
+            return ["idle-0", "idle-1"]
+        case .dragRunningRight, .automaticRunningRight:
+            return ["running-right-0", "running-right-1", "running-right-2", "running-right-3"]
         }
     }
 
@@ -39,7 +45,16 @@ public struct SpriteAnimator: Sendable {
             return 2.0
         case .idle:
             return 0.5
-        case .blink, .waking, .petting, .reminding, .automaticBlink, .automaticRunning:
+        case .blink,
+            .waking,
+            .petting,
+            .reminding,
+            .waving,
+            .dragRunningLeft,
+            .dragRunningRight,
+            .automaticBlink,
+            .automaticRunningLeft,
+            .automaticRunningRight:
             return 0.25
         case .sleeping:
             return 1.0

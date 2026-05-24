@@ -26,7 +26,7 @@ let appLifecycleSourceTests: [TestCase] = [
         try expect(runtimeSource.contains("handlePetWindowMoved()"), "AppRuntime should route window movement through reminder-aware handler")
         try expect(runtimeSource.contains("scheduler.dismissActiveReminder()"), "Dragging during a reminder should restart the reminder scheduler")
         try expect(runtimeSource.contains("handle(.dismissedReminder)"), "Dragging during a reminder should dismiss reminder state")
-        try expect(runtimeSource.contains("handle(.dragged)"), "Window movement should reset pet inactivity through dragged event outside reminders")
+        try expect(runtimeSource.contains("handle(.dragged("), "Window movement should reset pet inactivity through directional dragged event outside reminders")
     },
     TestCase(name: "settings can reset pet position") {
         let settingsSource = try String(

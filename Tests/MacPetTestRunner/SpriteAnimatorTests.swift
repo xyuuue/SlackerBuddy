@@ -30,7 +30,7 @@ let spriteAnimatorTests: [TestCase] = [
     TestCase(name: "automatic running is suppressed in lower distraction mode") {
         let animator = SpriteAnimator()
 
-        let frame = animator.frame(for: .automaticRunning, elapsed: 0, lowerDistractionMode: true)
+        let frame = animator.frame(for: .automaticRunningRight, elapsed: 0, lowerDistractionMode: true)
 
         try expect(frame.hasPrefix("idle"), "Expected lower distraction mode to suppress automatic running frames")
     },
@@ -38,5 +38,14 @@ let spriteAnimatorTests: [TestCase] = [
         let animator = SpriteAnimator()
 
         try expect(animator.frame(for: .petting, elapsed: 0.5, lowerDistractionMode: false) == "petting-0", "expected petting frames to cycle")
+    },
+    TestCase(name: "sprite animator exposes directional running and waving frames") {
+        let animator = SpriteAnimator()
+
+        try expect(animator.frame(for: .dragRunningLeft, elapsed: 0, lowerDistractionMode: false) == "running-left-0", "expected left drag running frame")
+        try expect(animator.frame(for: .dragRunningRight, elapsed: 0, lowerDistractionMode: false) == "running-right-0", "expected right drag running frame")
+        try expect(animator.frame(for: .automaticRunningLeft, elapsed: 0, lowerDistractionMode: false) == "running-left-0", "expected left automatic running frame")
+        try expect(animator.frame(for: .automaticRunningRight, elapsed: 0, lowerDistractionMode: false) == "running-right-0", "expected right automatic running frame")
+        try expect(animator.frame(for: .waving, elapsed: 0, lowerDistractionMode: false) == "wave-0", "expected wave frame")
     }
 ]

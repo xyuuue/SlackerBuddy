@@ -305,8 +305,12 @@ final class AppRuntime {
     private func completeTransientAnimationIfNeeded() {
         if stateMachine.state == .waking ||
             stateMachine.state == .petting ||
+            stateMachine.state == .waving ||
+            stateMachine.state == .dragRunningLeft ||
+            stateMachine.state == .dragRunningRight ||
             stateMachine.state == .automaticBlink ||
-            stateMachine.state == .automaticRunning {
+            stateMachine.state == .automaticRunningLeft ||
+            stateMachine.state == .automaticRunningRight {
             stateMachine.handle(.animationCompleted)
         }
     }
@@ -352,7 +356,7 @@ final class AppRuntime {
 
         let action: AutomaticPetAction
         if settings.preferences.automaticRunningEnabled && !settings.preferences.lowerDistractionMode {
-            action = .running
+            action = .running(.right)
         } else {
             action = .blink
         }
@@ -415,7 +419,7 @@ final class AppRuntime {
         if stateMachine.state == .reminding {
             dismissActiveReminder()
         } else {
-            stateMachine.handle(.dragged)
+            stateMachine.handle(.dragged(.right))
         }
     }
 

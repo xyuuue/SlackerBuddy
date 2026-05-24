@@ -11,9 +11,9 @@ public enum SpriteFrameMapping {
             return 3
         case .waking:
             return 4
-        case .reminding:
+        case .reminding, .waving:
             return 6
-        case .automaticRunning:
+        case .dragRunningLeft, .dragRunningRight, .automaticRunningLeft, .automaticRunningRight:
             return 7
         }
     }

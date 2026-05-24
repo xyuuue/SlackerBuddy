@@ -39,7 +39,7 @@ let petStateMachineTests: [TestCase] = [
 
         machine.handle(.reminderFired(.rest))
 
-        try expect(machine.state == .reminding, "expected reminding")
+        try expect(machine.state == .waving, "expected waving reminder feedback")
         try expect(machine.bubbleText == "休息一下吧", "expected reminder bubble")
     },
     TestCase(name: "state machine shows water reminder bubble") {
@@ -47,7 +47,7 @@ let petStateMachineTests: [TestCase] = [
 
         machine.handle(.reminderFired(.water))
 
-        try expect(machine.state == .reminding, "Expected water reminder to use reminding state")
+        try expect(machine.state == .waving, "Expected water reminder to wave first")
         try expect(machine.activeReminderKind == .water, "Expected active water reminder kind")
     },
     TestCase(name: "automatic action does not reset inactivity") {
@@ -110,10 +110,42 @@ let petStateMachineTests: [TestCase] = [
         let machine = PetStateMachine(now: { current })
 
         machine.handle(.reminderFired(.rest))
+        machine.handle(.animationCompleted)
         current = Date(timeIntervalSince1970: 120 * 60)
         machine.tick(preferences: PetPreferences(sleepDelayMinutes: 30))
 
         try expect(machine.state == .reminding, "expected reminder to stay visible after inactivity")
         try expect(machine.bubbleText == "休息一下吧", "expected reminder bubble to stay visible after inactivity")
+    },
+    TestCase(name: "pet state machine runs in drag direction") {
+        let machine = PetStateMachine(now: { Date(timeIntervalSince1970: 0) })
+
+        machine.handle(.dragged(.left))
+        try expect(machine.state == .dragRunningLeft, "expected left drag to show left running")
+
+        machine.handle(.animationCompleted)
+        machine.handle(.dragged(.right))
+        try expect(machine.state == .dragRunningRight, "expected right drag to show right running")
+    },
+    TestCase(name: "pet state machine waves before reminder settles") {
+        let machine = PetStateMachine(now: { Date(timeIntervalSince1970: 0) })
+
+        machine.handle(.reminderFired(.rest))
+        try expect(machine.state == .waving, "expected reminder to start with waving feedback")
+        try expect(machine.activeReminderKind == .rest, "expected active rest reminder")
+
+        machine.handle(.animationCompleted)
+        try expect(machine.state == .reminding, "expected waving reminder to settle into persistent reminder")
+        try expect(machine.bubbleText == "休息一下吧", "expected reminder bubble to stay visible")
+    },
+    TestCase(name: "automatic running carries direction") {
+        let machine = PetStateMachine(now: { Date(timeIntervalSince1970: 0) })
+
+        machine.handle(.automaticAction(.running(.left)))
+        try expect(machine.state == .automaticRunningLeft, "expected automatic left running")
+
+        machine.handle(.animationCompleted)
+        machine.handle(.automaticAction(.running(.right)))
+        try expect(machine.state == .automaticRunningRight, "expected automatic right running")
     }
 ]
