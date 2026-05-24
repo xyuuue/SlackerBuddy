@@ -25,6 +25,15 @@ let petdexCatalogTests: [TestCase] = [
 
         try expect(!pets.contains { $0.id == "broken-cat" }, "Expected missing sprite package to be skipped")
     },
+    TestCase(name: "catalog skips pet package with malformed metadata") {
+        let root = try temporaryDirectory()
+        try writeMalformedPetPackage(root: root, id: "bad-json-cat")
+
+        let pets = PetdexCatalog(rootDirectory: root).loadPets()
+
+        try expect(!pets.contains { $0.id == "bad-json-cat" }, "Expected malformed metadata package to be skipped")
+        try expect(pets.map(\.id) == [PetAsset.builtinID], "Expected malformed package to leave only builtin pet")
+    },
     TestCase(name: "catalog sorts pets by display name after builtin") {
         let root = try temporaryDirectory()
         try writePetPackage(root: root, id: "z-cat", displayName: "Z Cat", createSprite: true)
@@ -36,6 +45,7 @@ let petdexCatalogTests: [TestCase] = [
     },
     TestCase(name: "sprite mapping chooses expected atlas rows") {
         try expect(SpriteFrameMapping.row(for: .idle) == 0, "Expected idle row")
+        try expect(SpriteFrameMapping.row(for: .sleeping) == 8, "Expected sleeping row")
         try expect(SpriteFrameMapping.row(for: .reminding) == 6, "Expected reminder waiting row")
         try expect(SpriteFrameMapping.row(for: .petting) == 3, "Expected petting waving row")
         try expect(SpriteFrameMapping.row(for: .waking) == 4, "Expected waking jumping row")
@@ -67,4 +77,10 @@ private func writePetPackage(root: URL, id: String, displayName: String, createS
     if createSprite {
         try Data([0x89, 0x50, 0x4E, 0x47]).write(to: spritesDirectory.appendingPathComponent("atlas.png"))
     }
+}
+
+private func writeMalformedPetPackage(root: URL, id: String) throws {
+    let packageDirectory = root.appendingPathComponent(id, isDirectory: true)
+    try FileManager.default.createDirectory(at: packageDirectory, withIntermediateDirectories: true)
+    try "{".write(to: packageDirectory.appendingPathComponent("pet.json"), atomically: true, encoding: .utf8)
 }

@@ -6,7 +6,7 @@ public enum SpriteFrameMapping {
         case .idle, .blink:
             return 0
         case .sleeping:
-            return 1
+            return 8
         case .petting:
             return 3
         case .waking:
