@@ -198,6 +198,8 @@ let appLifecycleSourceTests: [TestCase] = [
         try expect(windowSource.contains("isProgrammaticFrameChange"), "Window controller should track programmatic frame changes")
         try expect(windowSource.contains("performProgrammaticFrameChange"), "Blocking overlay should wrap programmatic frame changes")
         try expect(windowSource.contains("guard self?.isProgrammaticFrameChange == false else"), "Programmatic frame changes should suppress movement callbacks")
+        try expect(windowSource.contains("pendingProgrammaticMoveNotifications"), "Programmatic frame changes should suppress deferred move notifications")
+        try expect(windowSource.contains("consumeProgrammaticMoveNotification()"), "Move notifications should consume programmatic suppression before calling onMoved")
     },
     TestCase(name: "runtime defers automatic actions while reminders or blocking overlay are active") {
         let appRuntimeSource = try String(
