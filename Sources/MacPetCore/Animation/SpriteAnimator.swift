@@ -15,7 +15,7 @@ public struct SpriteAnimator: Sendable {
     private func frames(for state: PetState, lowerDistractionMode: Bool) -> [String] {
         switch state {
         case .idle:
-            return ["idle-0", "idle-1", "tail-sway-0", "tail-sway-1"]
+            return ["idle-0", "idle-1", "tail-sway-0", "tail-sway-1", "blink-0", "blink-1"]
         case .blink, .automaticBlink:
             return ["blink-0", "blink-1"]
         case .sleeping:

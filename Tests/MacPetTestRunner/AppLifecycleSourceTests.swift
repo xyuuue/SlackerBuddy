@@ -20,10 +20,11 @@ let appLifecycleSourceTests: [TestCase] = [
             encoding: .utf8
         )
 
-        try expect(controllerSource.contains("public var onMoved: (() -> Void)?"), "PetWindowController should expose a movement callback")
-        try expect(controllerSource.contains("self?.onMoved?()"), "PetWindowController should invoke movement callback after window moves")
+        try expect(controllerSource.contains("public var onMoved: ((PetMovementDirection) -> Void)?"), "PetWindowController should expose a directional movement callback")
+        try expect(controllerSource.contains("movementDirection(from:"), "PetWindowController should infer movement direction")
+        try expect(controllerSource.contains("onMoved?(direction)"), "PetWindowController should invoke movement callback with direction after window moves")
         try expect(runtimeSource.contains("petWindowController.onMoved"), "AppRuntime should bind window movement to pet state")
-        try expect(runtimeSource.contains("handlePetWindowMoved()"), "AppRuntime should route window movement through reminder-aware handler")
+        try expect(runtimeSource.contains("handlePetWindowMoved(direction:"), "AppRuntime should route directional window movement through reminder-aware handler")
         try expect(runtimeSource.contains("scheduler.dismissActiveReminder()"), "Dragging during a reminder should restart the reminder scheduler")
         try expect(runtimeSource.contains("handle(.dismissedReminder)"), "Dragging during a reminder should dismiss reminder state")
         try expect(runtimeSource.contains("handle(.dragged("), "Window movement should reset pet inactivity through directional dragged event outside reminders")
@@ -266,7 +267,23 @@ let appLifecycleSourceTests: [TestCase] = [
         )
 
         try expect(appRuntimeSource.contains("stateMachine.state == .automaticBlink"), "Runtime should complete automatic blink animations")
-        try expect(appRuntimeSource.contains("stateMachine.state == .automaticRunning"), "Runtime should complete automatic running animations")
+        try expect(appRuntimeSource.contains("stateMachine.state == .automaticRunningLeft"), "Runtime should complete automatic left running animations")
+        try expect(appRuntimeSource.contains("stateMachine.state == .automaticRunningRight"), "Runtime should complete automatic right running animations")
+    },
+    TestCase(name: "runtime gives immediate automatic action and running feedback") {
+        let appRuntimeSource = try String(
+            contentsOf: URL(fileURLWithPath: "Sources/MacPet/App/AppRuntime.swift"),
+            encoding: .utf8
+        )
+        let windowSource = try String(
+            contentsOf: URL(fileURLWithPath: "Sources/MacPet/Windowing/PetWindowController.swift"),
+            encoding: .utf8
+        )
+
+        try expect(appRuntimeSource.contains("triggerAutomaticActionFeedback()"), "Runtime should trigger automatic feedback immediately when enabled")
+        try expect(appRuntimeSource.contains("performAutomaticRun(direction:"), "Runtime should move the pet during automatic running")
+        try expect(windowSource.contains("moveHorizontally(points:"), "Window controller should expose programmatic horizontal movement")
+        try expect(windowSource.contains("performProgrammaticFrameChange"), "Automatic movement should be programmatic and not count as user drag")
     },
     TestCase(name: "pet view auto-hides reminder bubble without dismissing reminder") {
         let petViewSource = try String(

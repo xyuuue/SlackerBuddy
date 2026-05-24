@@ -47,6 +47,7 @@ public struct PetView: View {
                 }
 
                 petContent(frameName: frame)
+                    .scaleEffect(x: shouldFaceLeft(frameName: frame) ? -1 : 1, y: 1)
                     .frame(
                         width: 128 * settings.preferences.petScale,
                         height: 128 * settings.preferences.petScale
@@ -110,6 +111,10 @@ public struct PetView: View {
         case nil:
             return fallback
         }
+    }
+
+    private func shouldFaceLeft(frameName: String) -> Bool {
+        frameName.contains("left")
     }
 
     private func scheduleBubbleAutoHide() {

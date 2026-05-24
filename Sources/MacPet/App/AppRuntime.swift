@@ -35,7 +35,13 @@ final class AppRuntime {
     private var blockingOverlayTask: Task<Void, Never>?
 
     @ObservationIgnored
+    private var automaticRunTask: Task<Void, Never>?
+
+    @ObservationIgnored
     private var isRestBlockingOverlayActive = false
+
+    @ObservationIgnored
+    private var nextAutomaticRunDirection: PetMovementDirection = .right
 
     init(
         settings: SettingsStore? = nil,
@@ -65,7 +71,7 @@ final class AppRuntime {
         self.petdexCatalog = petdexCatalog
 
         self.petWindowController.onMoved = { [weak self] in
-            self?.handlePetWindowMoved()
+            self?.handlePetWindowMoved(direction: $0)
         }
     }
 
@@ -138,6 +144,8 @@ final class AppRuntime {
         runtimeTask = nil
         blockingOverlayTask?.cancel()
         blockingOverlayTask = nil
+        automaticRunTask?.cancel()
+        automaticRunTask = nil
         petWindowController.close()
     }
 
@@ -229,6 +237,9 @@ final class AppRuntime {
             intervalMinutes: automaticActionInterval(),
             isEnabled: settings.preferences.automaticActionsEnabled
         )
+        if isEnabled {
+            triggerAutomaticActionFeedback()
+        }
     }
 
     func updateAutomaticActionInterval(minutes: Int) {
@@ -241,6 +252,9 @@ final class AppRuntime {
 
     func updateAutomaticRunningEnabled(_ isEnabled: Bool) {
         settings.updateAutomaticRunningEnabled(isEnabled)
+        if isEnabled, settings.preferences.automaticActionsEnabled {
+            triggerAutomaticActionFeedback(preferRunning: true)
+        }
     }
 
     func updateSystemNotificationsEnabled(_ isEnabled: Bool) {
@@ -356,12 +370,53 @@ final class AppRuntime {
 
         let action: AutomaticPetAction
         if settings.preferences.automaticRunningEnabled && !settings.preferences.lowerDistractionMode {
-            action = .running(.right)
+            let direction = nextAutomaticRunDirectionValue()
+            action = .running(direction)
+            performAutomaticRun(direction: direction)
         } else {
             action = .blink
         }
         stateMachine.handle(.automaticAction(action))
         automaticActionScheduler.dismissActive()
+    }
+
+    private func triggerAutomaticActionFeedback(preferRunning: Bool = false) {
+        guard shouldTickAutomaticActionScheduler else {
+            return
+        }
+
+        if preferRunning, settings.preferences.automaticRunningEnabled, !settings.preferences.lowerDistractionMode {
+            let direction = nextAutomaticRunDirectionValue()
+            stateMachine.handle(.automaticAction(.running(direction)))
+            performAutomaticRun(direction: direction)
+        } else {
+            stateMachine.handle(.automaticAction(.blink))
+        }
+    }
+
+    private func performAutomaticRun(direction: PetMovementDirection) {
+        automaticRunTask?.cancel()
+        automaticRunTask = Task { @MainActor [weak self] in
+            guard let self else {
+                return
+            }
+
+            let step = direction == .left ? -14.0 : 14.0
+            for _ in 0..<6 {
+                guard !Task.isCancelled else {
+                    return
+                }
+
+                petWindowController.moveHorizontally(points: step)
+                try? await Task.sleep(nanoseconds: 120_000_000)
+            }
+        }
+    }
+
+    private func nextAutomaticRunDirectionValue() -> PetMovementDirection {
+        let direction = nextAutomaticRunDirection
+        nextAutomaticRunDirection = direction == .left ? .right : .left
+        return direction
     }
 
     private var shouldTickAutomaticActionScheduler: Bool {
@@ -415,11 +470,11 @@ final class AppRuntime {
         stateMachine.handle(.dismissedReminder)
     }
 
-    private func handlePetWindowMoved() {
+    private func handlePetWindowMoved(direction: PetMovementDirection) {
         if stateMachine.state == .reminding {
             dismissActiveReminder()
         } else {
-            stateMachine.handle(.dragged(.right))
+            stateMachine.handle(.dragged(direction))
         }
     }
 

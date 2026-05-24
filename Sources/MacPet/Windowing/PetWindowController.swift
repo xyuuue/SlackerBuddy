@@ -1,10 +1,11 @@
 import AppKit
 import SwiftUI
+import MacPetCore
 
 @MainActor
 public final class PetWindowController {
     public private(set) var window: NSWindow?
-    public var onMoved: (() -> Void)?
+    public var onMoved: ((PetMovementDirection) -> Void)?
 
     private let defaults: UserDefaults
     private let frameDefaultsKey: String
@@ -12,6 +13,7 @@ public final class PetWindowController {
     private var preBlockingFrame: NSRect?
     private var isBlockingOverlayActive = false
     private var isProgrammaticFrameChange = false
+    private var lastObservedFrame: NSRect?
 
     public init(
         defaults: UserDefaults = .standard,
@@ -50,6 +52,7 @@ public final class PetWindowController {
         window.contentView = hostingView
 
         self.window = window
+        lastObservedFrame = frame
         observe(window: window)
         window.orderFrontRegardless()
     }
@@ -78,6 +81,7 @@ public final class PetWindowController {
         var frame = window.frame
         frame.size = size
         window.setFrame(frame, display: true, animate: false)
+        lastObservedFrame = frame
         saveFrame()
     }
 
@@ -103,6 +107,7 @@ public final class PetWindowController {
 
         performProgrammaticFrameChange {
             window.setFrame(frame, display: true, animate: false)
+            lastObservedFrame = frame
         }
     }
 
@@ -114,6 +119,7 @@ public final class PetWindowController {
         let frame = preBlockingFrame ?? defaultFrame(scale: scale)
         performProgrammaticFrameChange {
             window.setFrame(frame, display: true, animate: false)
+            lastObservedFrame = frame
         }
         preBlockingFrame = nil
         isBlockingOverlayActive = false
@@ -125,7 +131,24 @@ public final class PetWindowController {
 
         if let window {
             window.setFrame(frame, display: true, animate: false)
+            lastObservedFrame = frame
             saveFrame()
+        }
+    }
+
+    public func moveHorizontally(points: Double) {
+        guard let window else {
+            return
+        }
+
+        let screenFrame = window.screen?.visibleFrame ?? NSScreen.main?.visibleFrame ?? NSRect(x: 0, y: 0, width: 800, height: 600)
+        var frame = window.frame
+        let proposedX = frame.origin.x + CGFloat(points)
+        frame.origin.x = min(max(proposedX, screenFrame.minX), screenFrame.maxX - frame.width)
+
+        performProgrammaticFrameChange {
+            window.setFrame(frame, display: true, animate: false)
+            lastObservedFrame = frame
         }
     }
 
@@ -156,8 +179,14 @@ public final class PetWindowController {
                         return
                     }
 
-                    self?.saveFrame()
-                    self?.onMoved?()
+                    guard let self, let window = self.window else {
+                        return
+                    }
+
+                    let direction = self.movementDirection(from: self.lastObservedFrame, to: window.frame)
+                    self.lastObservedFrame = window.frame
+                    self.saveFrame()
+                    self.onMoved?(direction)
                 }
             },
             center.addObserver(
@@ -186,6 +215,7 @@ public final class PetWindowController {
            closingWindow === window {
             saveFrame()
             removeObservers()
+            lastObservedFrame = nil
             window = nil
         }
     }
@@ -204,6 +234,14 @@ public final class PetWindowController {
                 self?.isProgrammaticFrameChange = false
             }
         }
+    }
+
+    private func movementDirection(from oldFrame: NSRect?, to newFrame: NSRect) -> PetMovementDirection {
+        guard let oldFrame else {
+            return .right
+        }
+
+        return newFrame.origin.x < oldFrame.origin.x ? .left : .right
     }
 
     private func restoredFrame() -> NSRect? {

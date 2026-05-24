@@ -8,6 +8,7 @@ let spriteAnimatorTests: [TestCase] = [
         try expect(animator.frame(for: .idle, elapsed: 0, lowerDistractionMode: false) == "idle-0", "expected first idle frame")
         try expect(animator.frame(for: .idle, elapsed: 0.5, lowerDistractionMode: false) == "idle-1", "expected second idle frame")
         try expect(animator.frame(for: .idle, elapsed: 1.0, lowerDistractionMode: false) == "tail-sway-0", "expected first tail sway frame")
+        try expect(animator.frame(for: .idle, elapsed: 2.0, lowerDistractionMode: false).hasPrefix("blink"), "expected idle cycle to blink automatically")
     },
     TestCase(name: "sprite animator uses sleep frames while sleeping") {
         let animator = SpriteAnimator()
