@@ -12,7 +12,6 @@ public final class PetWindowController {
     private var preBlockingFrame: NSRect?
     private var isBlockingOverlayActive = false
     private var isProgrammaticFrameChange = false
-    private var pendingProgrammaticMoveNotifications = 0
 
     public init(
         defaults: UserDefaults = .standard,
@@ -153,9 +152,6 @@ public final class PetWindowController {
                 queue: .main
             ) { [weak self] _ in
                 Task { @MainActor in
-                    if self?.consumeProgrammaticMoveNotification() == true {
-                        return
-                    }
                     guard self?.isProgrammaticFrameChange == false else {
                         return
                     }
@@ -202,22 +198,12 @@ public final class PetWindowController {
 
     private func performProgrammaticFrameChange(_ change: () -> Void) {
         isProgrammaticFrameChange = true
-        pendingProgrammaticMoveNotifications += 1
         change()
         DispatchQueue.main.async { [weak self] in
             Task { @MainActor in
                 self?.isProgrammaticFrameChange = false
             }
         }
-    }
-
-    private func consumeProgrammaticMoveNotification() -> Bool {
-        guard pendingProgrammaticMoveNotifications > 0 else {
-            return false
-        }
-
-        pendingProgrammaticMoveNotifications -= 1
-        return true
     }
 
     private func restoredFrame() -> NSRect? {

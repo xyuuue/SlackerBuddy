@@ -216,8 +216,8 @@ let appLifecycleSourceTests: [TestCase] = [
         try expect(windowSource.contains("isProgrammaticFrameChange"), "Window controller should track programmatic frame changes")
         try expect(windowSource.contains("performProgrammaticFrameChange"), "Blocking overlay should wrap programmatic frame changes")
         try expect(windowSource.contains("guard self?.isProgrammaticFrameChange == false else"), "Programmatic frame changes should suppress movement callbacks")
-        try expect(windowSource.contains("pendingProgrammaticMoveNotifications"), "Programmatic frame changes should suppress deferred move notifications")
-        try expect(windowSource.contains("consumeProgrammaticMoveNotification()"), "Move notifications should consume programmatic suppression before calling onMoved")
+        try expect(!windowSource.contains("pendingProgrammaticMoveNotifications"), "Programmatic suppression should not leave stale pending movement notifications")
+        try expect(!windowSource.contains("consumeProgrammaticMoveNotification()"), "Programmatic suppression should not consume the next real user move")
         try expect(!windowSource.contains("window.setFrame(frame, display: true, animate: true)"), "Blocking overlay frame changes should not animate through extra move notifications")
 
         guard let moveObserverStart = windowSource.range(of: "forName: NSWindow.didMoveNotification") else {
@@ -228,14 +228,14 @@ let appLifecycleSourceTests: [TestCase] = [
         }
 
         let moveObserver = String(windowSource[moveObserverStart.lowerBound..<resizeObserverStart.lowerBound])
-        guard let consumeRange = moveObserver.range(of: "consumeProgrammaticMoveNotification()") else {
-            throw TestFailure.failed("Expected move observer to consume programmatic notifications")
+        guard let guardRange = moveObserver.range(of: "guard self?.isProgrammaticFrameChange == false else") else {
+            throw TestFailure.failed("Expected move observer to suppress programmatic notifications")
         }
         guard let saveRange = moveObserver.range(of: "saveFrame()") else {
             throw TestFailure.failed("Expected move observer to save user-moved frames")
         }
 
-        try expect(consumeRange.lowerBound < saveRange.lowerBound, "Move observer should suppress programmatic notifications before saving frames")
+        try expect(guardRange.lowerBound < saveRange.lowerBound, "Move observer should suppress programmatic notifications before saving frames")
     },
     TestCase(name: "runtime defers automatic actions while reminders or blocking overlay are active") {
         let appRuntimeSource = try String(
