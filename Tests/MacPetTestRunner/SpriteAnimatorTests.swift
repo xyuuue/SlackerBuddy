@@ -27,6 +27,13 @@ let spriteAnimatorTests: [TestCase] = [
         try expect(animator.frame(for: .reminding, elapsed: 0, lowerDistractionMode: false) == "reminder-0", "expected first reminder frame")
         try expect(animator.frame(for: .reminding, elapsed: 0.25, lowerDistractionMode: false) == "reminder-1", "expected second reminder frame")
     },
+    TestCase(name: "automatic running is suppressed in lower distraction mode") {
+        let animator = SpriteAnimator()
+
+        let frame = animator.frame(for: .automaticRunning, elapsed: 0, lowerDistractionMode: true)
+
+        try expect(frame.hasPrefix("idle"), "Expected lower distraction mode to suppress automatic running frames")
+    },
     TestCase(name: "sprite animator cycles frames instead of going out of range") {
         let animator = SpriteAnimator()
 

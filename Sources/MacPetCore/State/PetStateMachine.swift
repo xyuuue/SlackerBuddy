@@ -4,6 +4,7 @@ import Observation
 @MainActor @Observable public final class PetStateMachine {
     public private(set) var state: PetState = .idle
     public private(set) var bubbleText: String?
+    public private(set) var activeReminderKind: ReminderKind?
 
     private var lastInteractionAt: Date
     private let now: () -> Date
@@ -35,15 +36,23 @@ import Observation
             recordInteraction()
             state = state == .sleeping ? .waking : .idle
             bubbleText = nil
-        case .reminderFired:
+        case let .reminderFired(kind):
             state = .reminding
-            bubbleText = "休息一下吧"
+            activeReminderKind = kind
+            bubbleText = kind == .water ? "喝点水吧" : "休息一下吧"
         case .dismissedReminder:
             recordInteraction()
             state = .idle
             bubbleText = nil
+            activeReminderKind = nil
+        case let .automaticAction(action):
+            guard state == .idle else {
+                return
+            }
+
+            state = action == .running ? .automaticRunning : .automaticBlink
         case .animationCompleted:
-            if state == .waking || state == .petting || state == .blink {
+            if state == .waking || state == .petting || state == .blink || state == .automaticBlink || state == .automaticRunning {
                 state = .idle
             }
         }

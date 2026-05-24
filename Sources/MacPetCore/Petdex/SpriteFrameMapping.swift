@@ -3,7 +3,7 @@ import Foundation
 public enum SpriteFrameMapping {
     public static func row(for state: PetState) -> Int {
         switch state {
-        case .idle, .blink:
+        case .idle, .blink, .automaticBlink:
             return 0
         case .sleeping:
             return 8
@@ -13,6 +13,8 @@ public enum SpriteFrameMapping {
             return 4
         case .reminding:
             return 6
+        case .automaticRunning:
+            return 7
         }
     }
 }

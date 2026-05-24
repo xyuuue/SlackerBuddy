@@ -78,7 +78,7 @@ final class AppRuntime {
                 return
             }
 
-            stateMachine.handle(.reminderFired)
+            stateMachine.handle(.reminderFired(.rest))
             if settings.preferences.systemNotificationsEnabled {
                 notificationClient.sendRestReminder()
             }

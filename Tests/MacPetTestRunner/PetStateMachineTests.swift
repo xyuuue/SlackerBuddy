@@ -37,15 +37,34 @@ let petStateMachineTests: [TestCase] = [
     TestCase(name: "pet state machine shows bubble on reminder") {
         let machine = PetStateMachine(now: { Date(timeIntervalSince1970: 0) })
 
-        machine.handle(.reminderFired)
+        machine.handle(.reminderFired(.rest))
 
         try expect(machine.state == .reminding, "expected reminding")
         try expect(machine.bubbleText == "休息一下吧", "expected reminder bubble")
     },
+    TestCase(name: "state machine shows water reminder bubble") {
+        let machine = PetStateMachine(now: { Date(timeIntervalSince1970: 0) })
+
+        machine.handle(.reminderFired(.water))
+
+        try expect(machine.state == .reminding, "Expected water reminder to use reminding state")
+        try expect(machine.activeReminderKind == .water, "Expected active water reminder kind")
+    },
+    TestCase(name: "automatic action does not reset inactivity") {
+        var current = Date(timeIntervalSince1970: 0)
+        let machine = PetStateMachine(now: { current })
+
+        current = Date(timeIntervalSince1970: 60)
+        machine.handle(.automaticAction(.blink))
+        current = Date(timeIntervalSince1970: 30 * 60)
+        machine.tick(preferences: PetPreferences(sleepDelayMinutes: 30))
+
+        try expect(machine.state == .sleeping, "Expected automatic action not to reset user inactivity")
+    },
     TestCase(name: "pet state machine dismisses reminder") {
         let machine = PetStateMachine(now: { Date(timeIntervalSince1970: 0) })
 
-        machine.handle(.reminderFired)
+        machine.handle(.reminderFired(.rest))
         machine.handle(.dismissedReminder)
 
         try expect(machine.state == .idle, "expected idle")
@@ -58,7 +77,7 @@ let petStateMachineTests: [TestCase] = [
         machine.handle(.animationCompleted)
         try expect(machine.state == .idle, "expected idle after petting animation")
 
-        machine.handle(.reminderFired)
+        machine.handle(.reminderFired(.rest))
         machine.handle(.animationCompleted)
         try expect(machine.state == .reminding, "expected reminder to stay visible")
         try expect(machine.bubbleText == "休息一下吧", "expected reminder bubble to stay visible")
@@ -90,7 +109,7 @@ let petStateMachineTests: [TestCase] = [
         var current = Date(timeIntervalSince1970: 0)
         let machine = PetStateMachine(now: { current })
 
-        machine.handle(.reminderFired)
+        machine.handle(.reminderFired(.rest))
         current = Date(timeIntervalSince1970: 120 * 60)
         machine.tick(preferences: PetPreferences(sleepDelayMinutes: 30))
 

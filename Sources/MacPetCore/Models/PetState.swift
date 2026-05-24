@@ -7,13 +7,21 @@ public enum PetState: Equatable, Sendable {
     case waking
     case petting
     case reminding
+    case automaticBlink
+    case automaticRunning
+}
+
+public enum AutomaticPetAction: Equatable, Sendable {
+    case blink
+    case running
 }
 
 public enum PetEvent: Equatable, Sendable {
     case clicked
     case dragged
     case controlsOpened
-    case reminderFired
+    case reminderFired(ReminderKind)
     case dismissedReminder
+    case automaticAction(AutomaticPetAction)
     case animationCompleted
 }

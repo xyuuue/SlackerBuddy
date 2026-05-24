@@ -153,5 +153,15 @@ let appLifecycleSourceTests: [TestCase] = [
         try expect(appRuntimeSource.contains("restReminderScheduler.tick()"), "Runtime should tick rest scheduler")
         try expect(appRuntimeSource.contains("waterReminderScheduler.tick()"), "Runtime should tick water scheduler")
         try expect(appRuntimeSource.contains("if restReminderScheduler.isActive"), "Rest reminder should take priority")
+    },
+    TestCase(name: "pet view auto-hides reminder bubble without dismissing reminder") {
+        let petViewSource = try String(
+            contentsOf: URL(fileURLWithPath: "Sources/MacPet/Views/PetView.swift"),
+            encoding: .utf8
+        )
+
+        try expect(petViewSource.contains("bubbleDurationSeconds"), "PetView should use configured bubble duration")
+        try expect(petViewSource.contains("Task.sleep"), "PetView should auto-hide bubbles after a delay")
+        try expect(petViewSource.contains("isBubbleVisible"), "PetView should hide bubble without dismissing reminder")
     }
 ]

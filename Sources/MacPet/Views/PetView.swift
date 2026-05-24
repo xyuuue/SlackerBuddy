@@ -12,6 +12,8 @@ public struct PetView: View {
     private let animator = SpriteAnimator()
 
     @State private var animationStartedAt = Date()
+    @State private var isBubbleVisible = true
+    @State private var bubbleHideTask: Task<Void, Never>?
 
     public init(
         settings: SettingsStore,
@@ -38,6 +40,7 @@ public struct PetView: View {
 
             VStack(spacing: 8) {
                 if let bubbleText = stateMachine.bubbleText,
+                   isBubbleVisible,
                    !settings.preferences.lowerDistractionMode {
                     BubbleView(text: localizedBubbleText(fallback: bubbleText), onDismiss: dismissReminder)
                         .transition(.opacity.combined(with: .scale(scale: 0.96)))
@@ -57,6 +60,15 @@ public struct PetView: View {
         }
         .onChange(of: stateMachine.state) { _, _ in
             animationStartedAt = Date()
+        }
+        .onChange(of: stateMachine.bubbleText) { _, _ in
+            scheduleBubbleAutoHide()
+        }
+        .onChange(of: stateMachine.activeReminderKind) { _, _ in
+            scheduleBubbleAutoHide()
+        }
+        .onAppear {
+            scheduleBubbleAutoHide()
         }
     }
 
@@ -87,6 +99,37 @@ public struct PetView: View {
     }
 
     private func localizedBubbleText(fallback: String) -> String {
-        stateMachine.state == .reminding ? strings.text(.restReminderBubble) : fallback
+        guard stateMachine.state == .reminding else {
+            return fallback
+        }
+
+        switch stateMachine.activeReminderKind {
+        case .rest:
+            return strings.text(.restReminderBubble)
+        case .water:
+            return strings.text(.waterReminderBubble)
+        case nil:
+            return fallback
+        }
+    }
+
+    private func scheduleBubbleAutoHide() {
+        bubbleHideTask?.cancel()
+
+        guard stateMachine.bubbleText != nil else {
+            isBubbleVisible = true
+            return
+        }
+
+        isBubbleVisible = true
+        let durationSeconds = settings.preferences.bubbleDurationSeconds
+        bubbleHideTask = Task { @MainActor in
+            try? await Task.sleep(nanoseconds: UInt64(durationSeconds) * 1_000_000_000)
+            guard !Task.isCancelled else {
+                return
+            }
+
+            isBubbleVisible = false
+        }
     }
 }
