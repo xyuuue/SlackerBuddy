@@ -236,15 +236,23 @@ final class AppRuntime {
     }
 
     private func handleDueReminders() {
+        tickReminderSchedulers()
+        guard shouldTickAutomaticActionScheduler else {
+            return
+        }
+        automaticActionScheduler.tick()
+    }
+
+    private func tickReminderSchedulers() {
+        guard stateMachine.activeReminderKind == nil else {
+            return
+        }
+
         restReminderScheduler.tick()
         if restReminderScheduler.isActive {
             return
         }
         waterReminderScheduler.tick()
-        guard shouldTickAutomaticActionScheduler else {
-            return
-        }
-        automaticActionScheduler.tick()
     }
 
     private func handleRestReminderDue() {

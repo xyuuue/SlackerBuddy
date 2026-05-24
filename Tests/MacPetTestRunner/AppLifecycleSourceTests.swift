@@ -211,6 +211,15 @@ let appLifecycleSourceTests: [TestCase] = [
         try expect(appRuntimeSource.contains("!isRestBlockingOverlayActive"), "Automatic scheduler should not tick while blocking overlay is active")
         try expect(!appRuntimeSource.contains("automaticActionScheduler.dismissActive()\n            return"), "Automatic scheduler should defer instead of consuming due work while non-idle")
     },
+    TestCase(name: "runtime does not preempt active reminders with another reminder") {
+        let appRuntimeSource = try String(
+            contentsOf: URL(fileURLWithPath: "Sources/MacPet/App/AppRuntime.swift"),
+            encoding: .utf8
+        )
+
+        try expect(appRuntimeSource.contains("guard stateMachine.activeReminderKind == nil else"), "Runtime should not tick reminder schedulers while another reminder is active")
+        try expect(appRuntimeSource.contains("tickReminderSchedulers()"), "Runtime should separate reminder ticking from automatic action ticking")
+    },
     TestCase(name: "pet view auto-hides reminder bubble without dismissing reminder") {
         let petViewSource = try String(
             contentsOf: URL(fileURLWithPath: "Sources/MacPet/Views/PetView.swift"),
