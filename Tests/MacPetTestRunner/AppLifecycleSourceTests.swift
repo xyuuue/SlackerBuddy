@@ -109,6 +109,15 @@ let appLifecycleSourceTests: [TestCase] = [
         try expect(FileManager.default.fileExists(atPath: "Assets/SlackerBuddyMenuBarIcon.png"), "Expected generated menu bar icon asset")
         try expect(FileManager.default.fileExists(atPath: "Assets/SlackerBuddy.icns"), "Expected generated icns asset")
     },
+    TestCase(name: "app uses provided SlackerBuddy icon assets") {
+        let repoAppIcon = try Data(contentsOf: URL(fileURLWithPath: "Assets/SlackerBuddyAppIcon.png"))
+        let providedAppIcon = try Data(contentsOf: URL(fileURLWithPath: "/Users/xyue/Pictures/SlackerBuddy App Icon.png"))
+        let repoMenuIcon = try Data(contentsOf: URL(fileURLWithPath: "Assets/SlackerBuddyMenuBarIcon.png"))
+        let providedMenuIcon = try Data(contentsOf: URL(fileURLWithPath: "/Users/xyue/Pictures/SlackerBuddy Touch Bar Icon.png"))
+
+        try expect(repoAppIcon == providedAppIcon, "Expected app icon to match the user-provided SlackerBuddy app icon")
+        try expect(repoMenuIcon == providedMenuIcon, "Expected menu bar icon to match the user-provided SlackerBuddy touch bar icon")
+    },
     TestCase(name: "settings refreshes Petdex catalog when opened") {
         let macPetAppSource = try String(
             contentsOf: URL(fileURLWithPath: "Sources/MacPet/App/MacPetApp.swift"),
