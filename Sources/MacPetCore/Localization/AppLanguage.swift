@@ -10,7 +10,16 @@ public enum AppLanguage: String, CaseIterable, Sendable {
         case .chinese, .english:
             return self
         case .system:
-            return preferredLanguages.contains { $0.lowercased().hasPrefix("zh") } ? .chinese : .english
+            for language in preferredLanguages {
+                let languageCode = language.lowercased()
+                if languageCode.hasPrefix("zh") {
+                    return .chinese
+                }
+                if languageCode.hasPrefix("en") {
+                    return .english
+                }
+            }
+            return .english
         }
     }
 }

@@ -10,6 +10,14 @@ let localizationTests: [TestCase] = [
         let language = AppLanguage.system.resolved(preferredLanguages: ["fr-FR", "en-US"])
         try expect(language == .english, "Expected non-Chinese locale to resolve to English")
     },
+    TestCase(name: "system language respects English before Chinese preference order") {
+        let language = AppLanguage.system.resolved(preferredLanguages: ["en-US", "zh-Hans"])
+        try expect(language == .english, "Expected first supported English locale to resolve to English")
+    },
+    TestCase(name: "system language respects Chinese before English preference order") {
+        let language = AppLanguage.system.resolved(preferredLanguages: ["zh-Hans", "en-US"])
+        try expect(language == .chinese, "Expected first supported Chinese locale to resolve to Chinese")
+    },
     TestCase(name: "localized strings switch settings labels") {
         let zh = LocalizedStrings(language: .chinese)
         let en = LocalizedStrings(language: .english)
