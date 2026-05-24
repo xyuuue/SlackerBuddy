@@ -1,8 +1,8 @@
 import Foundation
 
-struct TestCase {
+struct TestCase: Sendable {
     let name: String
-    let run: @MainActor () async throws -> Void
+    let run: @MainActor @Sendable () async throws -> Void
 }
 
 enum TestFailure: Error, CustomStringConvertible {
