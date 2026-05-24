@@ -10,9 +10,19 @@ import Observation
     public init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
         self.preferences = PetPreferences(
-            reminderIntervalMinutes: defaults.integer(forKey: Keys.reminderIntervalMinutes, defaultValue: 25),
+            reminderIntervalMinutes: defaults.integer(forKey: Keys.reminderIntervalMinutes, defaultValue: 45),
             sleepDelayMinutes: defaults.integer(forKey: Keys.sleepDelayMinutes, defaultValue: 30),
             petScale: defaults.double(forKey: Keys.petScale, defaultValue: 1.0),
+            restRemindersEnabled: defaults.bool(forKey: Keys.restRemindersEnabled, defaultValue: true),
+            restBlockingEnabled: defaults.bool(forKey: Keys.restBlockingEnabled, defaultValue: true),
+            restBlockingDurationSeconds: defaults.integer(forKey: Keys.restBlockingDurationSeconds, defaultValue: 15),
+            restBlockingScalePercent: defaults.integer(forKey: Keys.restBlockingScalePercent, defaultValue: 40),
+            waterRemindersEnabled: defaults.bool(forKey: Keys.waterRemindersEnabled, defaultValue: true),
+            waterIntervalMinutes: defaults.integer(forKey: Keys.waterIntervalMinutes, defaultValue: 90),
+            bubbleDurationSeconds: defaults.integer(forKey: Keys.bubbleDurationSeconds, defaultValue: 6),
+            automaticActionsEnabled: defaults.bool(forKey: Keys.automaticActionsEnabled, defaultValue: true),
+            automaticActionIntervalMinutes: defaults.integer(forKey: Keys.automaticActionIntervalMinutes, defaultValue: 8),
+            automaticRunningEnabled: defaults.bool(forKey: Keys.automaticRunningEnabled, defaultValue: false),
             showPetOnLaunch: defaults.bool(forKey: Keys.showPetOnLaunch, defaultValue: true),
             systemNotificationsEnabled: defaults.bool(forKey: Keys.systemNotificationsEnabled, defaultValue: false),
             lowerDistractionMode: defaults.bool(forKey: Keys.lowerDistractionMode, defaultValue: false),
@@ -22,44 +32,67 @@ import Observation
     }
 
     public func updateReminderInterval(minutes: Int) {
-        preferences = PetPreferences(
-            reminderIntervalMinutes: minutes,
-            sleepDelayMinutes: preferences.sleepDelayMinutes,
-            petScale: preferences.petScale,
-            showPetOnLaunch: preferences.showPetOnLaunch,
-            systemNotificationsEnabled: preferences.systemNotificationsEnabled,
-            lowerDistractionMode: preferences.lowerDistractionMode,
-            language: preferences.language,
-            selectedPetID: preferences.selectedPetID
-        )
+        preferences = preferences.replacing(reminderIntervalMinutes: minutes)
+        persist()
+    }
+
+    public func updateRestRemindersEnabled(_ isEnabled: Bool) {
+        preferences = preferences.replacing(restRemindersEnabled: isEnabled)
+        persist()
+    }
+
+    public func updateRestBlockingEnabled(_ isEnabled: Bool) {
+        preferences = preferences.replacing(restBlockingEnabled: isEnabled)
+        persist()
+    }
+
+    public func updateRestBlockingDuration(seconds: Int) {
+        preferences = preferences.replacing(restBlockingDurationSeconds: seconds)
+        persist()
+    }
+
+    public func updateRestBlockingScale(percent: Int) {
+        preferences = preferences.replacing(restBlockingScalePercent: percent)
+        persist()
+    }
+
+    public func updateWaterRemindersEnabled(_ isEnabled: Bool) {
+        preferences = preferences.replacing(waterRemindersEnabled: isEnabled)
+        persist()
+    }
+
+    public func updateWaterInterval(minutes: Int) {
+        preferences = preferences.replacing(waterIntervalMinutes: minutes)
+        persist()
+    }
+
+    public func updateBubbleDuration(seconds: Int) {
+        preferences = preferences.replacing(bubbleDurationSeconds: seconds)
+        persist()
+    }
+
+    public func updateAutomaticActionsEnabled(_ isEnabled: Bool) {
+        preferences = preferences.replacing(automaticActionsEnabled: isEnabled)
+        persist()
+    }
+
+    public func updateAutomaticActionInterval(minutes: Int) {
+        preferences = preferences.replacing(automaticActionIntervalMinutes: minutes)
+        persist()
+    }
+
+    public func updateAutomaticRunningEnabled(_ isEnabled: Bool) {
+        preferences = preferences.replacing(automaticRunningEnabled: isEnabled)
         persist()
     }
 
     public func updateSleepDelay(minutes: Int) {
-        preferences = PetPreferences(
-            reminderIntervalMinutes: preferences.reminderIntervalMinutes,
-            sleepDelayMinutes: minutes,
-            petScale: preferences.petScale,
-            showPetOnLaunch: preferences.showPetOnLaunch,
-            systemNotificationsEnabled: preferences.systemNotificationsEnabled,
-            lowerDistractionMode: preferences.lowerDistractionMode,
-            language: preferences.language,
-            selectedPetID: preferences.selectedPetID
-        )
+        preferences = preferences.replacing(sleepDelayMinutes: minutes)
         persist()
     }
 
     public func updatePetScale(_ scale: Double) {
-        preferences = PetPreferences(
-            reminderIntervalMinutes: preferences.reminderIntervalMinutes,
-            sleepDelayMinutes: preferences.sleepDelayMinutes,
-            petScale: scale,
-            showPetOnLaunch: preferences.showPetOnLaunch,
-            systemNotificationsEnabled: preferences.systemNotificationsEnabled,
-            lowerDistractionMode: preferences.lowerDistractionMode,
-            language: preferences.language,
-            selectedPetID: preferences.selectedPetID
-        )
+        preferences = preferences.replacing(petScale: scale)
         persist()
     }
 
@@ -90,6 +123,16 @@ import Observation
 
     private func persist() {
         defaults.set(preferences.reminderIntervalMinutes, forKey: Keys.reminderIntervalMinutes)
+        defaults.set(preferences.restRemindersEnabled, forKey: Keys.restRemindersEnabled)
+        defaults.set(preferences.restBlockingEnabled, forKey: Keys.restBlockingEnabled)
+        defaults.set(preferences.restBlockingDurationSeconds, forKey: Keys.restBlockingDurationSeconds)
+        defaults.set(preferences.restBlockingScalePercent, forKey: Keys.restBlockingScalePercent)
+        defaults.set(preferences.waterRemindersEnabled, forKey: Keys.waterRemindersEnabled)
+        defaults.set(preferences.waterIntervalMinutes, forKey: Keys.waterIntervalMinutes)
+        defaults.set(preferences.bubbleDurationSeconds, forKey: Keys.bubbleDurationSeconds)
+        defaults.set(preferences.automaticActionsEnabled, forKey: Keys.automaticActionsEnabled)
+        defaults.set(preferences.automaticActionIntervalMinutes, forKey: Keys.automaticActionIntervalMinutes)
+        defaults.set(preferences.automaticRunningEnabled, forKey: Keys.automaticRunningEnabled)
         defaults.set(preferences.sleepDelayMinutes, forKey: Keys.sleepDelayMinutes)
         defaults.set(preferences.petScale, forKey: Keys.petScale)
         defaults.set(preferences.showPetOnLaunch, forKey: Keys.showPetOnLaunch)
@@ -101,6 +144,16 @@ import Observation
 
     private enum Keys {
         static let reminderIntervalMinutes = "settings.reminderIntervalMinutes"
+        static let restRemindersEnabled = "settings.restRemindersEnabled"
+        static let restBlockingEnabled = "settings.restBlockingEnabled"
+        static let restBlockingDurationSeconds = "settings.restBlockingDurationSeconds"
+        static let restBlockingScalePercent = "settings.restBlockingScalePercent"
+        static let waterRemindersEnabled = "settings.waterRemindersEnabled"
+        static let waterIntervalMinutes = "settings.waterIntervalMinutes"
+        static let bubbleDurationSeconds = "settings.bubbleDurationSeconds"
+        static let automaticActionsEnabled = "settings.automaticActionsEnabled"
+        static let automaticActionIntervalMinutes = "settings.automaticActionIntervalMinutes"
+        static let automaticRunningEnabled = "settings.automaticRunningEnabled"
         static let sleepDelayMinutes = "settings.sleepDelayMinutes"
         static let petScale = "settings.petScale"
         static let showPetOnLaunch = "settings.showPetOnLaunch"

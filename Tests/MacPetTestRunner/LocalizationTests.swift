@@ -27,5 +27,15 @@ let localizationTests: [TestCase] = [
     TestCase(name: "localized reminder bubble switches copy") {
         try expect(LocalizedStrings(language: .chinese).text(.restReminderBubble) == "休息一下吧", "Expected Chinese reminder copy")
         try expect(LocalizedStrings(language: .english).text(.restReminderBubble) == "Time for a break", "Expected English reminder copy")
+    },
+    TestCase(name: "localized reminder and autonomy strings switch copy") {
+        let zh = LocalizedStrings(language: .chinese)
+        let en = LocalizedStrings(language: .english)
+        try expect(zh.text(.enableRestReminders) == "开启休息提醒", "Expected Chinese rest toggle")
+        try expect(en.text(.enableRestReminders) == "Enable rest reminders", "Expected English rest toggle")
+        try expect(zh.text(.waterReminderBubble) == "喝点水吧", "Expected Chinese water copy")
+        try expect(en.text(.waterReminderBubble) == "Time to drink water", "Expected English water copy")
+        try expect(zh.text(.secondsSuffix) == "秒", "Expected Chinese seconds suffix")
+        try expect(en.text(.percentSuffix) == "%", "Expected English percent suffix")
     }
 ]

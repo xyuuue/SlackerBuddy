@@ -18,6 +18,20 @@ public struct LocalizedStrings: Sendable {
         case systemLanguageOption
         case systemNotifications
         case restReminderBubble
+        case bubbleDurationLabel
+        case enableAutomaticActions
+        case automaticActionFrequency
+        case enableAutomaticRunning
+        case enableRestReminders
+        case restBlockingEnabled
+        case restBlockingDuration
+        case restBlockingScale
+        case enableWaterReminders
+        case waterIntervalLabel
+        case waterReminderBubble
+        case secondsSuffix
+        case percentSuffix
+        case behaviorSectionTitle
     }
 
     private let language: AppLanguage
@@ -73,6 +87,34 @@ public struct LocalizedStrings: Sendable {
             return "System notifications"
         case .restReminderBubble:
             return "Time for a break"
+        case .bubbleDurationLabel:
+            return "Bubble duration"
+        case .enableAutomaticActions:
+            return "Enable automatic actions"
+        case .automaticActionFrequency:
+            return "Automatic action frequency"
+        case .enableAutomaticRunning:
+            return "Enable automatic running"
+        case .enableRestReminders:
+            return "Enable rest reminders"
+        case .restBlockingEnabled:
+            return "Blocking rest reminder"
+        case .restBlockingDuration:
+            return "Blocking duration"
+        case .restBlockingScale:
+            return "Blocking scale"
+        case .enableWaterReminders:
+            return "Enable water reminders"
+        case .waterIntervalLabel:
+            return "Water interval"
+        case .waterReminderBubble:
+            return "Time to drink water"
+        case .secondsSuffix:
+            return "sec"
+        case .percentSuffix:
+            return "%"
+        case .behaviorSectionTitle:
+            return "Behavior"
         }
     }
 
@@ -114,6 +156,34 @@ public struct LocalizedStrings: Sendable {
             return "系统通知"
         case .restReminderBubble:
             return "休息一下吧"
+        case .bubbleDurationLabel:
+            return "气泡时长"
+        case .enableAutomaticActions:
+            return "开启自动动作"
+        case .automaticActionFrequency:
+            return "自动动作频率"
+        case .enableAutomaticRunning:
+            return "开启自动跑动"
+        case .enableRestReminders:
+            return "开启休息提醒"
+        case .restBlockingEnabled:
+            return "开启休息遮挡"
+        case .restBlockingDuration:
+            return "遮挡时长"
+        case .restBlockingScale:
+            return "遮挡比例"
+        case .enableWaterReminders:
+            return "开启喝水提醒"
+        case .waterIntervalLabel:
+            return "喝水间隔"
+        case .waterReminderBubble:
+            return "喝点水吧"
+        case .secondsSuffix:
+            return "秒"
+        case .percentSuffix:
+            return "%"
+        case .behaviorSectionTitle:
+            return "行为"
         }
     }
 }
