@@ -220,6 +220,15 @@ let appLifecycleSourceTests: [TestCase] = [
         try expect(appRuntimeSource.contains("guard stateMachine.activeReminderKind == nil else"), "Runtime should not tick reminder schedulers while another reminder is active")
         try expect(appRuntimeSource.contains("tickReminderSchedulers()"), "Runtime should separate reminder ticking from automatic action ticking")
     },
+    TestCase(name: "runtime completes automatic action animations") {
+        let appRuntimeSource = try String(
+            contentsOf: URL(fileURLWithPath: "Sources/MacPet/App/AppRuntime.swift"),
+            encoding: .utf8
+        )
+
+        try expect(appRuntimeSource.contains("stateMachine.state == .automaticBlink"), "Runtime should complete automatic blink animations")
+        try expect(appRuntimeSource.contains("stateMachine.state == .automaticRunning"), "Runtime should complete automatic running animations")
+    },
     TestCase(name: "pet view auto-hides reminder bubble without dismissing reminder") {
         let petViewSource = try String(
             contentsOf: URL(fileURLWithPath: "Sources/MacPet/Views/PetView.swift"),

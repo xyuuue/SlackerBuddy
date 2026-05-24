@@ -230,7 +230,10 @@ final class AppRuntime {
     }
 
     private func completeTransientAnimationIfNeeded() {
-        if stateMachine.state == .waking || stateMachine.state == .petting {
+        if stateMachine.state == .waking ||
+            stateMachine.state == .petting ||
+            stateMachine.state == .automaticBlink ||
+            stateMachine.state == .automaticRunning {
             stateMachine.handle(.animationCompleted)
         }
     }
