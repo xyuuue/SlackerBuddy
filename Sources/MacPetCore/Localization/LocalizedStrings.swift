@@ -76,7 +76,7 @@ public struct LocalizedStrings: Sendable {
         case .remindersSectionTitle:
             return "Reminders"
         case .reminderIntervalLabel:
-            return "Reminder interval"
+            return "Rest interval"
         case .sleepDelayLabel:
             return "Sleep delay"
         case .minuteSuffix:
@@ -92,13 +92,13 @@ public struct LocalizedStrings: Sendable {
         case .enableAutomaticActions:
             return "Enable automatic actions"
         case .automaticActionFrequency:
-            return "Automatic action frequency"
+            return "Action frequency"
         case .enableAutomaticRunning:
             return "Enable automatic running"
         case .enableRestReminders:
             return "Enable rest reminders"
         case .restBlockingEnabled:
-            return "Blocking rest reminder"
+            return "Enlarge pet during rest"
         case .restBlockingDuration:
             return "Blocking duration"
         case .restBlockingScale:
@@ -145,7 +145,7 @@ public struct LocalizedStrings: Sendable {
         case .remindersSectionTitle:
             return "提醒"
         case .reminderIntervalLabel:
-            return "提醒间隔"
+            return "休息间隔"
         case .sleepDelayLabel:
             return "睡眠延迟"
         case .minuteSuffix:
@@ -157,21 +157,21 @@ public struct LocalizedStrings: Sendable {
         case .restReminderBubble:
             return "休息一下吧"
         case .bubbleDurationLabel:
-            return "气泡时长"
+            return "气泡显示时长"
         case .enableAutomaticActions:
             return "开启自动动作"
         case .automaticActionFrequency:
-            return "自动动作频率"
+            return "动作频率"
         case .enableAutomaticRunning:
             return "开启自动跑动"
         case .enableRestReminders:
             return "开启休息提醒"
         case .restBlockingEnabled:
-            return "开启休息遮挡"
+            return "休息时放大挡屏"
         case .restBlockingDuration:
-            return "遮挡时长"
+            return "挡屏时长"
         case .restBlockingScale:
-            return "遮挡比例"
+            return "挡屏比例"
         case .enableWaterReminders:
             return "开启喝水提醒"
         case .waterIntervalLabel:

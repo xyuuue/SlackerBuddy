@@ -37,5 +37,17 @@ let localizationTests: [TestCase] = [
         try expect(en.text(.waterReminderBubble) == "Time to drink water", "Expected English water copy")
         try expect(zh.text(.secondsSuffix) == "秒", "Expected Chinese seconds suffix")
         try expect(en.text(.percentSuffix) == "%", "Expected English percent suffix")
+        try expect(zh.text(.reminderIntervalLabel) == "休息间隔", "Expected Chinese rest interval label")
+        try expect(en.text(.reminderIntervalLabel) == "Rest interval", "Expected English rest interval label")
+        try expect(zh.text(.restBlockingEnabled) == "休息时放大挡屏", "Expected Chinese rest blocking label")
+        try expect(en.text(.restBlockingEnabled) == "Enlarge pet during rest", "Expected English rest blocking label")
+        try expect(zh.text(.restBlockingDuration) == "挡屏时长", "Expected Chinese rest blocking duration label")
+        try expect(en.text(.restBlockingDuration) == "Blocking duration", "Expected English rest blocking duration label")
+        try expect(zh.text(.restBlockingScale) == "挡屏比例", "Expected Chinese rest blocking scale label")
+        try expect(en.text(.restBlockingScale) == "Blocking scale", "Expected English rest blocking scale label")
+        try expect(zh.text(.bubbleDurationLabel) == "气泡显示时长", "Expected Chinese bubble duration label")
+        try expect(en.text(.bubbleDurationLabel) == "Bubble duration", "Expected English bubble duration label")
+        try expect(zh.text(.automaticActionFrequency) == "动作频率", "Expected Chinese action frequency label")
+        try expect(en.text(.automaticActionFrequency) == "Action frequency", "Expected English action frequency label")
     }
 ]
