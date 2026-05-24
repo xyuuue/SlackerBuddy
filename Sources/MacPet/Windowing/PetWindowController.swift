@@ -103,7 +103,7 @@ public final class PetWindowController {
         )
 
         performProgrammaticFrameChange {
-            window.setFrame(frame, display: true, animate: true)
+            window.setFrame(frame, display: true, animate: false)
         }
     }
 
@@ -114,7 +114,7 @@ public final class PetWindowController {
 
         let frame = preBlockingFrame ?? defaultFrame(scale: scale)
         performProgrammaticFrameChange {
-            window.setFrame(frame, display: true, animate: true)
+            window.setFrame(frame, display: true, animate: false)
         }
         preBlockingFrame = nil
         isBlockingOverlayActive = false
@@ -151,16 +151,16 @@ public final class PetWindowController {
                 forName: NSWindow.didMoveNotification,
                 object: window,
                 queue: .main
-	            ) { [weak self] _ in
-	                Task { @MainActor in
-	                    self?.saveFrame()
-	                    if self?.consumeProgrammaticMoveNotification() == true {
-	                        return
-	                    }
-	                    guard self?.isProgrammaticFrameChange == false else {
-	                        return
-	                    }
+            ) { [weak self] _ in
+                Task { @MainActor in
+                    if self?.consumeProgrammaticMoveNotification() == true {
+                        return
+                    }
+                    guard self?.isProgrammaticFrameChange == false else {
+                        return
+                    }
 
+                    self?.saveFrame()
                     self?.onMoved?()
                 }
             },
