@@ -11,6 +11,7 @@ public final class PetWindowController {
     private var observerTokens: [NSObjectProtocol] = []
     private var preBlockingFrame: NSRect?
     private var isBlockingOverlayActive = false
+    private var isProgrammaticFrameChange = false
 
     public init(
         defaults: UserDefaults = .standard,
@@ -100,7 +101,9 @@ public final class PetWindowController {
             height: side
         )
 
-        window.setFrame(frame, display: true, animate: true)
+        performProgrammaticFrameChange {
+            window.setFrame(frame, display: true, animate: true)
+        }
     }
 
     public func restoreFromBlockingOverlay(scale: Double) {
@@ -109,7 +112,9 @@ public final class PetWindowController {
         }
 
         let frame = preBlockingFrame ?? defaultFrame(scale: scale)
-        window.setFrame(frame, display: true, animate: true)
+        performProgrammaticFrameChange {
+            window.setFrame(frame, display: true, animate: true)
+        }
         preBlockingFrame = nil
         isBlockingOverlayActive = false
     }
@@ -125,7 +130,7 @@ public final class PetWindowController {
     }
 
     public func saveFrame() {
-        guard !isBlockingOverlayActive else {
+        guard !isBlockingOverlayActive, !isProgrammaticFrameChange else {
             return
         }
 
@@ -148,6 +153,10 @@ public final class PetWindowController {
             ) { [weak self] _ in
                 Task { @MainActor in
                     self?.saveFrame()
+                    guard self?.isProgrammaticFrameChange == false else {
+                        return
+                    }
+
                     self?.onMoved?()
                 }
             },
@@ -185,6 +194,16 @@ public final class PetWindowController {
         let center = NotificationCenter.default
         observerTokens.forEach(center.removeObserver)
         observerTokens.removeAll()
+    }
+
+    private func performProgrammaticFrameChange(_ change: () -> Void) {
+        isProgrammaticFrameChange = true
+        change()
+        DispatchQueue.main.async { [weak self] in
+            Task { @MainActor in
+                self?.isProgrammaticFrameChange = false
+            }
+        }
     }
 
     private func restoredFrame() -> NSRect? {

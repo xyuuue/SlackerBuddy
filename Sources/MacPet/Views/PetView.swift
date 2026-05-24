@@ -6,7 +6,7 @@ public struct PetView: View {
     @Bindable private var settings: SettingsStore
     @Bindable private var stateMachine: PetStateMachine
 
-    private let scheduler: ReminderScheduler
+    private let onDismissReminder: () -> Void
     private let strings: LocalizedStrings
     private let petAsset: PetAsset
     private let animator = SpriteAnimator()
@@ -18,13 +18,13 @@ public struct PetView: View {
     public init(
         settings: SettingsStore,
         stateMachine: PetStateMachine,
-        scheduler: ReminderScheduler,
+        onDismissReminder: @escaping () -> Void,
         strings: LocalizedStrings,
         petAsset: PetAsset
     ) {
         self.settings = settings
         self.stateMachine = stateMachine
-        self.scheduler = scheduler
+        self.onDismissReminder = onDismissReminder
         self.strings = strings
         self.petAsset = petAsset
     }
@@ -73,7 +73,7 @@ public struct PetView: View {
     }
 
     private func handlePetTap() {
-        if scheduler.isReminderActive || stateMachine.state == .reminding {
+        if stateMachine.state == .reminding {
             dismissReminder()
         } else {
             stateMachine.handle(.clicked)
@@ -81,8 +81,7 @@ public struct PetView: View {
     }
 
     private func dismissReminder() {
-        scheduler.dismissActiveReminder()
-        stateMachine.handle(.dismissedReminder)
+        onDismissReminder()
     }
 
     @ViewBuilder

@@ -34,6 +34,9 @@ final class AppRuntime {
     @ObservationIgnored
     private var blockingOverlayTask: Task<Void, Never>?
 
+    @ObservationIgnored
+    private var isRestBlockingOverlayActive = false
+
     init(
         settings: SettingsStore? = nil,
         stateMachine: PetStateMachine? = nil,
@@ -142,7 +145,9 @@ final class AppRuntime {
         let rootView = PetView(
             settings: settings,
             stateMachine: stateMachine,
-            scheduler: scheduler,
+            onDismissReminder: { [weak self] in
+                self?.dismissActiveReminder()
+            },
             strings: localizedStrings,
             petAsset: selectedPetAsset
         )
@@ -236,6 +241,9 @@ final class AppRuntime {
             return
         }
         waterReminderScheduler.tick()
+        guard shouldTickAutomaticActionScheduler else {
+            return
+        }
         automaticActionScheduler.tick()
     }
 
@@ -252,8 +260,7 @@ final class AppRuntime {
     }
 
     private func handleAutomaticActionDue() {
-        guard stateMachine.state == .idle else {
-            automaticActionScheduler.dismissActive()
+        guard shouldTickAutomaticActionScheduler else {
             return
         }
 
@@ -267,6 +274,12 @@ final class AppRuntime {
         automaticActionScheduler.dismissActive()
     }
 
+    private var shouldTickAutomaticActionScheduler: Bool {
+        stateMachine.state == .idle
+            && stateMachine.activeReminderKind == nil
+            && !isRestBlockingOverlayActive
+    }
+
     private func automaticActionInterval() -> Int {
         settings.preferences.automaticActionIntervalMinutes
     }
@@ -277,6 +290,7 @@ final class AppRuntime {
         }
 
         petWindowController.presentBlockingOverlay(scalePercent: settings.preferences.restBlockingScalePercent)
+        isRestBlockingOverlayActive = true
         blockingOverlayTask?.cancel()
         blockingOverlayTask = Task { @MainActor [weak self] in
             guard let self else {
@@ -294,6 +308,7 @@ final class AppRuntime {
         blockingOverlayTask?.cancel()
         blockingOverlayTask = nil
         petWindowController.restoreFromBlockingOverlay(scale: settings.preferences.petScale)
+        isRestBlockingOverlayActive = false
     }
 
     private func dismissActiveReminder() {

@@ -173,6 +173,44 @@ let appLifecycleSourceTests: [TestCase] = [
         try expect(windowSource.contains("restoreFromBlockingOverlay"), "Window controller should restore after blocking overlay")
         try expect(!windowSource.contains("saveCurrentFrame()") || windowSource.contains("isBlockingOverlayActive"), "Blocking overlay should not persist as normal placement")
     },
+    TestCase(name: "pet view delegates reminder dismissal to runtime") {
+        let appRuntimeSource = try String(
+            contentsOf: URL(fileURLWithPath: "Sources/MacPet/App/AppRuntime.swift"),
+            encoding: .utf8
+        )
+        let petViewSource = try String(
+            contentsOf: URL(fileURLWithPath: "Sources/MacPet/Views/PetView.swift"),
+            encoding: .utf8
+        )
+
+        try expect(petViewSource.contains("private let onDismissReminder: () -> Void"), "PetView should receive a runtime-owned reminder dismissal callback")
+        try expect(petViewSource.contains("onDismissReminder()"), "PetView should invoke the runtime dismissal callback")
+        try expect(!petViewSource.contains("scheduler.dismissActiveReminder()"), "PetView should not dismiss only the legacy rest scheduler")
+        try expect(appRuntimeSource.contains("onDismissReminder: { [weak self] in"), "Runtime should pass a kind-aware dismissal callback into PetView")
+        try expect(appRuntimeSource.contains("self?.dismissActiveReminder()"), "Runtime dismissal callback should route through active reminder kind handling")
+    },
+    TestCase(name: "blocking overlay frame changes do not report movement") {
+        let windowSource = try String(
+            contentsOf: URL(fileURLWithPath: "Sources/MacPet/Windowing/PetWindowController.swift"),
+            encoding: .utf8
+        )
+
+        try expect(windowSource.contains("isProgrammaticFrameChange"), "Window controller should track programmatic frame changes")
+        try expect(windowSource.contains("performProgrammaticFrameChange"), "Blocking overlay should wrap programmatic frame changes")
+        try expect(windowSource.contains("guard self?.isProgrammaticFrameChange == false else"), "Programmatic frame changes should suppress movement callbacks")
+    },
+    TestCase(name: "runtime defers automatic actions while reminders or blocking overlay are active") {
+        let appRuntimeSource = try String(
+            contentsOf: URL(fileURLWithPath: "Sources/MacPet/App/AppRuntime.swift"),
+            encoding: .utf8
+        )
+
+        try expect(appRuntimeSource.contains("shouldTickAutomaticActionScheduler"), "Runtime should centralize automatic action tick eligibility")
+        try expect(appRuntimeSource.contains("stateMachine.state == .idle"), "Automatic scheduler should only tick while state is idle")
+        try expect(appRuntimeSource.contains("stateMachine.activeReminderKind == nil"), "Automatic scheduler should not tick while a reminder is active")
+        try expect(appRuntimeSource.contains("!isRestBlockingOverlayActive"), "Automatic scheduler should not tick while blocking overlay is active")
+        try expect(!appRuntimeSource.contains("automaticActionScheduler.dismissActive()\n            return"), "Automatic scheduler should defer instead of consuming due work while non-idle")
+    },
     TestCase(name: "pet view auto-hides reminder bubble without dismissing reminder") {
         let petViewSource = try String(
             contentsOf: URL(fileURLWithPath: "Sources/MacPet/Views/PetView.swift"),
