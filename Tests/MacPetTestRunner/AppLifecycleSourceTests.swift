@@ -92,5 +92,13 @@ let appLifecycleSourceTests: [TestCase] = [
         try expect(macPetAppSource.contains("availablePets: runtime.availablePets"), "Settings picker should use runtime Petdex pets")
         try expect(macPetAppSource.contains(".onAppear"), "Settings should refresh when the settings scene appears")
         try expect(macPetAppSource.contains("runtime.refreshPetCatalog()"), "Settings should refresh Petdex catalog when opened")
+    },
+    TestCase(name: "runtime normalizes removed selected Petdex pet") {
+        let appRuntimeSource = try String(
+            contentsOf: URL(fileURLWithPath: "Sources/MacPet/App/AppRuntime.swift"),
+            encoding: .utf8
+        )
+
+        try expect(appRuntimeSource.contains("settings.updateSelectedPetID(PetAsset.builtinID)"), "Refreshing Petdex should persist builtin selection when saved pet is gone")
     }
 ]

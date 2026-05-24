@@ -155,6 +155,9 @@ final class AppRuntime {
             from: availablePets,
             selectedPetID: settings.preferences.selectedPetID
         )
+        if selectedPetAsset.id != settings.preferences.selectedPetID {
+            settings.updateSelectedPetID(PetAsset.builtinID)
+        }
     }
 
     func updateSelectedPet(_ petID: String) {
