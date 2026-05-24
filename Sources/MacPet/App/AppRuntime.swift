@@ -9,6 +9,8 @@ final class AppRuntime {
     let settings: SettingsStore
     let stateMachine: PetStateMachine
     let scheduler: ReminderScheduler
+    let restReminderScheduler: ReminderScheduler
+    let waterReminderScheduler: IntervalScheduler
     let petWindowController: PetWindowController
     private(set) var availablePets: [PetAsset]
     private(set) var selectedPetAsset: PetAsset
@@ -38,10 +40,13 @@ final class AppRuntime {
     ) {
         let settings = settings ?? SettingsStore()
         let availablePets = petdexCatalog.loadPets()
+        let restReminderScheduler = scheduler ?? ReminderScheduler()
 
         self.settings = settings
         self.stateMachine = stateMachine ?? PetStateMachine()
-        self.scheduler = scheduler ?? ReminderScheduler()
+        self.scheduler = restReminderScheduler
+        self.restReminderScheduler = restReminderScheduler
+        self.waterReminderScheduler = IntervalScheduler()
         self.petWindowController = petWindowController ?? PetWindowController()
         self.availablePets = availablePets
         self.selectedPetAsset = Self.selectedPetAsset(
@@ -68,7 +73,7 @@ final class AppRuntime {
             return
         }
 
-        scheduler.onReminder = { [weak self] in
+        restReminderScheduler.onReminder = { [weak self] in
             guard let self else {
                 return
             }
@@ -79,7 +84,11 @@ final class AppRuntime {
             }
         }
 
-        scheduler.start(intervalMinutes: settings.preferences.reminderIntervalMinutes)
+        restReminderScheduler.start(intervalMinutes: settings.preferences.reminderIntervalMinutes)
+        waterReminderScheduler.start(
+            intervalMinutes: settings.preferences.waterIntervalMinutes,
+            isEnabled: settings.preferences.waterRemindersEnabled
+        ) {}
         requestNotificationAuthorizationIfNeeded()
 
         if settings.preferences.showPetOnLaunch {
@@ -104,7 +113,7 @@ final class AppRuntime {
                     return
                 }
 
-                scheduler.tick()
+                handleDueReminders()
                 stateMachine.tick(preferences: settings.preferences)
                 completeTransientAnimationIfNeeded()
 
@@ -141,7 +150,7 @@ final class AppRuntime {
 
     func updateReminderInterval(minutes: Int) {
         settings.updateReminderInterval(minutes: minutes)
-        scheduler.updateInterval(minutes: settings.preferences.reminderIntervalMinutes)
+        restReminderScheduler.updateInterval(minutes: settings.preferences.reminderIntervalMinutes)
     }
 
     func updateSystemNotificationsEnabled(_ isEnabled: Bool) {
@@ -207,6 +216,14 @@ final class AppRuntime {
         if stateMachine.state == .waking || stateMachine.state == .petting {
             stateMachine.handle(.animationCompleted)
         }
+    }
+
+    private func handleDueReminders() {
+        restReminderScheduler.tick()
+        if restReminderScheduler.isActive {
+            return
+        }
+        waterReminderScheduler.tick()
     }
 
     private func handlePetWindowMoved() {

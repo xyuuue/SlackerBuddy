@@ -142,5 +142,16 @@ let appLifecycleSourceTests: [TestCase] = [
 
         try expect(spriteViewSource.contains("PetSpriteSheetFrameCache"), "Sprite renderer should use a frame cache")
         try expect(!spriteViewSource.contains("NSImage(contentsOf: spriteSheetURL)"), "Sprite renderer should not decode the atlas directly on each frame")
+    },
+    TestCase(name: "runtime centralizes rest and water reminder priority") {
+        let appRuntimeSource = try String(
+            contentsOf: URL(fileURLWithPath: "Sources/MacPet/App/AppRuntime.swift"),
+            encoding: .utf8
+        )
+
+        try expect(appRuntimeSource.contains("handleDueReminders()"), "Runtime should centralize rest and water priority")
+        try expect(appRuntimeSource.contains("restReminderScheduler.tick()"), "Runtime should tick rest scheduler")
+        try expect(appRuntimeSource.contains("waterReminderScheduler.tick()"), "Runtime should tick water scheduler")
+        try expect(appRuntimeSource.contains("if restReminderScheduler.isActive"), "Rest reminder should take priority")
     }
 ]

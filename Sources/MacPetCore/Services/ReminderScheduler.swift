@@ -3,47 +3,35 @@ import Foundation
 @MainActor
 public final class ReminderScheduler {
     public var onReminder: (() -> Void)?
-    public private(set) var isReminderActive = false
+    public var isReminderActive: Bool {
+        scheduler.isActive
+    }
 
-    private var intervalMinutes: Int = 25
-    private var nextReminderAt: Date?
-    private let now: () -> Date
+    public var isActive: Bool {
+        scheduler.isActive
+    }
+
+    private let scheduler: IntervalScheduler
 
     public init(now: @escaping () -> Date = Date.init) {
-        self.now = now
+        scheduler = IntervalScheduler(now: now)
     }
 
     public func start(intervalMinutes: Int) {
-        self.intervalMinutes = max(1, intervalMinutes)
-        isReminderActive = false
-        scheduleNext(from: now())
+        scheduler.start(intervalMinutes: intervalMinutes, isEnabled: true) { [weak self] in
+            self?.onReminder?()
+        }
     }
 
     public func updateInterval(minutes: Int) {
-        intervalMinutes = max(1, minutes)
-        isReminderActive = false
-        scheduleNext(from: now())
+        scheduler.update(intervalMinutes: minutes, isEnabled: true)
     }
 
     public func tick() {
-        guard !isReminderActive, let nextReminderAt else {
-            return
-        }
-
-        guard now() >= nextReminderAt else {
-            return
-        }
-
-        isReminderActive = true
-        onReminder?()
+        scheduler.tick()
     }
 
     public func dismissActiveReminder() {
-        isReminderActive = false
-        scheduleNext(from: now())
-    }
-
-    private func scheduleNext(from date: Date) {
-        nextReminderAt = date.addingTimeInterval(TimeInterval(intervalMinutes * 60))
+        scheduler.dismissActive()
     }
 }
