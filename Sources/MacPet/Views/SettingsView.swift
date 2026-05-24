@@ -68,11 +68,11 @@ public struct SettingsView: View {
 
             Section(strings.text(.remindersSectionTitle)) {
                 Stepper(value: reminderIntervalMinutes, in: 1...240, step: 1) {
-                    Text("\(strings.text(.reminderIntervalLabel)): \(settings.preferences.reminderIntervalMinutes) min")
+                    Text("\(strings.text(.reminderIntervalLabel)): \(settings.preferences.reminderIntervalMinutes) \(strings.text(.minuteSuffix))")
                 }
 
                 Stepper(value: sleepDelayMinutes, in: 1...240, step: 1) {
-                    Text("\(strings.text(.sleepDelayLabel)): \(settings.preferences.sleepDelayMinutes) min")
+                    Text("\(strings.text(.sleepDelayLabel)): \(settings.preferences.sleepDelayMinutes) \(strings.text(.minuteSuffix))")
                 }
 
                 Toggle(strings.text(.systemNotifications), isOn: systemNotificationsEnabled)
@@ -176,7 +176,7 @@ public struct SettingsView: View {
     private func languageName(_ language: AppLanguage) -> String {
         switch language {
         case .system:
-            return "System"
+            return strings.text(.systemLanguageOption)
         case .chinese:
             return "中文"
         case .english:

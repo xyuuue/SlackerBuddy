@@ -219,7 +219,7 @@ final class AppRuntime {
     }
 
     private func refreshPetWindowIfNeeded() {
-        guard petWindowController.window != nil else {
+        guard petWindowController.window?.isVisible == true else {
             return
         }
 

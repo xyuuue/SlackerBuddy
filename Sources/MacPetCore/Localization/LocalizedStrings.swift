@@ -14,6 +14,8 @@ public struct LocalizedStrings: Sendable {
         case remindersSectionTitle
         case reminderIntervalLabel
         case sleepDelayLabel
+        case minuteSuffix
+        case systemLanguageOption
         case systemNotifications
         case restReminderBubble
     }
@@ -63,6 +65,10 @@ public struct LocalizedStrings: Sendable {
             return "Reminder interval"
         case .sleepDelayLabel:
             return "Sleep delay"
+        case .minuteSuffix:
+            return "min"
+        case .systemLanguageOption:
+            return "System"
         case .systemNotifications:
             return "System notifications"
         case .restReminderBubble:
@@ -100,6 +106,10 @@ public struct LocalizedStrings: Sendable {
             return "提醒间隔"
         case .sleepDelayLabel:
             return "睡眠延迟"
+        case .minuteSuffix:
+            return "分钟"
+        case .systemLanguageOption:
+            return "跟随系统"
         case .systemNotifications:
             return "系统通知"
         case .restReminderBubble:

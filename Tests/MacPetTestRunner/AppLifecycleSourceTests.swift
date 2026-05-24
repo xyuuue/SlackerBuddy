@@ -110,5 +110,37 @@ let appLifecycleSourceTests: [TestCase] = [
         try expect(appRuntimeSource.contains("let previousSelectedPetID = selectedPetAsset.id"), "Runtime should capture selected pet before catalog refresh")
         try expect(appRuntimeSource.contains("if selectedPetAsset.id != previousSelectedPetID"), "Runtime should detect selected pet changes after catalog refresh")
         try expect(appRuntimeSource.contains("refreshPetWindowIfNeeded()"), "Runtime should refresh visible pet window after selected pet changes")
+    },
+    TestCase(name: "runtime does not reshow hidden pet during refresh") {
+        let appRuntimeSource = try String(
+            contentsOf: URL(fileURLWithPath: "Sources/MacPet/App/AppRuntime.swift"),
+            encoding: .utf8
+        )
+
+        try expect(appRuntimeSource.contains("petWindowController.window?.isVisible == true"), "Runtime should refresh pet window only when the pet window is visible")
+    },
+    TestCase(name: "settings visible copy is fully localized") {
+        let settingsSource = try String(
+            contentsOf: URL(fileURLWithPath: "Sources/MacPet/Views/SettingsView.swift"),
+            encoding: .utf8
+        )
+        let localizedStringsSource = try String(
+            contentsOf: URL(fileURLWithPath: "Sources/MacPetCore/Localization/LocalizedStrings.swift"),
+            encoding: .utf8
+        )
+
+        try expect(!settingsSource.contains(") min\""), "Settings duration labels should not hard-code English min suffix")
+        try expect(!settingsSource.contains("return \"System\""), "System language label should be localized")
+        try expect(localizedStringsSource.contains("case minuteSuffix"), "Localized strings should include minute suffix")
+        try expect(localizedStringsSource.contains("case systemLanguageOption"), "Localized strings should include system language option")
+    },
+    TestCase(name: "Petdex sprite renderer caches atlas instead of decoding every frame") {
+        let spriteViewSource = try String(
+            contentsOf: URL(fileURLWithPath: "Sources/MacPet/Animation/PetSpriteSheetView.swift"),
+            encoding: .utf8
+        )
+
+        try expect(spriteViewSource.contains("PetSpriteSheetFrameCache"), "Sprite renderer should use a frame cache")
+        try expect(!spriteViewSource.contains("NSImage(contentsOf: spriteSheetURL)"), "Sprite renderer should not decode the atlas directly on each frame")
     }
 ]
