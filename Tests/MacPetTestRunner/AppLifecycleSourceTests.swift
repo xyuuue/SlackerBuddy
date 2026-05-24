@@ -154,6 +154,25 @@ let appLifecycleSourceTests: [TestCase] = [
         try expect(appRuntimeSource.contains("waterReminderScheduler.tick()"), "Runtime should tick water scheduler")
         try expect(appRuntimeSource.contains("if restReminderScheduler.isActive"), "Rest reminder should take priority")
     },
+    TestCase(name: "runtime wires automatic scheduler and blocking overlay") {
+        let appRuntimeSource = try String(
+            contentsOf: URL(fileURLWithPath: "Sources/MacPet/App/AppRuntime.swift"),
+            encoding: .utf8
+        )
+        let windowSource = try String(
+            contentsOf: URL(fileURLWithPath: "Sources/MacPet/Windowing/PetWindowController.swift"),
+            encoding: .utf8
+        )
+
+        try expect(appRuntimeSource.contains("restReminderScheduler"), "Runtime should own rest scheduler")
+        try expect(appRuntimeSource.contains("waterReminderScheduler"), "Runtime should own water scheduler")
+        try expect(appRuntimeSource.contains("automaticActionScheduler"), "Runtime should own automatic action scheduler")
+        try expect(appRuntimeSource.contains("showRestBlockingOverlay"), "Runtime should show rest blocking overlay")
+        try expect(appRuntimeSource.contains("hideRestBlockingOverlay"), "Runtime should hide rest blocking overlay")
+        try expect(windowSource.contains("presentBlockingOverlay"), "Window controller should present blocking overlay")
+        try expect(windowSource.contains("restoreFromBlockingOverlay"), "Window controller should restore after blocking overlay")
+        try expect(!windowSource.contains("saveCurrentFrame()") || windowSource.contains("isBlockingOverlayActive"), "Blocking overlay should not persist as normal placement")
+    },
     TestCase(name: "pet view auto-hides reminder bubble without dismissing reminder") {
         let petViewSource = try String(
             contentsOf: URL(fileURLWithPath: "Sources/MacPet/Views/PetView.swift"),

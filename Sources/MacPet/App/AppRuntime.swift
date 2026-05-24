@@ -11,6 +11,7 @@ final class AppRuntime {
     let scheduler: ReminderScheduler
     let restReminderScheduler: ReminderScheduler
     let waterReminderScheduler: IntervalScheduler
+    let automaticActionScheduler: IntervalScheduler
     let petWindowController: PetWindowController
     private(set) var availablePets: [PetAsset]
     private(set) var selectedPetAsset: PetAsset
@@ -30,6 +31,9 @@ final class AppRuntime {
     @ObservationIgnored
     private var terminationObserver: NSObjectProtocol?
 
+    @ObservationIgnored
+    private var blockingOverlayTask: Task<Void, Never>?
+
     init(
         settings: SettingsStore? = nil,
         stateMachine: PetStateMachine? = nil,
@@ -47,6 +51,7 @@ final class AppRuntime {
         self.scheduler = restReminderScheduler
         self.restReminderScheduler = restReminderScheduler
         self.waterReminderScheduler = IntervalScheduler()
+        self.automaticActionScheduler = IntervalScheduler()
         self.petWindowController = petWindowController ?? PetWindowController()
         self.availablePets = availablePets
         self.selectedPetAsset = Self.selectedPetAsset(
@@ -74,21 +79,24 @@ final class AppRuntime {
         }
 
         restReminderScheduler.onReminder = { [weak self] in
-            guard let self else {
-                return
-            }
-
-            stateMachine.handle(.reminderFired(.rest))
-            if settings.preferences.systemNotificationsEnabled {
-                notificationClient.sendRestReminder()
-            }
+            self?.handleRestReminderDue()
         }
 
-        restReminderScheduler.start(intervalMinutes: settings.preferences.reminderIntervalMinutes)
+        if settings.preferences.restRemindersEnabled {
+            restReminderScheduler.start(intervalMinutes: settings.preferences.reminderIntervalMinutes)
+        }
         waterReminderScheduler.start(
             intervalMinutes: settings.preferences.waterIntervalMinutes,
             isEnabled: settings.preferences.waterRemindersEnabled
-        ) {}
+        ) { [weak self] in
+            self?.handleWaterReminderDue()
+        }
+        automaticActionScheduler.start(
+            intervalMinutes: automaticActionInterval(),
+            isEnabled: settings.preferences.automaticActionsEnabled
+        ) { [weak self] in
+            self?.handleAutomaticActionDue()
+        }
         requestNotificationAuthorizationIfNeeded()
 
         if settings.preferences.showPetOnLaunch {
@@ -125,6 +133,8 @@ final class AppRuntime {
     func stop() {
         runtimeTask?.cancel()
         runtimeTask = nil
+        blockingOverlayTask?.cancel()
+        blockingOverlayTask = nil
         petWindowController.close()
     }
 
@@ -150,7 +160,9 @@ final class AppRuntime {
 
     func updateReminderInterval(minutes: Int) {
         settings.updateReminderInterval(minutes: minutes)
-        restReminderScheduler.updateInterval(minutes: settings.preferences.reminderIntervalMinutes)
+        if settings.preferences.restRemindersEnabled {
+            restReminderScheduler.updateInterval(minutes: settings.preferences.reminderIntervalMinutes)
+        }
     }
 
     func updateSystemNotificationsEnabled(_ isEnabled: Bool) {
@@ -224,12 +236,83 @@ final class AppRuntime {
             return
         }
         waterReminderScheduler.tick()
+        automaticActionScheduler.tick()
+    }
+
+    private func handleRestReminderDue() {
+        stateMachine.handle(.reminderFired(.rest))
+        showRestBlockingOverlay()
+        if settings.preferences.systemNotificationsEnabled {
+            notificationClient.sendRestReminder()
+        }
+    }
+
+    private func handleWaterReminderDue() {
+        stateMachine.handle(.reminderFired(.water))
+    }
+
+    private func handleAutomaticActionDue() {
+        guard stateMachine.state == .idle else {
+            automaticActionScheduler.dismissActive()
+            return
+        }
+
+        let action: AutomaticPetAction
+        if settings.preferences.automaticRunningEnabled && !settings.preferences.lowerDistractionMode {
+            action = .running
+        } else {
+            action = .blink
+        }
+        stateMachine.handle(.automaticAction(action))
+        automaticActionScheduler.dismissActive()
+    }
+
+    private func automaticActionInterval() -> Int {
+        settings.preferences.automaticActionIntervalMinutes
+    }
+
+    private func showRestBlockingOverlay() {
+        guard settings.preferences.restBlockingEnabled else {
+            return
+        }
+
+        petWindowController.presentBlockingOverlay(scalePercent: settings.preferences.restBlockingScalePercent)
+        blockingOverlayTask?.cancel()
+        blockingOverlayTask = Task { @MainActor [weak self] in
+            guard let self else {
+                return
+            }
+
+            try? await Task.sleep(
+                nanoseconds: UInt64(settings.preferences.restBlockingDurationSeconds) * 1_000_000_000
+            )
+            hideRestBlockingOverlay()
+        }
+    }
+
+    private func hideRestBlockingOverlay() {
+        blockingOverlayTask?.cancel()
+        blockingOverlayTask = nil
+        petWindowController.restoreFromBlockingOverlay(scale: settings.preferences.petScale)
+    }
+
+    private func dismissActiveReminder() {
+        switch stateMachine.activeReminderKind {
+        case .rest:
+            scheduler.dismissActiveReminder()
+            hideRestBlockingOverlay()
+        case .water:
+            waterReminderScheduler.dismissActive()
+        case nil:
+            return
+        }
+
+        stateMachine.handle(.dismissedReminder)
     }
 
     private func handlePetWindowMoved() {
         if stateMachine.state == .reminding {
-            scheduler.dismissActiveReminder()
-            stateMachine.handle(.dismissedReminder)
+            dismissActiveReminder()
         } else {
             stateMachine.handle(.dragged)
         }

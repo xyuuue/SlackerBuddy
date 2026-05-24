@@ -9,6 +9,8 @@ public final class PetWindowController {
     private let defaults: UserDefaults
     private let frameDefaultsKey: String
     private var observerTokens: [NSObjectProtocol] = []
+    private var preBlockingFrame: NSRect?
+    private var isBlockingOverlayActive = false
 
     public init(
         defaults: UserDefaults = .standard,
@@ -78,6 +80,40 @@ public final class PetWindowController {
         saveFrame()
     }
 
+    public func presentBlockingOverlay(scalePercent: Int) {
+        guard let window else {
+            return
+        }
+
+        if !isBlockingOverlayActive {
+            preBlockingFrame = window.frame
+        }
+
+        isBlockingOverlayActive = true
+        let screenFrame = NSScreen.main?.visibleFrame ?? NSRect(x: 0, y: 0, width: 800, height: 600)
+        let clampedPercent = max(10, min(scalePercent, 90))
+        let side = min(screenFrame.width, screenFrame.height) * CGFloat(clampedPercent) / 100
+        let frame = NSRect(
+            x: screenFrame.midX - side / 2,
+            y: screenFrame.midY - side / 2,
+            width: side,
+            height: side
+        )
+
+        window.setFrame(frame, display: true, animate: true)
+    }
+
+    public func restoreFromBlockingOverlay(scale: Double) {
+        guard let window, isBlockingOverlayActive else {
+            return
+        }
+
+        let frame = preBlockingFrame ?? defaultFrame(scale: scale)
+        window.setFrame(frame, display: true, animate: true)
+        preBlockingFrame = nil
+        isBlockingOverlayActive = false
+    }
+
     public func resetPosition(scale: Double) {
         defaults.removeObject(forKey: frameDefaultsKey)
         let frame = defaultFrame(scale: scale)
@@ -89,6 +125,10 @@ public final class PetWindowController {
     }
 
     public func saveFrame() {
+        guard !isBlockingOverlayActive else {
+            return
+        }
+
         guard let window else {
             return
         }
