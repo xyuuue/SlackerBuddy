@@ -3,7 +3,7 @@ set -euo pipefail
 
 MODE="${1:-run}"
 APP_NAME="SlackerBuddy"
-BUILD_PRODUCT="MacPet"
+BUILD_PRODUCT="SlackerBuddy"
 BUNDLE_ID="com.xyue.SlackerBuddy"
 MIN_SYSTEM_VERSION="14.0"
 ICON_FILE="SlackerBuddy.icns"

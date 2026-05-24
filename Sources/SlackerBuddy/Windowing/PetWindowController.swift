@@ -1,6 +1,6 @@
 import AppKit
 import SwiftUI
-import MacPetCore
+import SlackerBuddyCore
 
 @MainActor
 public final class PetWindowController {
@@ -39,7 +39,7 @@ public final class PetWindowController {
             backing: .buffered,
             defer: false
         )
-        window.title = "Mac Pet"
+        window.title = "SlackerBuddy"
         window.backgroundColor = .clear
         window.isOpaque = false
         window.hasShadow = false

@@ -1,5 +1,5 @@
 import Foundation
-import MacPetCore
+import SlackerBuddyCore
 
 let intervalSchedulerTests: [TestCase] = [
     TestCase(name: "disabled scheduler does not fire") {

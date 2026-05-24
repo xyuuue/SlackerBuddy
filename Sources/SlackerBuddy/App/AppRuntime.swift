@@ -1,7 +1,7 @@
 import Foundation
 import Observation
 import SwiftUI
-import MacPetCore
+import SlackerBuddyCore
 
 @MainActor
 @Observable

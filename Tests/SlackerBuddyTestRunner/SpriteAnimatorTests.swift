@@ -1,5 +1,5 @@
 import Foundation
-import MacPetCore
+import SlackerBuddyCore
 
 let spriteAnimatorTests: [TestCase] = [
     TestCase(name: "sprite animator cycles idle frames") {

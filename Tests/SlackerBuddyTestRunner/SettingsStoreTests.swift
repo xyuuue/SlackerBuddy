@@ -1,9 +1,9 @@
 import Foundation
-import MacPetCore
+import SlackerBuddyCore
 
 let settingsStoreTests: [TestCase] = [
     TestCase(name: "defaults match product decisions") {
-        let suiteName = "MacPetTests.\(UUID().uuidString)"
+        let suiteName = "SlackerBuddyTests.\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suiteName)!
         defer { defaults.removePersistentDomain(forName: suiteName) }
 
@@ -27,7 +27,7 @@ let settingsStoreTests: [TestCase] = [
         try expect(store.preferences.lowerDistractionMode == false, "Expected lower distraction mode to default off")
     },
     TestCase(name: "saves language and selected pet id after reload from same suite") {
-        let suiteName = "MacPetTests.\(UUID().uuidString)"
+        let suiteName = "SlackerBuddyTests.\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suiteName)!
         defer { defaults.removePersistentDomain(forName: suiteName) }
 
@@ -41,7 +41,7 @@ let settingsStoreTests: [TestCase] = [
         try expect(reloadedStore.preferences.selectedPetID == "siamese-cat", "Expected selected pet id to persist")
     },
     TestCase(name: "saves custom reminder interval and scale after reload from same suite") {
-        let suiteName = "MacPetTests.\(UUID().uuidString)"
+        let suiteName = "SlackerBuddyTests.\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suiteName)!
         defer { defaults.removePersistentDomain(forName: suiteName) }
 
@@ -55,7 +55,7 @@ let settingsStoreTests: [TestCase] = [
         try expect(reloadedStore.preferences.petScale == 1.75, "Expected pet scale to persist after reload")
     },
     TestCase(name: "saves reminder and autonomy preferences after reload from same suite") {
-        let suiteName = "MacPetTests.\(UUID().uuidString)"
+        let suiteName = "SlackerBuddyTests.\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suiteName)!
         defer { defaults.removePersistentDomain(forName: suiteName) }
 

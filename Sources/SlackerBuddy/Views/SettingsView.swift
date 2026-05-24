@@ -1,6 +1,6 @@
 import Observation
 import SwiftUI
-import MacPetCore
+import SlackerBuddyCore
 
 public struct SettingsView: View {
     @Bindable private var settings: SettingsStore

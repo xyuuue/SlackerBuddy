@@ -3,29 +3,29 @@
 import PackageDescription
 
 let package = Package(
-    name: "MacPet",
+    name: "SlackerBuddy",
     platforms: [
         .macOS(.v14)
     ],
     products: [
-        .executable(name: "MacPet", targets: ["MacPet"]),
-        .library(name: "MacPetCore", targets: ["MacPetCore"]),
-        .executable(name: "MacPetTestRunner", targets: ["MacPetTestRunner"])
+        .executable(name: "SlackerBuddy", targets: ["SlackerBuddy"]),
+        .library(name: "SlackerBuddyCore", targets: ["SlackerBuddyCore"]),
+        .executable(name: "SlackerBuddyTestRunner", targets: ["SlackerBuddyTestRunner"])
     ],
     targets: [
         .executableTarget(
-            name: "MacPet",
-            dependencies: ["MacPetCore"],
-            path: "Sources/MacPet"
+            name: "SlackerBuddy",
+            dependencies: ["SlackerBuddyCore"],
+            path: "Sources/SlackerBuddy"
         ),
         .target(
-            name: "MacPetCore",
-            path: "Sources/MacPetCore"
+            name: "SlackerBuddyCore",
+            path: "Sources/SlackerBuddyCore"
         ),
         .executableTarget(
-            name: "MacPetTestRunner",
-            dependencies: ["MacPetCore"],
-            path: "Tests/MacPetTestRunner"
+            name: "SlackerBuddyTestRunner",
+            dependencies: ["SlackerBuddyCore"],
+            path: "Tests/SlackerBuddyTestRunner"
         )
     ]
 )

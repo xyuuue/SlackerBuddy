@@ -1,5 +1,5 @@
 import Foundation
-import MacPetCore
+import SlackerBuddyCore
 
 let petdexCatalogTests: [TestCase] = [
     TestCase(name: "catalog includes builtin pet when directory is empty") {
@@ -58,7 +58,7 @@ let petdexCatalogTests: [TestCase] = [
 
 private func temporaryDirectory() throws -> URL {
     let directory = FileManager.default.temporaryDirectory
-        .appendingPathComponent("MacPetTests.\(UUID().uuidString)", isDirectory: true)
+        .appendingPathComponent("SlackerBuddyTests.\(UUID().uuidString)", isDirectory: true)
     try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
     return directory
 }

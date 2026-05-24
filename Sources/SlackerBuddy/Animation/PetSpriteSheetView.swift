@@ -1,6 +1,6 @@
 import AppKit
 import SwiftUI
-import MacPetCore
+import SlackerBuddyCore
 
 public struct PetSpriteSheetView: View {
     private let spriteSheetURL: URL

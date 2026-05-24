@@ -1,5 +1,5 @@
 import Foundation
-import MacPetCore
+import SlackerBuddyCore
 
 let petStateMachineTests: [TestCase] = [
     TestCase(name: "pet state machine starts idle with no bubble") {

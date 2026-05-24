@@ -1,5 +1,5 @@
 import Foundation
-import MacPetCore
+import SlackerBuddyCore
 
 let localizationTests: [TestCase] = [
     TestCase(name: "system language resolves Chinese preferred locale") {

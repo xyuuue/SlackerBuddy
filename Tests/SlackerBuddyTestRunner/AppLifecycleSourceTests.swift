@@ -2,7 +2,7 @@ import Foundation
 
 let appLifecycleSourceTests: [TestCase] = [
     TestCase(name: "pet view does not own reminder scheduler lifecycle") {
-        let sourceURL = URL(fileURLWithPath: "Sources/MacPet/Views/PetView.swift")
+        let sourceURL = URL(fileURLWithPath: "Sources/SlackerBuddy/Views/PetView.swift")
         let source = try String(contentsOf: sourceURL, encoding: .utf8)
 
         try expect(!source.contains("scheduler.start("), "PetView should not start the reminder scheduler")
@@ -12,11 +12,11 @@ let appLifecycleSourceTests: [TestCase] = [
     },
     TestCase(name: "window movement is reported as pet interaction") {
         let controllerSource = try String(
-            contentsOf: URL(fileURLWithPath: "Sources/MacPet/Windowing/PetWindowController.swift"),
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/Windowing/PetWindowController.swift"),
             encoding: .utf8
         )
         let runtimeSource = try String(
-            contentsOf: URL(fileURLWithPath: "Sources/MacPet/App/AppRuntime.swift"),
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/App/AppRuntime.swift"),
             encoding: .utf8
         )
 
@@ -31,15 +31,15 @@ let appLifecycleSourceTests: [TestCase] = [
     },
     TestCase(name: "settings can reset pet position") {
         let settingsSource = try String(
-            contentsOf: URL(fileURLWithPath: "Sources/MacPet/Views/SettingsView.swift"),
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/Views/SettingsView.swift"),
             encoding: .utf8
         )
         let runtimeSource = try String(
-            contentsOf: URL(fileURLWithPath: "Sources/MacPet/App/AppRuntime.swift"),
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/App/AppRuntime.swift"),
             encoding: .utf8
         )
         let windowSource = try String(
-            contentsOf: URL(fileURLWithPath: "Sources/MacPet/Windowing/PetWindowController.swift"),
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/Windowing/PetWindowController.swift"),
             encoding: .utf8
         )
 
@@ -52,15 +52,15 @@ let appLifecycleSourceTests: [TestCase] = [
     },
     TestCase(name: "runtime connects settings to localized Petdex pets") {
         let appRuntimeSource = try String(
-            contentsOf: URL(fileURLWithPath: "Sources/MacPet/App/AppRuntime.swift"),
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/App/AppRuntime.swift"),
             encoding: .utf8
         )
         let petViewSource = try String(
-            contentsOf: URL(fileURLWithPath: "Sources/MacPet/Views/PetView.swift"),
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/Views/PetView.swift"),
             encoding: .utf8
         )
         let settingsViewSource = try String(
-            contentsOf: URL(fileURLWithPath: "Sources/MacPet/Views/SettingsView.swift"),
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/Views/SettingsView.swift"),
             encoding: .utf8
         )
 
@@ -73,7 +73,7 @@ let appLifecycleSourceTests: [TestCase] = [
     },
     TestCase(name: "menu labels use localized runtime strings") {
         let macPetAppSource = try String(
-            contentsOf: URL(fileURLWithPath: "Sources/MacPet/App/MacPetApp.swift"),
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/App/SlackerBuddyApp.swift"),
             encoding: .utf8
         )
 
@@ -86,11 +86,11 @@ let appLifecycleSourceTests: [TestCase] = [
     },
     TestCase(name: "app is branded as SlackerBuddy with custom paw icons") {
         let macPetAppSource = try String(
-            contentsOf: URL(fileURLWithPath: "Sources/MacPet/App/MacPetApp.swift"),
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/App/SlackerBuddyApp.swift"),
             encoding: .utf8
         )
         let notificationSource = try String(
-            contentsOf: URL(fileURLWithPath: "Sources/MacPetCore/Services/NotificationClient.swift"),
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddyCore/Services/NotificationClient.swift"),
             encoding: .utf8
         )
         let buildScript = try String(
@@ -102,12 +102,38 @@ let appLifecycleSourceTests: [TestCase] = [
         try expect(macPetAppSource.contains("SlackerBuddyMenuBarIcon"), "Menu bar should attempt to load the custom paw toolbar icon")
         try expect(notificationSource.contains("SlackerBuddy"), "Notification title should use SlackerBuddy")
         try expect(buildScript.contains("APP_NAME=\"SlackerBuddy\""), "Packaged app should be named SlackerBuddy")
-        try expect(buildScript.contains("BUILD_PRODUCT=\"MacPet\""), "Build script should still copy the SwiftPM MacPet binary")
+        try expect(buildScript.contains("BUILD_PRODUCT=\"SlackerBuddy\""), "Build script should copy the SwiftPM SlackerBuddy binary")
         try expect(buildScript.contains("CFBundleIconFile"), "Packaged app should declare an app icon")
         try expect(buildScript.contains("SlackerBuddy.icns"), "Packaged app should copy the SlackerBuddy app icon")
         try expect(FileManager.default.fileExists(atPath: "Assets/SlackerBuddyAppIcon.png"), "Expected generated app icon asset")
         try expect(FileManager.default.fileExists(atPath: "Assets/SlackerBuddyMenuBarIcon.png"), "Expected generated menu bar icon asset")
         try expect(FileManager.default.fileExists(atPath: "Assets/SlackerBuddy.icns"), "Expected generated icns asset")
+    },
+    TestCase(name: "active SwiftPM project is renamed to SlackerBuddy") {
+        let packageSource = try String(
+            contentsOf: URL(fileURLWithPath: "Package.swift"),
+            encoding: .utf8
+        )
+        let buildScript = try String(
+            contentsOf: URL(fileURLWithPath: "script/build_and_run.sh"),
+            encoding: .utf8
+        )
+        let windowSource = try String(
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/Windowing/PetWindowController.swift"),
+            encoding: .utf8
+        )
+
+        try expect(packageSource.contains("name: \"SlackerBuddy\""), "Package should be named SlackerBuddy")
+        try expect(packageSource.contains(".executable(name: \"SlackerBuddy\""), "Executable product should be SlackerBuddy")
+        try expect(packageSource.contains(".library(name: \"SlackerBuddyCore\""), "Core library should be SlackerBuddyCore")
+        try expect(packageSource.contains(".executable(name: \"SlackerBuddyTestRunner\""), "Test runner should be SlackerBuddyTestRunner")
+        try expect(!packageSource.contains("MacPet"), "Active Package.swift should not contain MacPet")
+        try expect(buildScript.contains("BUILD_PRODUCT=\"SlackerBuddy\""), "Build script should build the SlackerBuddy product")
+        try expect(!buildScript.contains("MacPet"), "Active build script should not contain MacPet")
+        try expect(windowSource.contains("window.title = \"SlackerBuddy\""), "Pet window title should use SlackerBuddy")
+        try expect(FileManager.default.fileExists(atPath: "Sources/SlackerBuddy"), "Expected SlackerBuddy app source directory")
+        try expect(FileManager.default.fileExists(atPath: "Sources/SlackerBuddyCore"), "Expected SlackerBuddyCore source directory")
+        try expect(FileManager.default.fileExists(atPath: "Tests/SlackerBuddyTestRunner"), "Expected SlackerBuddyTestRunner directory")
     },
     TestCase(name: "app uses provided SlackerBuddy icon assets") {
         let repoAppIcon = try Data(contentsOf: URL(fileURLWithPath: "Assets/SlackerBuddyAppIcon.png"))
@@ -120,7 +146,7 @@ let appLifecycleSourceTests: [TestCase] = [
     },
     TestCase(name: "settings refreshes Petdex catalog when opened") {
         let macPetAppSource = try String(
-            contentsOf: URL(fileURLWithPath: "Sources/MacPet/App/MacPetApp.swift"),
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/App/SlackerBuddyApp.swift"),
             encoding: .utf8
         )
 
@@ -130,7 +156,7 @@ let appLifecycleSourceTests: [TestCase] = [
     },
     TestCase(name: "runtime normalizes removed selected Petdex pet") {
         let appRuntimeSource = try String(
-            contentsOf: URL(fileURLWithPath: "Sources/MacPet/App/AppRuntime.swift"),
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/App/AppRuntime.swift"),
             encoding: .utf8
         )
 
@@ -138,7 +164,7 @@ let appLifecycleSourceTests: [TestCase] = [
     },
     TestCase(name: "runtime refreshes visible pet window after Petdex refresh changes selection") {
         let appRuntimeSource = try String(
-            contentsOf: URL(fileURLWithPath: "Sources/MacPet/App/AppRuntime.swift"),
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/App/AppRuntime.swift"),
             encoding: .utf8
         )
 
@@ -148,7 +174,7 @@ let appLifecycleSourceTests: [TestCase] = [
     },
     TestCase(name: "runtime does not reshow hidden pet during refresh") {
         let appRuntimeSource = try String(
-            contentsOf: URL(fileURLWithPath: "Sources/MacPet/App/AppRuntime.swift"),
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/App/AppRuntime.swift"),
             encoding: .utf8
         )
 
@@ -156,11 +182,11 @@ let appLifecycleSourceTests: [TestCase] = [
     },
     TestCase(name: "settings visible copy is fully localized") {
         let settingsSource = try String(
-            contentsOf: URL(fileURLWithPath: "Sources/MacPet/Views/SettingsView.swift"),
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/Views/SettingsView.swift"),
             encoding: .utf8
         )
         let localizedStringsSource = try String(
-            contentsOf: URL(fileURLWithPath: "Sources/MacPetCore/Localization/LocalizedStrings.swift"),
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddyCore/Localization/LocalizedStrings.swift"),
             encoding: .utf8
         )
 
@@ -171,7 +197,7 @@ let appLifecycleSourceTests: [TestCase] = [
     },
     TestCase(name: "settings exposes reminder and automatic action controls") {
         let settingsSource = try String(
-            contentsOf: URL(fileURLWithPath: "Sources/MacPet/Views/SettingsView.swift"),
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/Views/SettingsView.swift"),
             encoding: .utf8
         )
 
@@ -189,15 +215,15 @@ let appLifecycleSourceTests: [TestCase] = [
     },
     TestCase(name: "settings shows system notification feedback") {
         let settingsSource = try String(
-            contentsOf: URL(fileURLWithPath: "Sources/MacPet/Views/SettingsView.swift"),
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/Views/SettingsView.swift"),
             encoding: .utf8
         )
         let appRuntimeSource = try String(
-            contentsOf: URL(fileURLWithPath: "Sources/MacPet/App/AppRuntime.swift"),
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/App/AppRuntime.swift"),
             encoding: .utf8
         )
         let macPetAppSource = try String(
-            contentsOf: URL(fileURLWithPath: "Sources/MacPet/App/MacPetApp.swift"),
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/App/SlackerBuddyApp.swift"),
             encoding: .utf8
         )
 
@@ -210,7 +236,7 @@ let appLifecycleSourceTests: [TestCase] = [
     },
     TestCase(name: "Petdex sprite renderer caches atlas instead of decoding every frame") {
         let spriteViewSource = try String(
-            contentsOf: URL(fileURLWithPath: "Sources/MacPet/Animation/PetSpriteSheetView.swift"),
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/Animation/PetSpriteSheetView.swift"),
             encoding: .utf8
         )
 
@@ -219,7 +245,7 @@ let appLifecycleSourceTests: [TestCase] = [
     },
     TestCase(name: "runtime centralizes rest and water reminder priority") {
         let appRuntimeSource = try String(
-            contentsOf: URL(fileURLWithPath: "Sources/MacPet/App/AppRuntime.swift"),
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/App/AppRuntime.swift"),
             encoding: .utf8
         )
 
@@ -230,11 +256,11 @@ let appLifecycleSourceTests: [TestCase] = [
     },
     TestCase(name: "runtime wires automatic scheduler and blocking overlay") {
         let appRuntimeSource = try String(
-            contentsOf: URL(fileURLWithPath: "Sources/MacPet/App/AppRuntime.swift"),
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/App/AppRuntime.swift"),
             encoding: .utf8
         )
         let windowSource = try String(
-            contentsOf: URL(fileURLWithPath: "Sources/MacPet/Windowing/PetWindowController.swift"),
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/Windowing/PetWindowController.swift"),
             encoding: .utf8
         )
 
@@ -249,11 +275,11 @@ let appLifecycleSourceTests: [TestCase] = [
     },
     TestCase(name: "pet view delegates reminder dismissal to runtime") {
         let appRuntimeSource = try String(
-            contentsOf: URL(fileURLWithPath: "Sources/MacPet/App/AppRuntime.swift"),
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/App/AppRuntime.swift"),
             encoding: .utf8
         )
         let petViewSource = try String(
-            contentsOf: URL(fileURLWithPath: "Sources/MacPet/Views/PetView.swift"),
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/Views/PetView.swift"),
             encoding: .utf8
         )
 
@@ -265,7 +291,7 @@ let appLifecycleSourceTests: [TestCase] = [
     },
     TestCase(name: "blocking overlay frame changes do not report movement") {
         let windowSource = try String(
-            contentsOf: URL(fileURLWithPath: "Sources/MacPet/Windowing/PetWindowController.swift"),
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/Windowing/PetWindowController.swift"),
             encoding: .utf8
         )
 
@@ -295,7 +321,7 @@ let appLifecycleSourceTests: [TestCase] = [
     },
     TestCase(name: "runtime defers automatic actions while reminders or blocking overlay are active") {
         let appRuntimeSource = try String(
-            contentsOf: URL(fileURLWithPath: "Sources/MacPet/App/AppRuntime.swift"),
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/App/AppRuntime.swift"),
             encoding: .utf8
         )
 
@@ -307,7 +333,7 @@ let appLifecycleSourceTests: [TestCase] = [
     },
     TestCase(name: "runtime does not preempt active reminders with another reminder") {
         let appRuntimeSource = try String(
-            contentsOf: URL(fileURLWithPath: "Sources/MacPet/App/AppRuntime.swift"),
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/App/AppRuntime.swift"),
             encoding: .utf8
         )
 
@@ -317,7 +343,7 @@ let appLifecycleSourceTests: [TestCase] = [
     },
     TestCase(name: "runtime completes automatic action animations") {
         let appRuntimeSource = try String(
-            contentsOf: URL(fileURLWithPath: "Sources/MacPet/App/AppRuntime.swift"),
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/App/AppRuntime.swift"),
             encoding: .utf8
         )
 
@@ -327,11 +353,11 @@ let appLifecycleSourceTests: [TestCase] = [
     },
     TestCase(name: "runtime gives immediate automatic action and running feedback") {
         let appRuntimeSource = try String(
-            contentsOf: URL(fileURLWithPath: "Sources/MacPet/App/AppRuntime.swift"),
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/App/AppRuntime.swift"),
             encoding: .utf8
         )
         let windowSource = try String(
-            contentsOf: URL(fileURLWithPath: "Sources/MacPet/Windowing/PetWindowController.swift"),
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/Windowing/PetWindowController.swift"),
             encoding: .utf8
         )
 
@@ -342,7 +368,7 @@ let appLifecycleSourceTests: [TestCase] = [
     },
     TestCase(name: "pet view auto-hides reminder bubble without dismissing reminder") {
         let petViewSource = try String(
-            contentsOf: URL(fileURLWithPath: "Sources/MacPet/Views/PetView.swift"),
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/Views/PetView.swift"),
             encoding: .utf8
         )
 

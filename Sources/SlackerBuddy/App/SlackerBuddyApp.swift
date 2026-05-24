@@ -2,7 +2,7 @@ import AppKit
 import SwiftUI
 
 @main
-struct MacPetApp: App {
+struct SlackerBuddyApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @State private var runtime: AppRuntime
 

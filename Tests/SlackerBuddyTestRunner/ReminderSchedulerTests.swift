@@ -1,5 +1,5 @@
 import Foundation
-import MacPetCore
+import SlackerBuddyCore
 
 let reminderSchedulerTests: [TestCase] = [
     TestCase(name: "reminder scheduler does not fire before interval") {
