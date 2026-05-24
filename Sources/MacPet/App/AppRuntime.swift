@@ -150,6 +150,7 @@ final class AppRuntime {
     }
 
     func refreshPetCatalog() {
+        let previousSelectedPetID = selectedPetAsset.id
         availablePets = petdexCatalog.loadPets()
         selectedPetAsset = Self.selectedPetAsset(
             from: availablePets,
@@ -157,6 +158,9 @@ final class AppRuntime {
         )
         if selectedPetAsset.id != settings.preferences.selectedPetID {
             settings.updateSelectedPetID(PetAsset.builtinID)
+        }
+        if selectedPetAsset.id != previousSelectedPetID {
+            refreshPetWindowIfNeeded()
         }
     }
 
