@@ -143,10 +143,12 @@ let appLifecycleSourceTests: [TestCase] = [
         let providedMenuIcon = try Data(contentsOf: URL(fileURLWithPath: "/Users/xyue/Pictures/SlackerBuddy Touch Bar Icon.png"))
         let appIconSize = try imagePixelSize(at: "Assets/SlackerBuddyAppIcon.png")
         let menuIconSize = try imagePixelSize(at: "Assets/SlackerBuddyMenuBarIcon.png")
+        let appIconVisibleBounds = try visibleImageBounds(at: "Assets/SlackerBuddyAppIcon.png")
 
         try expect(repoAppIcon != providedAppIcon, "Expected app icon to be cropped/resized from the user-provided reference")
         try expect(repoMenuIcon != providedMenuIcon, "Expected menu bar icon to be cropped/resized from the user-provided reference")
         try expect(appIconSize.width == appIconSize.height && appIconSize.width >= 512, "Expected app icon to be a large square asset")
+        try expect(Double(appIconVisibleBounds.width) / Double(appIconSize.width) >= 0.68, "Expected app icon paw to fill more horizontal space")
         try expect(menuIconSize.width == menuIconSize.height && menuIconSize.width >= 128, "Expected menu bar icon to be a square template-ready asset")
     },
     TestCase(name: "settings refreshes Petdex catalog when opened") {
@@ -470,4 +472,46 @@ private func imagePixelSize(at path: String) throws -> (width: Int, height: Int)
     }
 
     return (width, height)
+}
+
+private func visibleImageBounds(at path: String) throws -> (width: Int, height: Int) {
+    let url = URL(fileURLWithPath: path)
+    guard let source = CGImageSourceCreateWithURL(url as CFURL, nil),
+          let image = CGImageSourceCreateImageAtIndex(source, 0, nil),
+          let dataProvider = image.dataProvider,
+          let data = dataProvider.data,
+          let bytes = CFDataGetBytePtr(data) else {
+        throw TestFailure.failed("Could not read image pixels for \(path)")
+    }
+
+    let width = image.width
+    let height = image.height
+    let bytesPerRow = image.bytesPerRow
+    let bitsPerPixel = image.bitsPerPixel
+    let bytesPerPixel = bitsPerPixel / 8
+    guard bytesPerPixel >= 4 else {
+        throw TestFailure.failed("Expected RGBA-like image for \(path)")
+    }
+
+    var minX = width
+    var minY = height
+    var maxX = 0
+    var maxY = 0
+    for y in 0..<height {
+        for x in 0..<width {
+            let offset = y * bytesPerRow + x * bytesPerPixel
+            let alpha = bytes[offset + 3]
+            if alpha > 24 {
+                minX = min(minX, x)
+                minY = min(minY, y)
+                maxX = max(maxX, x)
+                maxY = max(maxY, y)
+            }
+        }
+    }
+
+    guard minX <= maxX, minY <= maxY else {
+        throw TestFailure.failed("Expected visible pixels for \(path)")
+    }
+    return (maxX - minX + 1, maxY - minY + 1)
 }
