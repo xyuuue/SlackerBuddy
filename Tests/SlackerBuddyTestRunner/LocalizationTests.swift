@@ -45,6 +45,8 @@ let localizationTests: [TestCase] = [
         try expect(en.text(.restBlockingDuration) == "Blocking duration", "Expected English rest blocking duration label")
         try expect(zh.text(.restBlockingScale) == "挡屏比例", "Expected Chinese rest blocking scale label")
         try expect(en.text(.restBlockingScale) == "Blocking scale", "Expected English rest blocking scale label")
+        try expect(zh.text(.restBlockingReturnButton) == "我回来啦！", "Expected Chinese return button label")
+        try expect(en.text(.restBlockingReturnButton) == "I'm back!", "Expected English return button label")
         try expect(zh.text(.bubbleDurationLabel) == "气泡显示时长", "Expected Chinese bubble duration label")
         try expect(en.text(.bubbleDurationLabel) == "Bubble duration", "Expected English bubble duration label")
         try expect(zh.text(.automaticActionFrequency) == "动作频率", "Expected Chinese action frequency label")

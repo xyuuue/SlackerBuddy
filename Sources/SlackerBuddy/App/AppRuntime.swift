@@ -14,6 +14,7 @@ final class AppRuntime {
     let waterReminderScheduler: IntervalScheduler
     let automaticActionScheduler: IntervalScheduler
     let petWindowController: PetWindowController
+    let displayState: PetDisplayState
     private(set) var availablePets: [PetAsset]
     private(set) var selectedPetAsset: PetAsset
     private(set) var notificationPermissionStatus: NotificationPermissionStatus
@@ -61,6 +62,7 @@ final class AppRuntime {
         self.waterReminderScheduler = IntervalScheduler()
         self.automaticActionScheduler = IntervalScheduler()
         self.petWindowController = petWindowController ?? PetWindowController()
+        self.displayState = PetDisplayState()
         self.availablePets = availablePets
         self.selectedPetAsset = Self.selectedPetAsset(
             from: availablePets,
@@ -153,6 +155,7 @@ final class AppRuntime {
         let rootView = PetView(
             settings: settings,
             stateMachine: stateMachine,
+            displayState: displayState,
             onDismissReminder: { [weak self] in
                 self?.dismissActiveReminder()
             },
@@ -207,7 +210,9 @@ final class AppRuntime {
     func updateRestBlockingScale(percent: Int) {
         settings.updateRestBlockingScale(percent: percent)
         if isRestBlockingOverlayActive {
-            petWindowController.presentBlockingOverlay(scalePercent: settings.preferences.restBlockingScalePercent)
+            displayState.petScaleOverride = petWindowController.presentBlockingOverlay(
+                scalePercent: settings.preferences.restBlockingScalePercent
+            )
         }
     }
 
@@ -487,7 +492,8 @@ final class AppRuntime {
             return
         }
 
-        petWindowController.presentBlockingOverlay(scalePercent: settings.preferences.restBlockingScalePercent)
+        let effectiveScale = petWindowController.presentBlockingOverlay(scalePercent: settings.preferences.restBlockingScalePercent)
+        displayState.petScaleOverride = effectiveScale
         isRestBlockingOverlayActive = true
         blockingOverlayTask?.cancel()
         blockingOverlayTask = Task { @MainActor [weak self] in
@@ -505,6 +511,7 @@ final class AppRuntime {
     private func hideRestBlockingOverlay() {
         blockingOverlayTask?.cancel()
         blockingOverlayTask = nil
+        displayState.petScaleOverride = nil
         petWindowController.restoreFromBlockingOverlay(scale: settings.preferences.petScale)
         isRestBlockingOverlayActive = false
     }

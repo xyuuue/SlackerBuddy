@@ -161,6 +161,63 @@ let appLifecycleSourceTests: [TestCase] = [
         try expect(siteSource.contains("docs/site/assets/fufu-idle.png") || FileManager.default.fileExists(atPath: "docs/site/assets/fufu-idle.png"), "Release page should have a pet preview asset")
         try expect(FileManager.default.fileExists(atPath: "docs/site/assets/slackerbuddy-app-icon.png"), "Release page should copy the app icon asset")
     },
+    TestCase(name: "packaged app bundle is signed after resources are copied") {
+        let buildScript = try String(
+            contentsOf: URL(fileURLWithPath: "script/build_and_run.sh"),
+            encoding: .utf8
+        )
+        guard let resourceCopyRange = buildScript.range(of: "cp \"$ROOT_DIR/Assets/SlackerBuddyMenuBarIcon.png\"") else {
+            throw TestFailure.failed("Build script should copy the menu bar icon resource")
+        }
+        guard let signingRange = buildScript.range(of: "codesign --force --deep --sign - \"$APP_BUNDLE\"") else {
+            throw TestFailure.failed("Build script should ad-hoc sign the final app bundle")
+        }
+
+        try expect(resourceCopyRange.upperBound < signingRange.lowerBound, "Final app bundle signing should happen after resources are copied")
+    },
+    TestCase(name: "release website explains first launch for ad-hoc distribution") {
+        let siteURL = URL(fileURLWithPath: "docs/site/index.html")
+        let siteSource = try String(contentsOf: siteURL, encoding: .utf8)
+
+        try expect(siteSource.contains("Control") || siteSource.contains("右键"), "Release page should explain the first launch gesture for an ad-hoc signed app")
+        try expect(siteSource.contains("打开"), "Release page should tell users how to open the app")
+    },
+    TestCase(name: "release website includes detailed Gatekeeper walkthrough") {
+        let siteURL = URL(fileURLWithPath: "docs/site/index.html")
+        let siteSource = try String(contentsOf: siteURL, encoding: .utf8)
+
+        try expect(siteSource.contains("Privacy & Security") || siteSource.contains("Privacy &amp; Security"), "Release page should name the macOS Privacy & Security settings page")
+        try expect(siteSource.contains("Open Anyway"), "Release page should mention the Open Anyway button")
+        try expect(siteSource.contains("问号"), "Release page should explain the help button in the security dialog")
+        try expect(siteSource.contains("assets/install-control-open.svg"), "Release page should show the Control-click illustration")
+        try expect(siteSource.contains("assets/install-privacy-security.svg"), "Release page should show the Privacy & Security illustration")
+        try expect(siteSource.contains("assets/install-open-anyway.svg"), "Release page should show the Open Anyway illustration")
+        try expect(FileManager.default.fileExists(atPath: "docs/site/assets/install-control-open.svg"), "Expected Control-click install illustration asset")
+        try expect(FileManager.default.fileExists(atPath: "docs/site/assets/install-privacy-security.svg"), "Expected Privacy & Security install illustration asset")
+        try expect(FileManager.default.fileExists(atPath: "docs/site/assets/install-open-anyway.svg"), "Expected Open Anyway install illustration asset")
+    },
+    TestCase(name: "release website explains PetDex pet installation") {
+        let siteURL = URL(fileURLWithPath: "docs/site/index.html")
+        let siteSource = try String(contentsOf: siteURL, encoding: .utf8)
+
+        try expect(siteSource.contains("PetDex"), "Release page should explain PetDex support")
+        try expect(siteSource.contains("petdex.crafter.run"), "Release page should link to PetDex")
+        try expect(siteSource.contains("~/.codex/pets"), "Release page should show where PetDex pets are installed")
+        try expect(siteSource.contains("设置") && siteSource.contains("宠物"), "Release page should tell users to choose pets in settings")
+        try expect(siteSource.contains("下载宠物"), "Release page should explain downloading pets")
+    },
+    TestCase(name: "release website defaults to English and offers language switcher") {
+        let siteURL = URL(fileURLWithPath: "docs/site/index.html")
+        let siteSource = try String(contentsOf: siteURL, encoding: .utf8)
+
+        try expect(siteSource.contains("<html lang=\"en\">"), "Release page should default to English")
+        try expect(siteSource.contains("class=\"language-switcher\""), "Release page should show a top-right language switcher")
+        try expect(siteSource.contains("data-language-option=\"en\""), "Language switcher should include English")
+        try expect(siteSource.contains("data-language-option=\"zh-CN\""), "Language switcher should include Chinese")
+        try expect(siteSource.contains("const translations"), "Release page should include static translations")
+        try expect(siteSource.contains("\"zh-CN\""), "Release page should include Chinese translations")
+        try expect(siteSource.contains("A tiny Mac cat"), "Default hero copy should be English")
+    },
     TestCase(name: "settings refreshes Petdex catalog when opened") {
         let macPetAppSource = try String(
             contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/App/SlackerBuddyApp.swift"),
@@ -294,6 +351,27 @@ let appLifecycleSourceTests: [TestCase] = [
         try expect(windowSource.contains("restoreFromBlockingOverlay"), "Window controller should restore after blocking overlay")
         try expect(!windowSource.contains("saveCurrentFrame()") || windowSource.contains("isBlockingOverlayActive"), "Blocking overlay should not persist as normal placement")
     },
+    TestCase(name: "blocking overlay scales visible pet content within screen bounds") {
+        let appRuntimeSource = try String(
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/App/AppRuntime.swift"),
+            encoding: .utf8
+        )
+        let petViewSource = try String(
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/Views/PetView.swift"),
+            encoding: .utf8
+        )
+        let windowSource = try String(
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/Windowing/PetWindowController.swift"),
+            encoding: .utf8
+        )
+
+        try expect(appRuntimeSource.contains("PetDisplayState"), "Runtime should own shared display state for blocking scale")
+        try expect(appRuntimeSource.contains("displayState.petScaleOverride"), "Runtime should set a blocking pet scale override")
+        try expect(petViewSource.contains("displayState.effectivePetScale"), "PetView should render with the blocking scale override")
+        try expect(windowSource.contains("blockingFrame(scalePercent:"), "Window controller should calculate a bounded blocking frame")
+        try expect(windowSource.contains("visibleFrame.width") && windowSource.contains("visibleFrame.height"), "Blocking frame calculation should constrain to visible screen bounds")
+        try expect(windowSource.contains("return (frame, effectiveScale)") || windowSource.contains("-> (frame: NSRect, effectiveScale: Double)"), "Window controller should return the effective content scale it applied")
+    },
     TestCase(name: "pet view delegates reminder dismissal to runtime") {
         let appRuntimeSource = try String(
             contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/App/AppRuntime.swift"),
@@ -309,6 +387,20 @@ let appLifecycleSourceTests: [TestCase] = [
         try expect(!petViewSource.contains("scheduler.dismissActiveReminder()"), "PetView should not dismiss only the legacy rest scheduler")
         try expect(appRuntimeSource.contains("onDismissReminder: { [weak self] in"), "Runtime should pass a kind-aware dismissal callback into PetView")
         try expect(appRuntimeSource.contains("self?.dismissActiveReminder()"), "Runtime dismissal callback should route through active reminder kind handling")
+    },
+    TestCase(name: "rest blocking bubble exposes return button") {
+        let petViewSource = try String(
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/Views/PetView.swift"),
+            encoding: .utf8
+        )
+        let bubbleViewSource = try String(
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/Views/BubbleView.swift"),
+            encoding: .utf8
+        )
+
+        try expect(petViewSource.contains("strings.text(.restBlockingReturnButton)"), "Rest reminder bubble should use the localized return button label")
+        try expect(bubbleViewSource.contains("buttonTitle"), "Bubble view should support an optional interactive button title")
+        try expect(bubbleViewSource.contains("Button(action: onDismiss)"), "Bubble view should provide a clickable dismissal button")
     },
     TestCase(name: "blocking overlay frame changes do not report movement") {
         let windowSource = try String(

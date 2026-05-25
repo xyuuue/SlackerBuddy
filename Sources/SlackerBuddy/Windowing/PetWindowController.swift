@@ -86,9 +86,10 @@ public final class PetWindowController {
         saveFrame()
     }
 
-    public func presentBlockingOverlay(scalePercent: Int) {
+    @discardableResult
+    public func presentBlockingOverlay(scalePercent: Int) -> Double {
         guard let window else {
-            return
+            return 1.0
         }
 
         if !isBlockingOverlayActive {
@@ -96,20 +97,17 @@ public final class PetWindowController {
         }
 
         isBlockingOverlayActive = true
-        let screenFrame = NSScreen.main?.visibleFrame ?? NSRect(x: 0, y: 0, width: 800, height: 600)
-        let clampedPercent = max(10, min(scalePercent, 90))
-        let side = min(screenFrame.width, screenFrame.height) * CGFloat(clampedPercent) / 100
-        let frame = NSRect(
-            x: screenFrame.midX - side / 2,
-            y: screenFrame.midY - side / 2,
-            width: side,
-            height: side
-        )
+        let visibleFrame = window.screen?.visibleFrame ??
+            NSScreen.main?.visibleFrame ??
+            NSRect(x: 0, y: 0, width: 800, height: 600)
+        let result = Self.blockingFrame(scalePercent: scalePercent, visibleFrame: visibleFrame)
 
         performProgrammaticFrameChange {
-            window.setFrame(frame, display: true, animate: false)
-            lastObservedFrame = frame
+            window.setFrame(result.frame, display: true, animate: false)
+            lastObservedFrame = result.frame
         }
+
+        return result.effectiveScale
     }
 
     public func restoreFromBlockingOverlay(scale: Double) {
@@ -288,5 +286,32 @@ public final class PetWindowController {
     private static func windowSize(scale: Double) -> NSSize {
         let side = 176 * max(0.5, min(scale, 3.0))
         return NSSize(width: side, height: side + 48)
+    }
+
+    private static func blockingFrame(
+        scalePercent: Int,
+        visibleFrame: NSRect
+    ) -> (frame: NSRect, effectiveScale: Double) {
+        let clampedPercent = max(10, min(scalePercent, 90))
+        let targetWidth = visibleFrame.width * CGFloat(clampedPercent) / 100
+        let targetHeight = visibleFrame.height * CGFloat(clampedPercent) / 100
+        let widthScale = Double(targetWidth / 176)
+        let heightScale = Double(max(0, targetHeight - 48) / 176)
+        let effectiveScale = max(0.5, min(3.0, widthScale, heightScale))
+        let size = windowSize(scale: effectiveScale)
+        let frame = NSRect(
+            x: min(
+                max(visibleFrame.midX - size.width / 2, visibleFrame.minX),
+                visibleFrame.maxX - size.width
+            ),
+            y: min(
+                max(visibleFrame.midY - size.height / 2, visibleFrame.minY),
+                visibleFrame.maxY - size.height
+            ),
+            width: min(size.width, visibleFrame.width),
+            height: min(size.height, visibleFrame.height)
+        )
+
+        return (frame, effectiveScale)
     }
 }

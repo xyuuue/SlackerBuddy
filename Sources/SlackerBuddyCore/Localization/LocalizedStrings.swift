@@ -29,6 +29,7 @@ public struct LocalizedStrings: Sendable {
         case restBlockingEnabled
         case restBlockingDuration
         case restBlockingScale
+        case restBlockingReturnButton
         case enableWaterReminders
         case waterIntervalLabel
         case waterReminderBubble
@@ -117,6 +118,8 @@ public struct LocalizedStrings: Sendable {
             return "Blocking duration"
         case .restBlockingScale:
             return "Blocking scale"
+        case .restBlockingReturnButton:
+            return "I'm back!"
         case .enableWaterReminders:
             return "Enable water reminders"
         case .waterIntervalLabel:
@@ -202,6 +205,8 @@ public struct LocalizedStrings: Sendable {
             return "挡屏时长"
         case .restBlockingScale:
             return "挡屏比例"
+        case .restBlockingReturnButton:
+            return "我回来啦！"
         case .enableWaterReminders:
             return "开启喝水提醒"
         case .waterIntervalLabel:

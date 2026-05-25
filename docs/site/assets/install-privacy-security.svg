@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 620" role="img" aria-labelledby="title desc">
+  <title id="title">Use the help button to open Privacy and Security</title>
+  <desc id="desc">An illustrated macOS security dialog with the question mark help button and a Privacy and Security link highlighted.</desc>
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="20" stdDeviation="20" flood-color="#443448" flood-opacity="0.18"/>
+    </filter>
+  </defs>
+  <rect width="960" height="620" rx="36" fill="#f6f8fb"/>
+  <rect x="180" y="98" width="600" height="376" rx="28" fill="#fff" stroke="#d9dde7" filter="url(#shadow)"/>
+  <circle cx="735" cy="136" r="18" fill="#f3f5f9" stroke="#ccd2dc"/>
+  <text x="735" y="144" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="25" font-weight="800" fill="#5b606c">?</text>
+  <rect x="316" y="142" width="328" height="56" rx="18" fill="#fff4f6"/>
+  <text x="480" y="177" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="22" font-weight="800" fill="#312d35">macOS Security</text>
+  <text x="260" y="244" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="27" font-weight="800" fill="#1f1c22">“SlackerBuddy” cannot be opened?</text>
+  <text x="260" y="290" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="22" fill="#6d6672">Click the help button in the upper-right corner.</text>
+  <text x="260" y="326" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="22" fill="#6d6672">Choose Privacy &amp; Security.</text>
+  <rect x="506" y="362" width="202" height="52" rx="13" fill="#49aee8"/>
+  <text x="607" y="396" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="20" font-weight="800" fill="#fff">Open Help</text>
+  <path d="M690 162l-96 82" stroke="#49aee8" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="690" cy="162" r="13" fill="#49aee8"/>
+  <rect x="126" y="410" width="338" height="116" rx="20" fill="#fff" stroke="#d8d2dc" filter="url(#shadow)"/>
+  <text x="158" y="454" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="21" font-weight="800" fill="#1f1c22">Help menu</text>
+  <rect x="154" y="474" width="260" height="38" rx="10" fill="#eaf6fd" stroke="#49aee8" stroke-width="3"/>
+  <text x="174" y="501" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="20" fill="#1f1c22">Privacy &amp; Security</text>
+  <text x="520" y="514" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="24" font-weight="800" fill="#1f1c22">2</text>
+  <text x="558" y="514" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="23" fill="#6d6672">Go to macOS settings</text>
+</svg>

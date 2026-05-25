@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>SlackerBuddy - Mac 桌面宠物</title>
-  <meta name="description" content="SlackerBuddy 是一只会陪你工作、提醒休息和喝水的 macOS 桌面宠物。">
+  <title>SlackerBuddy - Mac Desktop Pet</title>
+  <meta name="description" content="SlackerBuddy is a tiny macOS desktop pet that keeps you company and reminds you to rest or drink water.">
   <style>
     :root {
       color-scheme: light;
@@ -35,6 +35,7 @@
     }
 
     .hero {
+      position: relative;
       min-height: 88vh;
       display: grid;
       grid-template-columns: minmax(0, 1fr) minmax(320px, 520px);
@@ -44,6 +45,39 @@
       background:
         radial-gradient(circle at 78% 22%, rgba(73, 174, 232, 0.18), transparent 30%),
         linear-gradient(135deg, #fffafc 0%, #f5f8ff 48%, #fff4f6 100%);
+    }
+
+    .language-switcher {
+      position: absolute;
+      top: 28px;
+      right: clamp(24px, 7vw, 96px);
+      display: inline-flex;
+      gap: 4px;
+      padding: 4px;
+      border: 1px solid rgba(31, 28, 34, 0.1);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.78);
+      box-shadow: 0 12px 34px rgba(68, 52, 72, 0.1);
+      backdrop-filter: blur(14px);
+      z-index: 2;
+    }
+
+    .language-switcher button {
+      min-width: 58px;
+      min-height: 34px;
+      border: 0;
+      border-radius: 999px;
+      color: var(--muted);
+      background: transparent;
+      font: inherit;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .language-switcher button[aria-pressed="true"] {
+      color: #fff;
+      background: var(--ink);
     }
 
     .brand {
@@ -225,6 +259,115 @@
       font-weight: 800;
     }
 
+    .install-guide {
+      display: grid;
+      gap: 18px;
+      border-top: 1px solid var(--line);
+      padding-top: 42px;
+    }
+
+    .install-guide > p {
+      max-width: 760px;
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 17px;
+    }
+
+    .petdex {
+      display: grid;
+      grid-template-columns: 0.95fr 1.05fr;
+      gap: 28px;
+      align-items: center;
+      border-top: 1px solid var(--line);
+      padding-top: 42px;
+    }
+
+    .petdex-copy p {
+      margin: 0 0 18px;
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 17px;
+    }
+
+    .petdex-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 46px;
+      padding: 0 18px;
+      border-radius: 13px;
+      color: #fff;
+      background: var(--blue);
+      text-decoration: none;
+      font-weight: 800;
+    }
+
+    .petdex-panel {
+      display: grid;
+      gap: 14px;
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #fff;
+      box-shadow: 0 10px 34px rgba(73, 58, 82, 0.06);
+    }
+
+    .petdex-panel ol {
+      margin: 0;
+      padding-left: 22px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .petdex-panel code {
+      padding: 2px 6px;
+      border-radius: 8px;
+      background: var(--soft);
+      color: var(--ink);
+      font-size: 0.92em;
+    }
+
+    .install-cards {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+      margin-top: 12px;
+    }
+
+    .install-card {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #fff;
+      box-shadow: 0 10px 34px rgba(73, 58, 82, 0.06);
+    }
+
+    .install-card img {
+      display: block;
+      width: 100%;
+      aspect-ratio: 1.55;
+      object-fit: cover;
+      background: #f6f8fb;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .install-card div {
+      display: grid;
+      gap: 8px;
+      padding: 18px;
+    }
+
+    .install-card strong {
+      font-size: 18px;
+    }
+
+    .install-card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
     footer {
       padding: 34px clamp(24px, 7vw, 96px);
       border-top: 1px solid var(--line);
@@ -234,12 +377,14 @@
 
     @media (max-width: 860px) {
       .hero,
-      .steps {
+      .steps,
+      .petdex {
         grid-template-columns: 1fr;
       }
 
       .hero {
         min-height: auto;
+        padding-top: 88px;
       }
 
       .brand {
@@ -270,65 +415,262 @@
       .grid {
         grid-template-columns: 1fr;
       }
+
+      .install-cards {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
 <body>
   <header class="hero">
+    <div class="language-switcher" aria-label="Language">
+      <button type="button" data-language-option="en" aria-pressed="true">EN</button>
+      <button type="button" data-language-option="zh-CN" aria-pressed="false">中文</button>
+    </div>
     <div>
       <div class="brand">
-        <img src="assets/slackerbuddy-app-icon.png" alt="SlackerBuddy 爪子图标">
+        <img src="assets/slackerbuddy-app-icon.png" alt="SlackerBuddy paw icon" data-i18n-attr="alt:brandIconAlt">
         <span>SlackerBuddy</span>
       </div>
-      <h1>一只会陪你偷懒，也会提醒你休息的 Mac 小猫。</h1>
-      <p class="lead">FuFu 是 SlackerBuddy 的暹罗猫桌面宠物。它会眨眼、挥手、跳跃、等待、奔跑，在你工作的时候陪在屏幕边上，并按你设置的节奏提醒休息和喝水。</p>
+      <h1 data-i18n="heroTitle">A tiny Mac cat that keeps you company and nudges you to rest.</h1>
+      <p class="lead" data-i18n="heroLead">FuFu is SlackerBuddy's Siamese desktop pet. It blinks, waves, jumps, waits, runs, hangs out near your workspace, and reminds you to rest or drink water on your schedule.</p>
       <div class="actions">
-        <a class="download" href="downloads/SlackerBuddy.dmg" download>下载 SlackerBuddy.dmg</a>
-        <span class="secondary">适用于 macOS 14 或更新版本</span>
+        <a class="download" href="downloads/SlackerBuddy.dmg" download data-i18n="downloadButton">Download SlackerBuddy.dmg</a>
+        <span class="secondary" data-i18n="macRequirement">For macOS 14 or later</span>
       </div>
     </div>
-    <div class="pet-stage" aria-label="FuFu 宠物预览">
+    <div class="pet-stage" aria-label="FuFu pet preview" data-i18n-attr="aria-label:petPreviewLabel">
       <div class="pet-card">
-        <img src="assets/fufu-idle.png" alt="FuFu 暹罗猫桌面宠物">
+        <img src="assets/fufu-idle.png" alt="FuFu Siamese desktop pet" data-i18n-attr="alt:fufuAlt">
       </div>
-      <div class="status-bubble">FuFu 会在你专注时安静待机，也会在提醒时间到时挥手出现。</div>
+      <div class="status-bubble" data-i18n="statusBubble">FuFu stays quiet while you focus, then waves when it is time for a reminder.</div>
     </div>
   </header>
 
   <main>
     <section>
-      <h2>认识 FuFu</h2>
+      <h2 data-i18n="meetTitle">Meet FuFu</h2>
       <div class="grid">
         <article class="feature">
-          <strong>像桌面伙伴一样陪伴</strong>
-          <p>小猫可以拖动到你喜欢的位置，也能调整大小，安静地停在工作区旁边。</p>
+          <strong data-i18n="featureCompanionTitle">A little desktop companion</strong>
+          <p data-i18n="featureCompanionBody">Drag the cat wherever you like, resize it, and let it quietly sit beside your work.</p>
         </article>
         <article class="feature">
-          <strong>有反应的小动作</strong>
-          <p>点击、拖拽、提醒和自动动作都会触发不同反馈，包括审视、跳跃、等待和奔跑。</p>
+          <strong data-i18n="featureActionsTitle">Small reactions that feel alive</strong>
+          <p data-i18n="featureActionsBody">Clicks, drags, reminders, and automatic actions can trigger reviewing, jumping, waiting, and running animations.</p>
         </article>
         <article class="feature">
-          <strong>休息和喝水提醒</strong>
-          <p>休息间隔、喝水间隔、气泡显示时长都可以自定义，也可以开启低干扰模式。</p>
+          <strong data-i18n="featureReminderTitle">Rest and water reminders</strong>
+          <p data-i18n="featureReminderBody">Customize rest intervals, water intervals, bubble duration, and lower-distraction behavior.</p>
         </article>
+      </div>
+    </section>
+
+    <section class="petdex">
+      <div class="petdex-copy">
+        <h2 data-i18n="petdexTitle">Supports PetDex pets</h2>
+        <p data-i18n="petdexBody">SlackerBuddy is not limited to the default FuFu pet. It supports PetDex pet packages, so you can pick a desktop pet you like, download it, place it in your local pet folder, and switch to it from SlackerBuddy settings.</p>
+        <a class="petdex-link" href="https://petdex.crafter.run/" target="_blank" rel="noreferrer" data-i18n="petdexLink">Open PetDex to choose a pet</a>
+      </div>
+      <div class="petdex-panel" aria-label="PetDex pet installation steps" data-i18n-attr="aria-label:petdexPanelLabel">
+        <ol>
+          <li data-i18n-html="petdexStep1">Go to <strong>PetDex</strong>, choose a pet you like, and click download pet.</li>
+          <li data-i18n-html="petdexStep2">Put the downloaded pet folder into <code>~/.codex/pets</code>. Each pet usually includes <code>pet.json</code> and a spritesheet image.</li>
+          <li data-i18n-html="petdexStep3">Open SlackerBuddy from the menu bar, go to settings, and choose your new PetDex pet from the Pet option.</li>
+          <li data-i18n-html="petdexStep4">If settings is already open, reopen it or switch the pet picker once so SlackerBuddy refreshes the available pets.</li>
+        </ol>
       </div>
     </section>
 
     <section class="steps">
       <div>
-        <h2>下载与安装</h2>
-        <p>下载 DMG 后，把 SlackerBuddy 拖到 Applications。第一次打开未公证版本时，macOS 可能要求你在系统设置里允许打开。</p>
+        <h2 data-i18n="installTitle">Download and install</h2>
+        <p data-i18n="installIntro">After downloading the DMG, drag SlackerBuddy into Applications. Because this lightweight build is not notarized yet, macOS may block the first launch. Follow these steps to open it.</p>
       </div>
       <ol class="install-list">
-        <li><span>1</span><p>点击页面上方的下载按钮，保存 <strong>SlackerBuddy.dmg</strong>。</p></li>
-        <li><span>2</span><p>打开 DMG，把 <strong>SlackerBuddy.app</strong> 拖入 Applications。</p></li>
-        <li><span>3</span><p>从 Applications 启动 SlackerBuddy，在菜单栏里打开设置并选择你喜欢的提醒节奏。</p></li>
+        <li><span>1</span><p data-i18n-html="installStep1">Click the download button above and save <strong>SlackerBuddy.dmg</strong>.</p></li>
+        <li><span>2</span><p data-i18n-html="installStep2">Open the DMG and drag <strong>SlackerBuddy.app</strong> into Applications.</p></li>
+        <li><span>3</span><p data-i18n-html="installStep3">On first launch, right-click or Control-click <strong>SlackerBuddy.app</strong>, then choose Open.</p></li>
+        <li><span>4</span><p data-i18n-html="installStep4">If a security dialog appears, click the question mark in the upper-right corner, then click <strong>Privacy &amp; Security</strong> to open System Settings.</p></li>
+        <li><span>5</span><p data-i18n-html="installStep5">Close the original security dialog, click <strong>Open Anyway</strong> in System Settings, then confirm. After that, SlackerBuddy can launch normally.</p></li>
       </ol>
+    </section>
+
+    <section class="install-guide">
+      <h2 data-i18n="firstLaunchTitle">What to do on first launch</h2>
+      <p data-i18n="firstLaunchIntro">SlackerBuddy is currently a lightweight distribution build, so macOS may ask for one extra confirmation the first time. These three images show the usual flow: manually choose Open, go from the security prompt into System Settings, then click Open Anyway.</p>
+      <div class="install-cards">
+        <article class="install-card">
+          <img src="assets/install-control-open.svg" alt="Right-click or Control-click SlackerBuddy.app and choose Open" data-i18n-attr="alt:installImage1Alt">
+          <div>
+            <strong data-i18n="installCard1Title">1. Right-click or Control-click Open</strong>
+            <p data-i18n="installCard1Body">Find SlackerBuddy.app in Applications, right-click or Control-click it, then choose Open.</p>
+          </div>
+        </article>
+        <article class="install-card">
+          <img src="assets/install-privacy-security.svg" alt="Click the question mark in the security dialog and go to Privacy and Security" data-i18n-attr="alt:installImage2Alt">
+          <div>
+            <strong data-i18n="installCard2Title">2. Use the question mark to reach Privacy &amp; Security</strong>
+            <p data-i18n="installCard2Body">If a security dialog appears, click the question mark in the upper-right corner, then choose Privacy &amp; Security from the help menu.</p>
+          </div>
+        </article>
+        <article class="install-card">
+          <img src="assets/install-open-anyway.svg" alt="Click Open Anyway in System Settings to finish opening" data-i18n-attr="alt:installImage3Alt">
+          <div>
+            <strong data-i18n="installCard3Title">3. Click Open Anyway</strong>
+            <p data-i18n="installCard3Body">Close the original dialog, click Open Anyway in Privacy &amp; Security, then confirm the launch.</p>
+          </div>
+        </article>
+      </div>
     </section>
   </main>
 
   <footer>
-    SlackerBuddy is a small macOS desktop pet app. Built for people who like soft reminders, tiny companions, and a little less lonely workday.
+    <span data-i18n="footerText">SlackerBuddy is a small macOS desktop pet app. Built for people who like soft reminders, tiny companions, and a little less lonely workday.</span>
   </footer>
+  <script>
+    const translations = {
+      en: {
+        pageTitle: "SlackerBuddy - Mac Desktop Pet",
+        metaDescription: "SlackerBuddy is a tiny macOS desktop pet that keeps you company and reminds you to rest or drink water.",
+        brandIconAlt: "SlackerBuddy paw icon",
+        heroTitle: "A tiny Mac cat that keeps you company and nudges you to rest.",
+        heroLead: "FuFu is SlackerBuddy's Siamese desktop pet. It blinks, waves, jumps, waits, runs, hangs out near your workspace, and reminds you to rest or drink water on your schedule.",
+        downloadButton: "Download SlackerBuddy.dmg",
+        macRequirement: "For macOS 14 or later",
+        petPreviewLabel: "FuFu pet preview",
+        fufuAlt: "FuFu Siamese desktop pet",
+        statusBubble: "FuFu stays quiet while you focus, then waves when it is time for a reminder.",
+        meetTitle: "Meet FuFu",
+        featureCompanionTitle: "A little desktop companion",
+        featureCompanionBody: "Drag the cat wherever you like, resize it, and let it quietly sit beside your work.",
+        featureActionsTitle: "Small reactions that feel alive",
+        featureActionsBody: "Clicks, drags, reminders, and automatic actions can trigger reviewing, jumping, waiting, and running animations.",
+        featureReminderTitle: "Rest and water reminders",
+        featureReminderBody: "Customize rest intervals, water intervals, bubble duration, and lower-distraction behavior.",
+        petdexTitle: "Supports PetDex pets",
+        petdexBody: "SlackerBuddy is not limited to the default FuFu pet. It supports PetDex pet packages, so you can pick a desktop pet you like, download it, place it in your local pet folder, and switch to it from SlackerBuddy settings.",
+        petdexLink: "Open PetDex to choose a pet",
+        petdexPanelLabel: "PetDex pet installation steps",
+        petdexStep1: "Go to <strong>PetDex</strong>, choose a pet you like, and click download pet.",
+        petdexStep2: "Put the downloaded pet folder into <code>~/.codex/pets</code>. Each pet usually includes <code>pet.json</code> and a spritesheet image.",
+        petdexStep3: "Open SlackerBuddy from the menu bar, go to settings, and choose your new PetDex pet from the Pet option.",
+        petdexStep4: "If settings is already open, reopen it or switch the pet picker once so SlackerBuddy refreshes the available pets.",
+        installTitle: "Download and install",
+        installIntro: "After downloading the DMG, drag SlackerBuddy into Applications. Because this lightweight build is not notarized yet, macOS may block the first launch. Follow these steps to open it.",
+        installStep1: "Click the download button above and save <strong>SlackerBuddy.dmg</strong>.",
+        installStep2: "Open the DMG and drag <strong>SlackerBuddy.app</strong> into Applications.",
+        installStep3: "On first launch, right-click or Control-click <strong>SlackerBuddy.app</strong>, then choose Open.",
+        installStep4: "If a security dialog appears, click the question mark in the upper-right corner, then click <strong>Privacy &amp; Security</strong> to open System Settings.",
+        installStep5: "Close the original security dialog, click <strong>Open Anyway</strong> in System Settings, then confirm. After that, SlackerBuddy can launch normally.",
+        firstLaunchTitle: "What to do on first launch",
+        firstLaunchIntro: "SlackerBuddy is currently a lightweight distribution build, so macOS may ask for one extra confirmation the first time. These three images show the usual flow: manually choose Open, go from the security prompt into System Settings, then click Open Anyway.",
+        installImage1Alt: "Right-click or Control-click SlackerBuddy.app and choose Open",
+        installCard1Title: "1. Right-click or Control-click Open",
+        installCard1Body: "Find SlackerBuddy.app in Applications, right-click or Control-click it, then choose Open.",
+        installImage2Alt: "Click the question mark in the security dialog and go to Privacy and Security",
+        installCard2Title: "2. Use the question mark to reach Privacy &amp; Security",
+        installCard2Body: "If a security dialog appears, click the question mark in the upper-right corner, then choose Privacy &amp; Security from the help menu.",
+        installImage3Alt: "Click Open Anyway in System Settings to finish opening",
+        installCard3Title: "3. Click Open Anyway",
+        installCard3Body: "Close the original dialog, click Open Anyway in Privacy &amp; Security, then confirm the launch.",
+        footerText: "SlackerBuddy is a small macOS desktop pet app. Built for people who like soft reminders, tiny companions, and a little less lonely workday."
+      },
+      "zh-CN": {
+        pageTitle: "SlackerBuddy - Mac 桌面宠物",
+        metaDescription: "SlackerBuddy 是一只会陪你工作、提醒休息和喝水的 macOS 桌面宠物。",
+        brandIconAlt: "SlackerBuddy 爪子图标",
+        heroTitle: "一只会陪你偷懒，也会提醒你休息的 Mac 小猫。",
+        heroLead: "FuFu 是 SlackerBuddy 的暹罗猫桌面宠物。它会眨眼、挥手、跳跃、等待、奔跑，在你工作的时候陪在屏幕边上，并按你设置的节奏提醒休息和喝水。",
+        downloadButton: "下载 SlackerBuddy.dmg",
+        macRequirement: "适用于 macOS 14 或更新版本",
+        petPreviewLabel: "FuFu 宠物预览",
+        fufuAlt: "FuFu 暹罗猫桌面宠物",
+        statusBubble: "FuFu 会在你专注时安静待机，也会在提醒时间到时挥手出现。",
+        meetTitle: "认识 FuFu",
+        featureCompanionTitle: "像桌面伙伴一样陪伴",
+        featureCompanionBody: "小猫可以拖动到你喜欢的位置，也能调整大小，安静地停在工作区旁边。",
+        featureActionsTitle: "有反应的小动作",
+        featureActionsBody: "点击、拖拽、提醒和自动动作都会触发不同反馈，包括审视、跳跃、等待和奔跑。",
+        featureReminderTitle: "休息和喝水提醒",
+        featureReminderBody: "休息间隔、喝水间隔、气泡显示时长都可以自定义，也可以开启低干扰模式。",
+        petdexTitle: "支持 PetDex 宠物",
+        petdexBody: "SlackerBuddy 不只能使用默认的 FuFu。它支持 PetDex 宠物包，你可以在 PetDex 里挑选自己喜欢的桌面宠物，下载后放到本机宠物目录，再回到 SlackerBuddy 的设置里切换。",
+        petdexLink: "打开 PetDex 挑选宠物",
+        petdexPanelLabel: "PetDex 宠物安装步骤",
+        petdexStep1: "进入 <strong>PetDex</strong>，选择你喜欢的宠物并点击下载宠物。",
+        petdexStep2: "把下载得到的宠物文件夹放入 <code>~/.codex/pets</code>。每只宠物通常包含 <code>pet.json</code> 和 spritesheet 图片。",
+        petdexStep3: "打开 SlackerBuddy 菜单栏设置，在“宠物”选项里选择刚下载的 PetDex 宠物。",
+        petdexStep4: "如果设置窗口已经打开，重新打开设置或切换一次宠物列表，SlackerBuddy 会刷新可用宠物。",
+        installTitle: "下载与安装",
+        installIntro: "下载 DMG 后，把 SlackerBuddy 拖到 Applications。第一次打开未公证版本时，macOS 可能会阻止直接启动。按下面步骤操作即可完成打开。",
+        installStep1: "点击页面上方的下载按钮，保存 <strong>SlackerBuddy.dmg</strong>。",
+        installStep2: "打开 DMG，把 <strong>SlackerBuddy.app</strong> 拖入 Applications。",
+        installStep3: "第一次启动时右键或 Control-点击 <strong>SlackerBuddy.app</strong>，选择“打开”。",
+        installStep4: "如果出现安全弹窗，点击右上角的问号，然后点击 <strong>Privacy &amp; Security</strong> 进入系统设置。",
+        installStep5: "关闭原本的安全弹窗，在系统设置里点击 <strong>Open Anyway</strong>，再确认打开。之后就可以正常启动。",
+        firstLaunchTitle: "第一次打开时怎么做",
+        firstLaunchIntro: "SlackerBuddy 现在是轻量分发版本，所以 macOS 第一次可能会多问一步。下面三张图对应最常见的流程：先手动选择打开，再从安全提示进入系统设置，最后点击 Open Anyway。",
+        installImage1Alt: "右键或 Control-点击 SlackerBuddy.app 并选择打开",
+        installCard1Title: "1. 右键或 Control-点击打开",
+        installCard1Body: "在 Applications 里找到 SlackerBuddy.app，右键或 Control-点击它，然后选择“打开”。",
+        installImage2Alt: "安全弹窗中点击问号并进入 Privacy and Security",
+        installCard2Title: "2. 从问号进入 Privacy &amp; Security",
+        installCard2Body: "如果出现安全弹窗，点击右上角的问号，在帮助菜单里点击 Privacy &amp; Security。",
+        installImage3Alt: "系统设置里点击 Open Anyway 完成打开",
+        installCard3Title: "3. 点击 Open Anyway",
+        installCard3Body: "关闭原本的弹窗，在系统设置的 Privacy &amp; Security 里点击 Open Anyway，再确认打开。",
+        footerText: "SlackerBuddy 是一个小小的 macOS 桌面宠物 app，适合喜欢轻柔提醒、可爱陪伴和没那么孤单工作日的人。"
+      }
+    };
+
+    const languageButtons = document.querySelectorAll("[data-language-option]");
+    const metaDescription = document.querySelector("meta[name='description']");
+
+    function setLanguage(language) {
+      const copy = translations[language] || translations.en;
+      document.documentElement.lang = language;
+      document.title = copy.pageTitle;
+      if (metaDescription) {
+        metaDescription.setAttribute("content", copy.metaDescription);
+      }
+
+      document.querySelectorAll("[data-i18n]").forEach((element) => {
+        const key = element.getAttribute("data-i18n");
+        if (copy[key]) {
+          element.textContent = copy[key];
+        }
+      });
+
+      document.querySelectorAll("[data-i18n-html]").forEach((element) => {
+        const key = element.getAttribute("data-i18n-html");
+        if (copy[key]) {
+          element.innerHTML = copy[key];
+        }
+      });
+
+      document.querySelectorAll("[data-i18n-attr]").forEach((element) => {
+        element.getAttribute("data-i18n-attr").split(";").forEach((pair) => {
+          const [attribute, key] = pair.split(":");
+          if (attribute && key && copy[key]) {
+            element.setAttribute(attribute, copy[key]);
+          }
+        });
+      });
+
+      languageButtons.forEach((button) => {
+        button.setAttribute("aria-pressed", String(button.dataset.languageOption === language));
+      });
+
+      localStorage.setItem("slackerbuddy-language", language);
+    }
+
+    languageButtons.forEach((button) => {
+      button.addEventListener("click", () => setLanguage(button.dataset.languageOption));
+    });
+
+    setLanguage(localStorage.getItem("slackerbuddy-language") || "en");
+  </script>
 </body>
 </html>

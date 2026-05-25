@@ -2,3 +2,9 @@
 .worktrees/
 .build/
 dist/
+.DS_Store
+**/.DS_Store
+.vercel/
+docs/site/.vercel/
+docs/site/.gitignore
+.codex/config.toml

@@ -5,6 +5,7 @@ import SlackerBuddyCore
 public struct PetView: View {
     @Bindable private var settings: SettingsStore
     @Bindable private var stateMachine: PetStateMachine
+    @Bindable private var displayState: PetDisplayState
 
     private let onDismissReminder: () -> Void
     private let onPetTap: () -> Void
@@ -19,6 +20,7 @@ public struct PetView: View {
     public init(
         settings: SettingsStore,
         stateMachine: PetStateMachine,
+        displayState: PetDisplayState,
         onDismissReminder: @escaping () -> Void,
         onPetTap: @escaping () -> Void,
         strings: LocalizedStrings,
@@ -26,6 +28,7 @@ public struct PetView: View {
     ) {
         self.settings = settings
         self.stateMachine = stateMachine
+        self.displayState = displayState
         self.onDismissReminder = onDismissReminder
         self.onPetTap = onPetTap
         self.strings = strings
@@ -45,14 +48,19 @@ public struct PetView: View {
                 if let bubbleText = stateMachine.bubbleText,
                    isBubbleVisible,
                    !settings.preferences.lowerDistractionMode {
-                    BubbleView(text: localizedBubbleText(fallback: bubbleText), onDismiss: dismissReminder)
+                    BubbleView(
+                        text: localizedBubbleText(fallback: bubbleText),
+                        buttonTitle: reminderBubbleButtonTitle,
+                        onDismiss: dismissReminder
+                    )
                         .transition(.opacity.combined(with: .scale(scale: 0.96)))
                 }
 
+                let effectivePetScale = displayState.effectivePetScale(defaultScale: settings.preferences.petScale)
                 petContent(frameName: frame)
                     .frame(
-                        width: 128 * settings.preferences.petScale,
-                        height: 128 * settings.preferences.petScale
+                        width: 128 * effectivePetScale,
+                        height: 128 * effectivePetScale
                     )
                     .contentShape(Rectangle())
                     .onTapGesture(perform: handlePetTap)
@@ -114,6 +122,14 @@ public struct PetView: View {
         case nil:
             return fallback
         }
+    }
+
+    private var reminderBubbleButtonTitle: String? {
+        guard stateMachine.activeReminderKind == .rest else {
+            return nil
+        }
+
+        return strings.text(.restBlockingReturnButton)
     }
 
     private func shouldFaceLeft(frameName: String) -> Bool {
