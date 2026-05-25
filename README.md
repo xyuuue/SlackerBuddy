@@ -79,6 +79,6 @@ DEVELOPER_DIR=/Library/Developer/CommandLineTools swift run SlackerBuddyTestRunn
 
 ## License
 
-SlackerBuddy is released under the MIT License. See [LICENSE](LICENSE).
+SlackerBuddy is proprietary software by Yueling Qiu. All rights reserved. See [LICENSE](LICENSE).
 
 For questions, help, or collaboration, contact Yueling Qiu at [lindaqiuyueling@gmail.com](mailto:lindaqiuyueling@gmail.com).
