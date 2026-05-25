@@ -151,6 +151,16 @@ let appLifecycleSourceTests: [TestCase] = [
         try expect(Double(appIconVisibleBounds.width) / Double(appIconSize.width) >= 0.68, "Expected app icon paw to fill more horizontal space")
         try expect(menuIconSize.width == menuIconSize.height && menuIconSize.width >= 128, "Expected menu bar icon to be a square template-ready asset")
     },
+    TestCase(name: "release website introduces SlackerBuddy and links the DMG") {
+        let siteURL = URL(fileURLWithPath: "docs/site/index.html")
+        let siteSource = try String(contentsOf: siteURL, encoding: .utf8)
+
+        try expect(siteSource.contains("SlackerBuddy"), "Release page should introduce SlackerBuddy")
+        try expect(siteSource.contains("FuFu"), "Release page should introduce the FuFu pet")
+        try expect(siteSource.contains("downloads/SlackerBuddy.dmg"), "Release page should link the distributable DMG")
+        try expect(siteSource.contains("docs/site/assets/fufu-idle.png") || FileManager.default.fileExists(atPath: "docs/site/assets/fufu-idle.png"), "Release page should have a pet preview asset")
+        try expect(FileManager.default.fileExists(atPath: "docs/site/assets/slackerbuddy-app-icon.png"), "Release page should copy the app icon asset")
+    },
     TestCase(name: "settings refreshes Petdex catalog when opened") {
         let macPetAppSource = try String(
             contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/App/SlackerBuddyApp.swift"),

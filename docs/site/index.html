@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SlackerBuddy - Mac 桌面宠物</title>
+  <meta name="description" content="SlackerBuddy 是一只会陪你工作、提醒休息和喝水的 macOS 桌面宠物。">
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #1f1c22;
+      --muted: #6d6672;
+      --line: #e6e1e8;
+      --paper: #fffafc;
+      --soft: #f4eef7;
+      --pink: #ff8fa1;
+      --blue: #49aee8;
+      --green: #83bc9a;
+      --shadow: 0 22px 70px rgba(68, 52, 72, 0.14);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: var(--paper);
+    }
+
+    a {
+      color: inherit;
+    }
+
+    .hero {
+      min-height: 88vh;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(320px, 520px);
+      gap: clamp(32px, 6vw, 80px);
+      align-items: center;
+      padding: 40px clamp(24px, 7vw, 96px) 72px;
+      background:
+        radial-gradient(circle at 78% 22%, rgba(73, 174, 232, 0.18), transparent 30%),
+        linear-gradient(135deg, #fffafc 0%, #f5f8ff 48%, #fff4f6 100%);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 54px;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    .brand img {
+      width: 42px;
+      height: 42px;
+      object-fit: contain;
+    }
+
+    h1 {
+      margin: 0;
+      max-width: 680px;
+      font-size: 74px;
+      line-height: 1.04;
+      letter-spacing: 0;
+    }
+
+    .lead {
+      max-width: 660px;
+      margin: 28px 0 0;
+      color: var(--muted);
+      font-size: 22px;
+      line-height: 1.55;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-top: 36px;
+      align-items: center;
+    }
+
+    .download {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      min-height: 52px;
+      padding: 0 22px;
+      border-radius: 14px;
+      color: #fff;
+      background: #1f1c22;
+      text-decoration: none;
+      font-weight: 700;
+      box-shadow: 0 14px 34px rgba(31, 28, 34, 0.2);
+    }
+
+    .secondary {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .pet-stage {
+      position: relative;
+      display: grid;
+      place-items: center;
+      min-height: 520px;
+    }
+
+    .pet-card {
+      width: min(100%, 440px);
+      aspect-ratio: 1;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      border-radius: 34px;
+      background: rgba(255, 255, 255, 0.66);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+
+    .pet-card img {
+      width: min(76%, 336px);
+      image-rendering: pixelated;
+      filter: drop-shadow(0 18px 20px rgba(60, 45, 65, 0.16));
+    }
+
+    .status-bubble {
+      position: absolute;
+      left: 10px;
+      bottom: 58px;
+      max-width: 220px;
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: #fff;
+      box-shadow: 0 16px 44px rgba(63, 49, 70, 0.12);
+      color: var(--muted);
+      line-height: 1.45;
+      font-size: 15px;
+    }
+
+    main {
+      padding: 64px clamp(24px, 7vw, 96px) 88px;
+    }
+
+    section {
+      max-width: 1120px;
+      margin: 0 auto 76px;
+    }
+
+    h2 {
+      margin: 0 0 20px;
+      font-size: 42px;
+      letter-spacing: 0;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .feature {
+      min-height: 170px;
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #fff;
+      box-shadow: 0 10px 34px rgba(73, 58, 82, 0.06);
+    }
+
+    .feature strong {
+      display: block;
+      margin-bottom: 10px;
+      font-size: 18px;
+    }
+
+    .feature p,
+    .steps p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: 0.9fr 1.1fr;
+      gap: 28px;
+      align-items: start;
+      border-top: 1px solid var(--line);
+      padding-top: 42px;
+    }
+
+    .install-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 14px;
+    }
+
+    .install-list li {
+      display: grid;
+      grid-template-columns: 36px 1fr;
+      gap: 14px;
+      align-items: start;
+      padding: 16px;
+      border-radius: 16px;
+      background: var(--soft);
+    }
+
+    .install-list span {
+      display: grid;
+      place-items: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      color: #fff;
+      background: var(--blue);
+      font-weight: 800;
+    }
+
+    footer {
+      padding: 34px clamp(24px, 7vw, 96px);
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    @media (max-width: 860px) {
+      .hero,
+      .steps {
+        grid-template-columns: 1fr;
+      }
+
+      .hero {
+        min-height: auto;
+      }
+
+      .brand {
+        margin-bottom: 34px;
+      }
+
+      h1 {
+        font-size: 46px;
+      }
+
+      .lead {
+        font-size: 18px;
+      }
+
+      h2 {
+        font-size: 32px;
+      }
+
+      .pet-stage {
+        min-height: 380px;
+      }
+
+      .status-bubble {
+        left: 0;
+        bottom: 18px;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div>
+      <div class="brand">
+        <img src="assets/slackerbuddy-app-icon.png" alt="SlackerBuddy 爪子图标">
+        <span>SlackerBuddy</span>
+      </div>
+      <h1>一只会陪你偷懒，也会提醒你休息的 Mac 小猫。</h1>
+      <p class="lead">FuFu 是 SlackerBuddy 的暹罗猫桌面宠物。它会眨眼、挥手、跳跃、等待、奔跑，在你工作的时候陪在屏幕边上，并按你设置的节奏提醒休息和喝水。</p>
+      <div class="actions">
+        <a class="download" href="downloads/SlackerBuddy.dmg" download>下载 SlackerBuddy.dmg</a>
+        <span class="secondary">适用于 macOS 14 或更新版本</span>
+      </div>
+    </div>
+    <div class="pet-stage" aria-label="FuFu 宠物预览">
+      <div class="pet-card">
+        <img src="assets/fufu-idle.png" alt="FuFu 暹罗猫桌面宠物">
+      </div>
+      <div class="status-bubble">FuFu 会在你专注时安静待机，也会在提醒时间到时挥手出现。</div>
+    </div>
+  </header>
+
+  <main>
+    <section>
+      <h2>认识 FuFu</h2>
+      <div class="grid">
+        <article class="feature">
+          <strong>像桌面伙伴一样陪伴</strong>
+          <p>小猫可以拖动到你喜欢的位置，也能调整大小，安静地停在工作区旁边。</p>
+        </article>
+        <article class="feature">
+          <strong>有反应的小动作</strong>
+          <p>点击、拖拽、提醒和自动动作都会触发不同反馈，包括审视、跳跃、等待和奔跑。</p>
+        </article>
+        <article class="feature">
+          <strong>休息和喝水提醒</strong>
+          <p>休息间隔、喝水间隔、气泡显示时长都可以自定义，也可以开启低干扰模式。</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="steps">
+      <div>
+        <h2>下载与安装</h2>
+        <p>下载 DMG 后，把 SlackerBuddy 拖到 Applications。第一次打开未公证版本时，macOS 可能要求你在系统设置里允许打开。</p>
+      </div>
+      <ol class="install-list">
+        <li><span>1</span><p>点击页面上方的下载按钮，保存 <strong>SlackerBuddy.dmg</strong>。</p></li>
+        <li><span>2</span><p>打开 DMG，把 <strong>SlackerBuddy.app</strong> 拖入 Applications。</p></li>
+        <li><span>3</span><p>从 Applications 启动 SlackerBuddy，在菜单栏里打开设置并选择你喜欢的提醒节奏。</p></li>
+      </ol>
+    </section>
+  </main>
+
+  <footer>
+    SlackerBuddy is a small macOS desktop pet app. Built for people who like soft reminders, tiny companions, and a little less lonely workday.
+  </footer>
+</body>
+</html>
