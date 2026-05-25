@@ -14,7 +14,7 @@ public struct PetPreferences: Equatable, Sendable {
     public var automaticActionsEnabled: Bool
     public var automaticActionIntervalMinutes: Int
     public var automaticRunningEnabled: Bool
-    public var sleepDelayMinutes: Int
+    public var automaticRunDirectionMode: AutomaticRunDirectionMode
     public var petScale: Double
     public var showPetOnLaunch: Bool
     public var systemNotificationsEnabled: Bool
@@ -24,7 +24,6 @@ public struct PetPreferences: Equatable, Sendable {
 
     public init(
         reminderIntervalMinutes: Int = 45,
-        sleepDelayMinutes: Int = 30,
         petScale: Double = 1.0,
         restRemindersEnabled: Bool = true,
         restBlockingEnabled: Bool = true,
@@ -36,13 +35,14 @@ public struct PetPreferences: Equatable, Sendable {
         automaticActionsEnabled: Bool = true,
         automaticActionIntervalMinutes: Int = 8,
         automaticRunningEnabled: Bool = false,
+        automaticRunDirectionMode: AutomaticRunDirectionMode = .random,
         showPetOnLaunch: Bool = true,
         systemNotificationsEnabled: Bool = false,
         lowerDistractionMode: Bool = false,
         language: AppLanguage = .system,
         selectedPetID: String = Self.defaultSelectedPetID
     ) {
-        self.reminderIntervalMinutes = max(1, reminderIntervalMinutes)
+        self.reminderIntervalMinutes = min(max(reminderIntervalMinutes, 1), 240)
         self.restRemindersEnabled = restRemindersEnabled
         self.restBlockingEnabled = restBlockingEnabled
         self.restBlockingDurationSeconds = min(max(restBlockingDurationSeconds, 1), 300)
@@ -53,7 +53,7 @@ public struct PetPreferences: Equatable, Sendable {
         self.automaticActionsEnabled = automaticActionsEnabled
         self.automaticActionIntervalMinutes = min(max(automaticActionIntervalMinutes, 1), 120)
         self.automaticRunningEnabled = automaticRunningEnabled
-        self.sleepDelayMinutes = max(1, sleepDelayMinutes)
+        self.automaticRunDirectionMode = automaticRunDirectionMode
         self.petScale = min(max(petScale, 0.5), 3.0)
         self.showPetOnLaunch = showPetOnLaunch
         self.systemNotificationsEnabled = systemNotificationsEnabled
@@ -74,7 +74,7 @@ public struct PetPreferences: Equatable, Sendable {
         automaticActionsEnabled: Bool? = nil,
         automaticActionIntervalMinutes: Int? = nil,
         automaticRunningEnabled: Bool? = nil,
-        sleepDelayMinutes: Int? = nil,
+        automaticRunDirectionMode: AutomaticRunDirectionMode? = nil,
         petScale: Double? = nil,
         showPetOnLaunch: Bool? = nil,
         systemNotificationsEnabled: Bool? = nil,
@@ -84,7 +84,6 @@ public struct PetPreferences: Equatable, Sendable {
     ) -> PetPreferences {
         PetPreferences(
             reminderIntervalMinutes: reminderIntervalMinutes ?? self.reminderIntervalMinutes,
-            sleepDelayMinutes: sleepDelayMinutes ?? self.sleepDelayMinutes,
             petScale: petScale ?? self.petScale,
             restRemindersEnabled: restRemindersEnabled ?? self.restRemindersEnabled,
             restBlockingEnabled: restBlockingEnabled ?? self.restBlockingEnabled,
@@ -96,6 +95,7 @@ public struct PetPreferences: Equatable, Sendable {
             automaticActionsEnabled: automaticActionsEnabled ?? self.automaticActionsEnabled,
             automaticActionIntervalMinutes: automaticActionIntervalMinutes ?? self.automaticActionIntervalMinutes,
             automaticRunningEnabled: automaticRunningEnabled ?? self.automaticRunningEnabled,
+            automaticRunDirectionMode: automaticRunDirectionMode ?? self.automaticRunDirectionMode,
             showPetOnLaunch: showPetOnLaunch ?? self.showPetOnLaunch,
             systemNotificationsEnabled: systemNotificationsEnabled ?? self.systemNotificationsEnabled,
             lowerDistractionMode: lowerDistractionMode ?? self.lowerDistractionMode,

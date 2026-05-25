@@ -31,8 +31,8 @@ struct SlackerBuddyApp: App {
 
             Divider()
 
-            SettingsLink {
-                Text(runtime.localizedStrings.text(.settingsTitle))
+            Button(runtime.localizedStrings.text(.settingsTitle)) {
+                runtime.openSettingsWindow()
             }
 
             Divider()
@@ -67,6 +67,7 @@ struct SlackerBuddyApp: App {
                 onAutomaticActionsEnabledChanged: { runtime.updateAutomaticActionsEnabled($0) },
                 onAutomaticActionIntervalChanged: { runtime.updateAutomaticActionInterval(minutes: $0) },
                 onAutomaticRunningEnabledChanged: { runtime.updateAutomaticRunningEnabled($0) },
+                onAutomaticRunDirectionModeChanged: { runtime.updateAutomaticRunDirectionMode($0) },
                 onSystemNotificationsEnabledChanged: { runtime.updateSystemNotificationsEnabled($0) },
                 onLanguageChanged: { runtime.updateLanguage($0) },
                 onSelectedPetChanged: { runtime.updateSelectedPet($0) },

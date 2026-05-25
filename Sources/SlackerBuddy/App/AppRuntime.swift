@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 import Observation
 import SwiftUI
@@ -40,9 +41,6 @@ final class AppRuntime {
 
     @ObservationIgnored
     private var isRestBlockingOverlayActive = false
-
-    @ObservationIgnored
-    private var nextAutomaticRunDirection: PetMovementDirection = .right
 
     init(
         settings: SettingsStore? = nil,
@@ -133,7 +131,7 @@ final class AppRuntime {
                 }
 
                 handleDueReminders()
-                stateMachine.tick(preferences: settings.preferences)
+                stateMachine.tick()
                 completeTransientAnimationIfNeeded()
 
                 try? await Task.sleep(nanoseconds: 1_000_000_000)
@@ -157,6 +155,9 @@ final class AppRuntime {
             stateMachine: stateMachine,
             onDismissReminder: { [weak self] in
                 self?.dismissActiveReminder()
+            },
+            onPetTap: { [weak self] in
+                self?.handlePetTap()
             },
             strings: localizedStrings,
             petAsset: selectedPetAsset
@@ -259,6 +260,13 @@ final class AppRuntime {
         }
     }
 
+    func updateAutomaticRunDirectionMode(_ mode: AutomaticRunDirectionMode) {
+        settings.updateAutomaticRunDirectionMode(mode)
+        if settings.preferences.automaticRunningEnabled, settings.preferences.automaticActionsEnabled {
+            triggerAutomaticActionFeedback(preferRunning: true)
+        }
+    }
+
     func updateSystemNotificationsEnabled(_ isEnabled: Bool) {
         settings.updateSystemNotificationsEnabled(isEnabled)
         if isEnabled {
@@ -296,6 +304,16 @@ final class AppRuntime {
 
     func resetPetPosition() {
         petWindowController.resetPosition(scale: settings.preferences.petScale)
+    }
+
+    func openSettingsWindow() {
+        NSApp.activate(ignoringOtherApps: true)
+        NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+
+        Task { @MainActor [weak self] in
+            try? await Task.sleep(nanoseconds: 100_000_000)
+            self?.bringSettingsWindowToFront()
+        }
     }
 
     var localizedStrings: LocalizedStrings {
@@ -339,6 +357,11 @@ final class AppRuntime {
         if stateMachine.state == .waking ||
             stateMachine.state == .petting ||
             stateMachine.state == .waving ||
+            stateMachine.state == .reviewing ||
+            stateMachine.state == .jumping ||
+            stateMachine.state == .failed ||
+            stateMachine.state == .waiting ||
+            stateMachine.state == .running ||
             stateMachine.state == .dragRunningLeft ||
             stateMachine.state == .dragRunningRight ||
             stateMachine.state == .automaticBlink ||
@@ -387,15 +410,16 @@ final class AppRuntime {
             return
         }
 
-        let action: AutomaticPetAction
-        if settings.preferences.automaticRunningEnabled && !settings.preferences.lowerDistractionMode {
+        let expressiveAction = randomExpressiveAction()
+        if expressiveAction == .run,
+           settings.preferences.automaticRunningEnabled,
+           !settings.preferences.lowerDistractionMode {
             let direction = nextAutomaticRunDirectionValue()
-            action = .running(direction)
+            stateMachine.handle(.automaticAction(.running(direction)))
             performAutomaticRun(direction: direction)
         } else {
-            action = .blink
+            stateMachine.handle(.automaticAction(.expressive(expressiveAction)))
         }
-        stateMachine.handle(.automaticAction(action))
         automaticActionScheduler.dismissActive()
     }
 
@@ -408,6 +432,8 @@ final class AppRuntime {
             let direction = nextAutomaticRunDirectionValue()
             stateMachine.handle(.automaticAction(.running(direction)))
             performAutomaticRun(direction: direction)
+        } else if settings.preferences.automaticActionsEnabled {
+            stateMachine.handle(.automaticAction(.expressive(randomExpressiveAction())))
         } else {
             stateMachine.handle(.automaticAction(.blink))
         }
@@ -433,9 +459,18 @@ final class AppRuntime {
     }
 
     private func nextAutomaticRunDirectionValue() -> PetMovementDirection {
-        let direction = nextAutomaticRunDirection
-        nextAutomaticRunDirection = direction == .left ? .right : .left
-        return direction
+        switch settings.preferences.automaticRunDirectionMode {
+        case .left:
+            return .left
+        case .right:
+            return .right
+        case .random:
+            return Bool.random() ? .left : .right
+        }
+    }
+
+    private func randomExpressiveAction() -> ExpressivePetAction {
+        ExpressivePetAction.allCases.randomElement() ?? .wait
     }
 
     private var shouldTickAutomaticActionScheduler: Bool {
@@ -494,6 +529,47 @@ final class AppRuntime {
             dismissActiveReminder()
         } else {
             stateMachine.handle(.dragged(direction))
+        }
+    }
+
+    private func handlePetTap() {
+        if stateMachine.state == .sleeping {
+            stateMachine.handle(.clicked)
+        } else {
+            stateMachine.handle(.expressiveAction(randomExpressiveAction()))
+        }
+    }
+
+    private func bringSettingsWindowToFront() {
+        let expectedTitle = localizedStrings.text(.settingsTitle)
+        for window in NSApp.windows where window !== petWindowController.window {
+            guard window.title == expectedTitle || String(describing: type(of: window)).contains("Settings") else {
+                continue
+            }
+
+            let originalLevel = window.level
+            let originalCollectionBehavior = window.collectionBehavior
+            window.collectionBehavior.insert(.moveToActiveSpace)
+            window.level = .floating
+            window.makeKeyAndOrderFront(nil)
+            window.orderFrontRegardless()
+            restoreSettingsWindowLevel(
+                window,
+                to: originalLevel,
+                collectionBehavior: originalCollectionBehavior
+            )
+        }
+    }
+
+    private func restoreSettingsWindowLevel(
+        _ window: NSWindow,
+        to level: NSWindow.Level,
+        collectionBehavior: NSWindow.CollectionBehavior
+    ) {
+        Task { @MainActor [weak window] in
+            try? await Task.sleep(nanoseconds: 750_000_000)
+            window?.level = level
+            window?.collectionBehavior = collectionBehavior
         }
     }
 

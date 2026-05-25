@@ -55,5 +55,14 @@ let spriteAnimatorTests: [TestCase] = [
 
         try expect(animator.frame(for: .automaticBlink, elapsed: 0, lowerDistractionMode: false) == "idle-4", "expected automatic blink to use FuFu idle blink frame")
         try expect(animator.frame(for: .blink, elapsed: 0.25, lowerDistractionMode: false) == "idle-5", "expected blink recovery to stay on FuFu idle row")
+    },
+    TestCase(name: "sprite animator exposes FuFu expressive action frames") {
+        let animator = SpriteAnimator()
+
+        try expect(animator.frame(for: .reviewing, elapsed: 0, lowerDistractionMode: false) == "review-0", "expected review row frame")
+        try expect(animator.frame(for: .jumping, elapsed: 0, lowerDistractionMode: false) == "jump-0", "expected jump row frame")
+        try expect(animator.frame(for: .failed, elapsed: 0, lowerDistractionMode: false) == "failed-0", "expected failed row frame")
+        try expect(animator.frame(for: .waiting, elapsed: 0, lowerDistractionMode: false) == "waiting-0", "expected waiting row frame")
+        try expect(animator.frame(for: .running, elapsed: 0, lowerDistractionMode: false) == "running-0", "expected running row frame")
     }
 ]

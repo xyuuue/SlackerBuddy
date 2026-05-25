@@ -13,7 +13,6 @@ public struct LocalizedStrings: Sendable {
         case resetPetPosition
         case remindersSectionTitle
         case reminderIntervalLabel
-        case sleepDelayLabel
         case minuteSuffix
         case systemLanguageOption
         case systemNotifications
@@ -22,6 +21,10 @@ public struct LocalizedStrings: Sendable {
         case enableAutomaticActions
         case automaticActionFrequency
         case enableAutomaticRunning
+        case automaticRunDirection
+        case automaticRunDirectionLeft
+        case automaticRunDirectionRight
+        case automaticRunDirectionRandom
         case enableRestReminders
         case restBlockingEnabled
         case restBlockingDuration
@@ -82,8 +85,6 @@ public struct LocalizedStrings: Sendable {
             return "Reminders"
         case .reminderIntervalLabel:
             return "Rest interval"
-        case .sleepDelayLabel:
-            return "Sleep delay"
         case .minuteSuffix:
             return "min"
         case .systemLanguageOption:
@@ -100,6 +101,14 @@ public struct LocalizedStrings: Sendable {
             return "Action frequency"
         case .enableAutomaticRunning:
             return "Enable automatic running"
+        case .automaticRunDirection:
+            return "Run direction"
+        case .automaticRunDirectionLeft:
+            return "Left"
+        case .automaticRunDirectionRight:
+            return "Right"
+        case .automaticRunDirectionRandom:
+            return "Random"
         case .enableRestReminders:
             return "Enable rest reminders"
         case .restBlockingEnabled:
@@ -161,8 +170,6 @@ public struct LocalizedStrings: Sendable {
             return "提醒"
         case .reminderIntervalLabel:
             return "休息间隔"
-        case .sleepDelayLabel:
-            return "睡眠延迟"
         case .minuteSuffix:
             return "分钟"
         case .systemLanguageOption:
@@ -179,6 +186,14 @@ public struct LocalizedStrings: Sendable {
             return "动作频率"
         case .enableAutomaticRunning:
             return "开启自动跑动"
+        case .automaticRunDirection:
+            return "跑动方向"
+        case .automaticRunDirectionLeft:
+            return "向左"
+        case .automaticRunDirectionRight:
+            return "向右"
+        case .automaticRunDirectionRandom:
+            return "随机"
         case .enableRestReminders:
             return "开启休息提醒"
         case .restBlockingEnabled:

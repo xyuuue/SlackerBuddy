@@ -20,7 +20,7 @@ let settingsStoreTests: [TestCase] = [
         try expect(store.preferences.automaticActionsEnabled == true, "Expected automatic actions enabled by default")
         try expect(store.preferences.automaticActionIntervalMinutes == 8, "Expected automatic action interval to default to 8")
         try expect(store.preferences.automaticRunningEnabled == false, "Expected automatic running off by default")
-        try expect(store.preferences.sleepDelayMinutes == 30, "Expected sleep delay to default to 30")
+        try expect(store.preferences.automaticRunDirectionMode == .random, "Expected automatic running direction to default to random")
         try expect(store.preferences.petScale == 1.0, "Expected pet scale to default to 1.0")
         try expect(store.preferences.showPetOnLaunch == true, "Expected pet to show on launch by default")
         try expect(store.preferences.systemNotificationsEnabled == false, "Expected system notifications to default off")
@@ -70,6 +70,7 @@ let settingsStoreTests: [TestCase] = [
         store.updateAutomaticActionsEnabled(false)
         store.updateAutomaticActionInterval(minutes: 12)
         store.updateAutomaticRunningEnabled(true)
+        store.updateAutomaticRunDirectionMode(.left)
 
         let reloadedStore = SettingsStore(defaults: defaults)
 
@@ -83,11 +84,11 @@ let settingsStoreTests: [TestCase] = [
         try expect(reloadedStore.preferences.automaticActionsEnabled == false, "Expected automatic action toggle to persist")
         try expect(reloadedStore.preferences.automaticActionIntervalMinutes == 12, "Expected automatic action interval to persist")
         try expect(reloadedStore.preferences.automaticRunningEnabled == true, "Expected automatic running toggle to persist")
+        try expect(reloadedStore.preferences.automaticRunDirectionMode == .left, "Expected automatic running direction mode to persist")
     },
     TestCase(name: "clamps invalid values") {
         let lowPreferences = PetPreferences(
             reminderIntervalMinutes: 0,
-            sleepDelayMinutes: -4,
             petScale: 0.1,
             restBlockingDurationSeconds: 0,
             restBlockingScalePercent: 5,
@@ -95,16 +96,27 @@ let settingsStoreTests: [TestCase] = [
             bubbleDurationSeconds: 0,
             automaticActionIntervalMinutes: 0
         )
-        let highPreferences = PetPreferences(petScale: 9.0)
+        let highPreferences = PetPreferences(
+            reminderIntervalMinutes: 999,
+            petScale: 9.0,
+            restBlockingDurationSeconds: 999,
+            waterIntervalMinutes: 999,
+            bubbleDurationSeconds: 999,
+            automaticActionIntervalMinutes: 999
+        )
 
         try expect(lowPreferences.reminderIntervalMinutes == 1, "Expected reminder interval 0 to clamp to 1")
-        try expect(lowPreferences.sleepDelayMinutes == 1, "Expected sleep delay -4 to clamp to 1")
         try expect(lowPreferences.petScale == 0.5, "Expected pet scale 0.1 to clamp to 0.5")
         try expect(lowPreferences.restBlockingDurationSeconds == 1, "Expected blocking duration to clamp to 1")
         try expect(lowPreferences.restBlockingScalePercent == 10, "Expected blocking scale to clamp to 10")
         try expect(lowPreferences.waterIntervalMinutes == 1, "Expected water interval to clamp to 1")
         try expect(lowPreferences.bubbleDurationSeconds == 1, "Expected bubble duration to clamp to 1")
         try expect(lowPreferences.automaticActionIntervalMinutes == 1, "Expected automatic action interval to clamp to 1")
+        try expect(highPreferences.reminderIntervalMinutes == 240, "Expected reminder interval to clamp to 240")
         try expect(highPreferences.petScale == 3.0, "Expected pet scale 9.0 to clamp to 3.0")
+        try expect(highPreferences.restBlockingDurationSeconds == 300, "Expected blocking duration to clamp to 300")
+        try expect(highPreferences.waterIntervalMinutes == 480, "Expected water interval to clamp to 480")
+        try expect(highPreferences.bubbleDurationSeconds == 60, "Expected bubble duration to clamp to 60")
+        try expect(highPreferences.automaticActionIntervalMinutes == 120, "Expected automatic action interval to clamp to 120")
     }
 ]

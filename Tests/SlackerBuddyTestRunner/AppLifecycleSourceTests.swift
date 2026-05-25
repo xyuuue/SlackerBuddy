@@ -1,4 +1,5 @@
 import Foundation
+import ImageIO
 
 let appLifecycleSourceTests: [TestCase] = [
     TestCase(name: "pet view does not own reminder scheduler lifecycle") {
@@ -140,9 +141,13 @@ let appLifecycleSourceTests: [TestCase] = [
         let providedAppIcon = try Data(contentsOf: URL(fileURLWithPath: "/Users/xyue/Pictures/SlackerBuddy App Icon.png"))
         let repoMenuIcon = try Data(contentsOf: URL(fileURLWithPath: "Assets/SlackerBuddyMenuBarIcon.png"))
         let providedMenuIcon = try Data(contentsOf: URL(fileURLWithPath: "/Users/xyue/Pictures/SlackerBuddy Touch Bar Icon.png"))
+        let appIconSize = try imagePixelSize(at: "Assets/SlackerBuddyAppIcon.png")
+        let menuIconSize = try imagePixelSize(at: "Assets/SlackerBuddyMenuBarIcon.png")
 
-        try expect(repoAppIcon == providedAppIcon, "Expected app icon to match the user-provided SlackerBuddy app icon")
-        try expect(repoMenuIcon == providedMenuIcon, "Expected menu bar icon to match the user-provided SlackerBuddy touch bar icon")
+        try expect(repoAppIcon != providedAppIcon, "Expected app icon to be cropped/resized from the user-provided reference")
+        try expect(repoMenuIcon != providedMenuIcon, "Expected menu bar icon to be cropped/resized from the user-provided reference")
+        try expect(appIconSize.width == appIconSize.height && appIconSize.width >= 512, "Expected app icon to be a large square asset")
+        try expect(menuIconSize.width == menuIconSize.height && menuIconSize.width >= 128, "Expected menu bar icon to be a square template-ready asset")
     },
     TestCase(name: "settings refreshes Petdex catalog when opened") {
         let macPetAppSource = try String(
@@ -195,23 +200,27 @@ let appLifecycleSourceTests: [TestCase] = [
         try expect(localizedStringsSource.contains("case minuteSuffix"), "Localized strings should include minute suffix")
         try expect(localizedStringsSource.contains("case systemLanguageOption"), "Localized strings should include system language option")
     },
-    TestCase(name: "settings exposes reminder and automatic action controls") {
+    TestCase(name: "settings exposes reminder and automatic action controls with custom time input") {
         let settingsSource = try String(
             contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/Views/SettingsView.swift"),
             encoding: .utf8
         )
 
         try expect(settingsSource.contains("Toggle(strings.text(.enableRestReminders)"), "Settings should expose rest reminder toggle")
-        try expect(settingsSource.contains("Stepper(value: reminderIntervalMinutes"), "Settings should expose rest interval stepper")
+        try expect(settingsSource.contains("TimeValueControl("), "Settings should use reusable custom time input controls")
+        try expect(settingsSource.contains("binding: reminderIntervalMinutes"), "Settings should expose rest interval custom input")
         try expect(settingsSource.contains("Toggle(strings.text(.restBlockingEnabled)"), "Settings should expose blocking toggle")
-        try expect(settingsSource.contains("Stepper(value: restBlockingDurationSeconds"), "Settings should expose blocking duration stepper")
+        try expect(settingsSource.contains("binding: restBlockingDurationSeconds"), "Settings should expose blocking duration custom input")
         try expect(settingsSource.contains("Stepper(value: restBlockingScalePercent"), "Settings should expose blocking scale stepper")
         try expect(settingsSource.contains("Toggle(strings.text(.enableWaterReminders)"), "Settings should expose water toggle")
-        try expect(settingsSource.contains("Stepper(value: waterIntervalMinutes"), "Settings should expose water interval stepper")
-        try expect(settingsSource.contains("Stepper(value: bubbleDurationSeconds"), "Settings should expose bubble duration stepper")
+        try expect(settingsSource.contains("binding: waterIntervalMinutes"), "Settings should expose water interval custom input")
+        try expect(!settingsSource.contains("sleepDelayMinutes"), "Settings should remove the sleep delay control")
+        try expect(settingsSource.contains("binding: bubbleDurationSeconds"), "Settings should expose bubble duration custom input")
         try expect(settingsSource.contains("Toggle(strings.text(.enableAutomaticActions)"), "Settings should expose automatic actions toggle")
-        try expect(settingsSource.contains("Stepper(value: automaticActionIntervalMinutes"), "Settings should expose automatic frequency stepper")
+        try expect(settingsSource.contains("binding: automaticActionIntervalMinutes"), "Settings should expose automatic frequency custom input")
         try expect(settingsSource.contains("Toggle(strings.text(.enableAutomaticRunning)"), "Settings should expose automatic running toggle")
+        try expect(settingsSource.contains("Picker(strings.text(.automaticRunDirection)"), "Settings should expose automatic running direction choices")
+        try expect(settingsSource.contains("TextField"), "Settings time rows should allow direct typed custom values")
     },
     TestCase(name: "settings shows system notification feedback") {
         let settingsSource = try String(
@@ -363,8 +372,78 @@ let appLifecycleSourceTests: [TestCase] = [
 
         try expect(appRuntimeSource.contains("triggerAutomaticActionFeedback()"), "Runtime should trigger automatic feedback immediately when enabled")
         try expect(appRuntimeSource.contains("performAutomaticRun(direction:"), "Runtime should move the pet during automatic running")
+        try expect(appRuntimeSource.contains("randomExpressiveAction()"), "Runtime should choose random expressive actions when automatic actions are enabled")
+        try expect(appRuntimeSource.contains("automaticRunDirectionMode"), "Runtime should honor automatic running direction mode")
         try expect(windowSource.contains("moveHorizontally(points:"), "Window controller should expose programmatic horizontal movement")
         try expect(windowSource.contains("performProgrammaticFrameChange"), "Automatic movement should be programmatic and not count as user drag")
+    },
+    TestCase(name: "pet tap delegates random expressive feedback to runtime") {
+        let appRuntimeSource = try String(
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/App/AppRuntime.swift"),
+            encoding: .utf8
+        )
+        let petViewSource = try String(
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/Views/PetView.swift"),
+            encoding: .utf8
+        )
+
+        try expect(petViewSource.contains("private let onPetTap: () -> Void"), "PetView should delegate non-reminder taps to runtime")
+        try expect(petViewSource.contains("onPetTap()"), "PetView should call runtime tap handler")
+        try expect(appRuntimeSource.contains("func handlePetTap()"), "Runtime should own random tap behavior")
+        try expect(appRuntimeSource.contains("stateMachine.handle(.expressiveAction(randomExpressiveAction()))"), "Runtime should randomize tap expressive actions")
+    },
+    TestCase(name: "Petdex directional sprites are not double-flipped") {
+        let petViewSource = try String(
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/Views/PetView.swift"),
+            encoding: .utf8
+        )
+        let windowSource = try String(
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/Windowing/PetWindowController.swift"),
+            encoding: .utf8
+        )
+
+        try expect(!petViewSource.contains("petContent(frameName: frame)\n                    .scaleEffect"), "Petdex sprites should not be globally flipped after row mapping")
+        try expect(petViewSource.contains("PixelCatPlaceholderView(frameName: frameName)\n                .scaleEffect"), "Only the placeholder should mirror left-facing frames")
+        try expect(windowSource.contains("horizontalDelta"), "Window movement direction should be based on a horizontal delta")
+        try expect(!windowSource.contains("guard let oldFrame else {\n            return .right"), "Unknown movement direction should not default every drag to right")
+    },
+    TestCase(name: "settings menu opens frontmost on current desktop") {
+        let appSource = try String(
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/App/SlackerBuddyApp.swift"),
+            encoding: .utf8
+        )
+        let runtimeSource = try String(
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/App/AppRuntime.swift"),
+            encoding: .utf8
+        )
+
+        try expect(!appSource.contains("SettingsLink"), "Menu bar settings should use a controlled AppKit bridge instead of SettingsLink")
+        try expect(appSource.contains("runtime.openSettingsWindow()"), "Menu bar settings should call runtime settings opener")
+        try expect(runtimeSource.contains("func openSettingsWindow()"), "Runtime should expose settings window opener")
+        try expect(runtimeSource.contains("NSApp.activate(ignoringOtherApps: true)"), "Settings opener should activate the app")
+        try expect(runtimeSource.contains(".moveToActiveSpace"), "Settings window should move to the active desktop")
+        try expect(runtimeSource.contains("orderFrontRegardless()"), "Settings window should appear above other apps")
+        try expect(runtimeSource.contains("let originalLevel = window.level"), "Settings opener should capture the original window level")
+        try expect(runtimeSource.contains("let originalCollectionBehavior = window.collectionBehavior"), "Settings opener should capture the original collection behavior")
+        try expect(runtimeSource.contains("restoreSettingsWindowLevel"), "Settings opener should restore temporary floating level")
+    },
+    TestCase(name: "sleep delay preference is removed") {
+        let preferenceSource = try String(
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddyCore/Models/PetPreferences.swift"),
+            encoding: .utf8
+        )
+        let storeSource = try String(
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddyCore/Stores/SettingsStore.swift"),
+            encoding: .utf8
+        )
+        let localizedStringsSource = try String(
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddyCore/Localization/LocalizedStrings.swift"),
+            encoding: .utf8
+        )
+
+        try expect(!preferenceSource.contains("sleepDelayMinutes"), "PetPreferences should not expose sleep delay")
+        try expect(!storeSource.contains("sleepDelayMinutes"), "SettingsStore should not persist sleep delay")
+        try expect(!localizedStringsSource.contains("sleepDelayLabel"), "Localization should not expose sleep delay")
     },
     TestCase(name: "pet view auto-hides reminder bubble without dismissing reminder") {
         let petViewSource = try String(
@@ -377,3 +456,15 @@ let appLifecycleSourceTests: [TestCase] = [
         try expect(petViewSource.contains("isBubbleVisible"), "PetView should hide bubble without dismissing reminder")
     }
 ]
+
+private func imagePixelSize(at path: String) throws -> (width: Int, height: Int) {
+    let url = URL(fileURLWithPath: path)
+    guard let source = CGImageSourceCreateWithURL(url as CFURL, nil),
+          let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any],
+          let width = properties[kCGImagePropertyPixelWidth] as? Int,
+          let height = properties[kCGImagePropertyPixelHeight] as? Int else {
+        throw TestFailure.failed("Could not read image size for \(path)")
+    }
+
+    return (width, height)
+}

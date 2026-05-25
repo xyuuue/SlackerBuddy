@@ -14,6 +14,7 @@ public final class PetWindowController {
     private var isBlockingOverlayActive = false
     private var isProgrammaticFrameChange = false
     private var lastObservedFrame: NSRect?
+    private var lastMovementDirection: PetMovementDirection = .right
 
     public init(
         defaults: UserDefaults = .standard,
@@ -238,10 +239,17 @@ public final class PetWindowController {
 
     private func movementDirection(from oldFrame: NSRect?, to newFrame: NSRect) -> PetMovementDirection {
         guard let oldFrame else {
-            return .right
+            return lastMovementDirection
         }
 
-        return newFrame.origin.x < oldFrame.origin.x ? .left : .right
+        let horizontalDelta = newFrame.origin.x - oldFrame.origin.x
+        guard abs(horizontalDelta) > 0.5 else {
+            return lastMovementDirection
+        }
+
+        let direction: PetMovementDirection = horizontalDelta < 0 ? .left : .right
+        lastMovementDirection = direction
+        return direction
     }
 
     private func restoredFrame() -> NSRect? {

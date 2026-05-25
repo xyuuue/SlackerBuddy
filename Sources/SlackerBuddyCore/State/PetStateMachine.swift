@@ -6,6 +6,8 @@ import Observation
     public private(set) var bubbleText: String?
     public private(set) var activeReminderKind: ReminderKind?
 
+    private static let inactivitySleepDelay: TimeInterval = 30 * 60
+
     private var lastInteractionAt: Date
     private let now: () -> Date
 
@@ -14,13 +16,13 @@ import Observation
         self.lastInteractionAt = now()
     }
 
-    public func tick(preferences: PetPreferences) {
+    public func tick() {
         if state == .reminding {
             return
         }
 
         let inactiveSeconds = now().timeIntervalSince(lastInteractionAt)
-        if inactiveSeconds >= TimeInterval(preferences.sleepDelayMinutes * 60) {
+        if inactiveSeconds >= Self.inactivitySleepDelay {
             state = .sleeping
             bubbleText = nil
         }
@@ -39,6 +41,10 @@ import Observation
             } else {
                 state = direction == .left ? .dragRunningLeft : .dragRunningRight
             }
+            bubbleText = nil
+        case let .expressiveAction(action):
+            recordInteraction()
+            applyExpressiveAction(action)
             bubbleText = nil
         case .controlsOpened:
             recordInteraction()
@@ -65,12 +71,19 @@ import Observation
                 state = .automaticRunningLeft
             case .running(.right):
                 state = .automaticRunningRight
+            case let .expressive(action):
+                applyExpressiveAction(action)
             }
         case .animationCompleted:
             if state == .waving {
                 state = .reminding
             } else if state == .waking ||
                 state == .petting ||
+                state == .reviewing ||
+                state == .jumping ||
+                state == .failed ||
+                state == .waiting ||
+                state == .running ||
                 state == .blink ||
                 state == .dragRunningLeft ||
                 state == .dragRunningRight ||
@@ -84,5 +97,25 @@ import Observation
 
     private func recordInteraction() {
         lastInteractionAt = now()
+    }
+
+    private func applyExpressiveAction(_ action: ExpressivePetAction) {
+        if state == .sleeping {
+            state = .waking
+            return
+        }
+
+        switch action {
+        case .review:
+            state = .reviewing
+        case .jump:
+            state = .jumping
+        case .fail:
+            state = .failed
+        case .wait:
+            state = .waiting
+        case .run:
+            state = .running
+        }
     }
 }

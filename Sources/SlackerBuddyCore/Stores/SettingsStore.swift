@@ -11,7 +11,6 @@ import Observation
         self.defaults = defaults
         self.preferences = PetPreferences(
             reminderIntervalMinutes: defaults.integer(forKey: Keys.reminderIntervalMinutes, defaultValue: 45),
-            sleepDelayMinutes: defaults.integer(forKey: Keys.sleepDelayMinutes, defaultValue: 30),
             petScale: defaults.double(forKey: Keys.petScale, defaultValue: 1.0),
             restRemindersEnabled: defaults.bool(forKey: Keys.restRemindersEnabled, defaultValue: true),
             restBlockingEnabled: defaults.bool(forKey: Keys.restBlockingEnabled, defaultValue: true),
@@ -23,6 +22,7 @@ import Observation
             automaticActionsEnabled: defaults.bool(forKey: Keys.automaticActionsEnabled, defaultValue: true),
             automaticActionIntervalMinutes: defaults.integer(forKey: Keys.automaticActionIntervalMinutes, defaultValue: 8),
             automaticRunningEnabled: defaults.bool(forKey: Keys.automaticRunningEnabled, defaultValue: false),
+            automaticRunDirectionMode: defaults.automaticRunDirectionMode(forKey: Keys.automaticRunDirectionMode),
             showPetOnLaunch: defaults.bool(forKey: Keys.showPetOnLaunch, defaultValue: true),
             systemNotificationsEnabled: defaults.bool(forKey: Keys.systemNotificationsEnabled, defaultValue: false),
             lowerDistractionMode: defaults.bool(forKey: Keys.lowerDistractionMode, defaultValue: false),
@@ -86,8 +86,8 @@ import Observation
         persist()
     }
 
-    public func updateSleepDelay(minutes: Int) {
-        preferences = preferences.replacing(sleepDelayMinutes: minutes)
+    public func updateAutomaticRunDirectionMode(_ mode: AutomaticRunDirectionMode) {
+        preferences = preferences.replacing(automaticRunDirectionMode: mode)
         persist()
     }
 
@@ -133,7 +133,7 @@ import Observation
         defaults.set(preferences.automaticActionsEnabled, forKey: Keys.automaticActionsEnabled)
         defaults.set(preferences.automaticActionIntervalMinutes, forKey: Keys.automaticActionIntervalMinutes)
         defaults.set(preferences.automaticRunningEnabled, forKey: Keys.automaticRunningEnabled)
-        defaults.set(preferences.sleepDelayMinutes, forKey: Keys.sleepDelayMinutes)
+        defaults.set(preferences.automaticRunDirectionMode.rawValue, forKey: Keys.automaticRunDirectionMode)
         defaults.set(preferences.petScale, forKey: Keys.petScale)
         defaults.set(preferences.showPetOnLaunch, forKey: Keys.showPetOnLaunch)
         defaults.set(preferences.systemNotificationsEnabled, forKey: Keys.systemNotificationsEnabled)
@@ -154,7 +154,7 @@ import Observation
         static let automaticActionsEnabled = "settings.automaticActionsEnabled"
         static let automaticActionIntervalMinutes = "settings.automaticActionIntervalMinutes"
         static let automaticRunningEnabled = "settings.automaticRunningEnabled"
-        static let sleepDelayMinutes = "settings.sleepDelayMinutes"
+        static let automaticRunDirectionMode = "settings.automaticRunDirectionMode"
         static let petScale = "settings.petScale"
         static let showPetOnLaunch = "settings.showPetOnLaunch"
         static let systemNotificationsEnabled = "settings.systemNotificationsEnabled"
@@ -182,5 +182,12 @@ private extension UserDefaults {
             return .system
         }
         return AppLanguage(rawValue: rawValue) ?? .system
+    }
+
+    func automaticRunDirectionMode(forKey key: String) -> AutomaticRunDirectionMode {
+        guard let rawValue = string(forKey: key) else {
+            return .random
+        }
+        return AutomaticRunDirectionMode(rawValue: rawValue) ?? .random
     }
 }

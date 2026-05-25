@@ -7,6 +7,7 @@ public struct PetView: View {
     @Bindable private var stateMachine: PetStateMachine
 
     private let onDismissReminder: () -> Void
+    private let onPetTap: () -> Void
     private let strings: LocalizedStrings
     private let petAsset: PetAsset
     private let animator = SpriteAnimator()
@@ -19,12 +20,14 @@ public struct PetView: View {
         settings: SettingsStore,
         stateMachine: PetStateMachine,
         onDismissReminder: @escaping () -> Void,
+        onPetTap: @escaping () -> Void,
         strings: LocalizedStrings,
         petAsset: PetAsset
     ) {
         self.settings = settings
         self.stateMachine = stateMachine
         self.onDismissReminder = onDismissReminder
+        self.onPetTap = onPetTap
         self.strings = strings
         self.petAsset = petAsset
     }
@@ -47,7 +50,6 @@ public struct PetView: View {
                 }
 
                 petContent(frameName: frame)
-                    .scaleEffect(x: shouldFaceLeft(frameName: frame) ? -1 : 1, y: 1)
                     .frame(
                         width: 128 * settings.preferences.petScale,
                         height: 128 * settings.preferences.petScale
@@ -77,7 +79,7 @@ public struct PetView: View {
         if stateMachine.state == .reminding {
             dismissReminder()
         } else {
-            stateMachine.handle(.clicked)
+            onPetTap()
         }
     }
 
@@ -95,6 +97,7 @@ public struct PetView: View {
             )
         } else {
             PixelCatPlaceholderView(frameName: frameName)
+                .scaleEffect(x: shouldFaceLeft(frameName: frameName) ? -1 : 1, y: 1)
         }
     }
 

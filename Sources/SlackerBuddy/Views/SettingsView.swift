@@ -18,6 +18,7 @@ public struct SettingsView: View {
     private let onAutomaticActionsEnabledChanged: ((Bool) -> Void)?
     private let onAutomaticActionIntervalChanged: ((Int) -> Void)?
     private let onAutomaticRunningEnabledChanged: ((Bool) -> Void)?
+    private let onAutomaticRunDirectionModeChanged: ((AutomaticRunDirectionMode) -> Void)?
     private let onSystemNotificationsEnabledChanged: ((Bool) -> Void)?
     private let onLanguageChanged: ((AppLanguage) -> Void)?
     private let onSelectedPetChanged: ((String) -> Void)?
@@ -39,6 +40,7 @@ public struct SettingsView: View {
         onAutomaticActionsEnabledChanged: ((Bool) -> Void)? = nil,
         onAutomaticActionIntervalChanged: ((Int) -> Void)? = nil,
         onAutomaticRunningEnabledChanged: ((Bool) -> Void)? = nil,
+        onAutomaticRunDirectionModeChanged: ((AutomaticRunDirectionMode) -> Void)? = nil,
         onSystemNotificationsEnabledChanged: ((Bool) -> Void)? = nil,
         onLanguageChanged: ((AppLanguage) -> Void)? = nil,
         onSelectedPetChanged: ((String) -> Void)? = nil,
@@ -59,6 +61,7 @@ public struct SettingsView: View {
         self.onAutomaticActionsEnabledChanged = onAutomaticActionsEnabledChanged
         self.onAutomaticActionIntervalChanged = onAutomaticActionIntervalChanged
         self.onAutomaticRunningEnabledChanged = onAutomaticRunningEnabledChanged
+        self.onAutomaticRunDirectionModeChanged = onAutomaticRunDirectionModeChanged
         self.onSystemNotificationsEnabledChanged = onSystemNotificationsEnabledChanged
         self.onLanguageChanged = onLanguageChanged
         self.onSelectedPetChanged = onSelectedPetChanged
@@ -102,15 +105,21 @@ public struct SettingsView: View {
             Section(strings.text(.remindersSectionTitle)) {
                 Toggle(strings.text(.enableRestReminders), isOn: restRemindersEnabled)
 
-                Stepper(value: reminderIntervalMinutes, in: 1...240, step: 1) {
-                    Text("\(strings.text(.reminderIntervalLabel)): \(settings.preferences.reminderIntervalMinutes) \(strings.text(.minuteSuffix))")
-                }
+                TimeValueControl(
+                    title: strings.text(.reminderIntervalLabel),
+                    binding: reminderIntervalMinutes,
+                    range: 1...240,
+                    unit: strings.text(.minuteSuffix)
+                )
 
                 Toggle(strings.text(.restBlockingEnabled), isOn: restBlockingEnabled)
 
-                Stepper(value: restBlockingDurationSeconds, in: 1...300, step: 1) {
-                    Text("\(strings.text(.restBlockingDuration)): \(settings.preferences.restBlockingDurationSeconds) \(strings.text(.secondsSuffix))")
-                }
+                TimeValueControl(
+                    title: strings.text(.restBlockingDuration),
+                    binding: restBlockingDurationSeconds,
+                    range: 1...300,
+                    unit: strings.text(.secondsSuffix)
+                )
 
                 Stepper(value: restBlockingScalePercent, in: 10...90, step: 5) {
                     Text("\(strings.text(.restBlockingScale)): \(settings.preferences.restBlockingScalePercent) \(strings.text(.percentSuffix))")
@@ -118,13 +127,12 @@ public struct SettingsView: View {
 
                 Toggle(strings.text(.enableWaterReminders), isOn: waterRemindersEnabled)
 
-                Stepper(value: waterIntervalMinutes, in: 1...480, step: 1) {
-                    Text("\(strings.text(.waterIntervalLabel)): \(settings.preferences.waterIntervalMinutes) \(strings.text(.minuteSuffix))")
-                }
-
-                Stepper(value: sleepDelayMinutes, in: 1...240, step: 1) {
-                    Text("\(strings.text(.sleepDelayLabel)): \(settings.preferences.sleepDelayMinutes) \(strings.text(.minuteSuffix))")
-                }
+                TimeValueControl(
+                    title: strings.text(.waterIntervalLabel),
+                    binding: waterIntervalMinutes,
+                    range: 1...480,
+                    unit: strings.text(.minuteSuffix)
+                )
 
                 VStack(alignment: .leading, spacing: 4) {
                     Toggle(strings.text(.systemNotifications), isOn: systemNotificationsEnabled)
@@ -135,17 +143,30 @@ public struct SettingsView: View {
             }
 
             Section(strings.text(.behaviorSectionTitle)) {
-                Stepper(value: bubbleDurationSeconds, in: 1...60, step: 1) {
-                    Text("\(strings.text(.bubbleDurationLabel)): \(settings.preferences.bubbleDurationSeconds) \(strings.text(.secondsSuffix))")
-                }
+                TimeValueControl(
+                    title: strings.text(.bubbleDurationLabel),
+                    binding: bubbleDurationSeconds,
+                    range: 1...60,
+                    unit: strings.text(.secondsSuffix)
+                )
 
                 Toggle(strings.text(.enableAutomaticActions), isOn: automaticActionsEnabled)
 
-                Stepper(value: automaticActionIntervalMinutes, in: 1...120, step: 1) {
-                    Text("\(strings.text(.automaticActionFrequency)): \(settings.preferences.automaticActionIntervalMinutes) \(strings.text(.minuteSuffix))")
-                }
+                TimeValueControl(
+                    title: strings.text(.automaticActionFrequency),
+                    binding: automaticActionIntervalMinutes,
+                    range: 1...120,
+                    unit: strings.text(.minuteSuffix)
+                )
 
                 Toggle(strings.text(.enableAutomaticRunning), isOn: automaticRunningEnabled)
+
+                Picker(strings.text(.automaticRunDirection), selection: automaticRunDirectionMode) {
+                    Text(strings.text(.automaticRunDirectionLeft)).tag(AutomaticRunDirectionMode.left)
+                    Text(strings.text(.automaticRunDirectionRight)).tag(AutomaticRunDirectionMode.right)
+                    Text(strings.text(.automaticRunDirectionRandom)).tag(AutomaticRunDirectionMode.random)
+                }
+                .pickerStyle(.segmented)
             }
         }
         .formStyle(.grouped)
@@ -323,13 +344,6 @@ public struct SettingsView: View {
         )
     }
 
-    private var sleepDelayMinutes: Binding<Int> {
-        Binding(
-            get: { settings.preferences.sleepDelayMinutes },
-            set: { settings.updateSleepDelay(minutes: $0) }
-        )
-    }
-
     private var systemNotificationsEnabled: Binding<Bool> {
         Binding(
             get: { settings.preferences.systemNotificationsEnabled },
@@ -396,6 +410,53 @@ public struct SettingsView: View {
             return "中文"
         case .english:
             return "English"
+        }
+    }
+
+    private var automaticRunDirectionMode: Binding<AutomaticRunDirectionMode> {
+        Binding(
+            get: { settings.preferences.automaticRunDirectionMode },
+            set: { value in
+                if let onAutomaticRunDirectionModeChanged {
+                    onAutomaticRunDirectionModeChanged(value)
+                } else {
+                    settings.updateAutomaticRunDirectionMode(value)
+                }
+            }
+        )
+    }
+}
+
+private struct TimeValueControl: View {
+    let title: String
+    let range: ClosedRange<Int>
+    let step: Int
+    let unit: String
+
+    @Binding private var value: Int
+
+    init(title: String, binding: Binding<Int>, range: ClosedRange<Int>, step: Int = 1, unit: String) {
+        self.title = title
+        self._value = binding
+        self.range = range
+        self.step = step
+        self.unit = unit
+    }
+
+    var body: some View {
+        HStack {
+            Text(title)
+            Spacer()
+            Stepper(value: $value, in: range, step: step) {
+                EmptyView()
+            }
+            .labelsHidden()
+            TextField("", value: $value, format: .number)
+                .multilineTextAlignment(.trailing)
+                .frame(width: 54)
+            Text(unit)
+                .foregroundStyle(.secondary)
+                .frame(minWidth: 32, alignment: .leading)
         }
     }
 }

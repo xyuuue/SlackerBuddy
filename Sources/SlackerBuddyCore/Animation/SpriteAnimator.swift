@@ -26,6 +26,16 @@ public struct SpriteAnimator: Sendable {
             return ["petting-0", "petting-1"]
         case .reminding, .waving:
             return state == .waving ? ["wave-0", "wave-1"] : ["reminder-0", "reminder-1"]
+        case .reviewing:
+            return ["review-0", "review-1", "review-2", "review-3", "review-4", "review-5"]
+        case .jumping:
+            return ["jump-0", "jump-1", "jump-2", "jump-3", "jump-4"]
+        case .failed:
+            return ["failed-0", "failed-1", "failed-2", "failed-3", "failed-4", "failed-5", "failed-6", "failed-7"]
+        case .waiting:
+            return ["waiting-0", "waiting-1", "waiting-2", "waiting-3", "waiting-4", "waiting-5"]
+        case .running:
+            return ["running-0", "running-1", "running-2", "running-3", "running-4", "running-5"]
         case .dragRunningLeft where lowerDistractionMode,
             .automaticRunningLeft where lowerDistractionMode:
             return ["idle-0", "idle-1"]
@@ -50,6 +60,11 @@ public struct SpriteAnimator: Sendable {
             .petting,
             .reminding,
             .waving,
+            .reviewing,
+            .jumping,
+            .failed,
+            .waiting,
+            .running,
             .dragRunningLeft,
             .dragRunningRight,
             .automaticBlink,
