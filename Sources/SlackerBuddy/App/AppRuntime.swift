@@ -306,9 +306,8 @@ final class AppRuntime {
         petWindowController.resetPosition(scale: settings.preferences.petScale)
     }
 
-    func openSettingsWindow() {
+    func focusSettingsWindow() {
         NSApp.activate(ignoringOtherApps: true)
-        NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
 
         Task { @MainActor [weak self] in
             try? await Task.sleep(nanoseconds: 100_000_000)

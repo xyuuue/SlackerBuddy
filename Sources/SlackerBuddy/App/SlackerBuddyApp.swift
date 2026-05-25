@@ -4,6 +4,7 @@ import SwiftUI
 @main
 struct SlackerBuddyApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
+    @Environment(\.openSettings) private var openSettings
     @State private var runtime: AppRuntime
 
     init() {
@@ -32,7 +33,8 @@ struct SlackerBuddyApp: App {
             Divider()
 
             Button(runtime.localizedStrings.text(.settingsTitle)) {
-                runtime.openSettingsWindow()
+                openSettings()
+                runtime.focusSettingsWindow()
             }
 
             Divider()

@@ -417,9 +417,12 @@ let appLifecycleSourceTests: [TestCase] = [
             encoding: .utf8
         )
 
-        try expect(!appSource.contains("SettingsLink"), "Menu bar settings should use a controlled AppKit bridge instead of SettingsLink")
-        try expect(appSource.contains("runtime.openSettingsWindow()"), "Menu bar settings should call runtime settings opener")
-        try expect(runtimeSource.contains("func openSettingsWindow()"), "Runtime should expose settings window opener")
+        try expect(!appSource.contains("SettingsLink"), "Menu bar settings should use a controlled settings opener instead of SettingsLink")
+        try expect(appSource.contains("@Environment(\\.openSettings)"), "Menu bar settings should use SwiftUI openSettings action")
+        try expect(appSource.contains("openSettings()"), "Menu bar settings should open the Settings scene through SwiftUI")
+        try expect(appSource.contains("runtime.focusSettingsWindow()"), "Menu bar settings should ask runtime to foreground the opened window")
+        try expect(runtimeSource.contains("func focusSettingsWindow()"), "Runtime should expose settings foregrounding without owning Settings scene creation")
+        try expect(!runtimeSource.contains("showSettingsWindow:"), "Runtime should not rely on an unreliable AppKit showSettingsWindow selector")
         try expect(runtimeSource.contains("NSApp.activate(ignoringOtherApps: true)"), "Settings opener should activate the app")
         try expect(runtimeSource.contains(".moveToActiveSpace"), "Settings window should move to the active desktop")
         try expect(runtimeSource.contains("orderFrontRegardless()"), "Settings window should appear above other apps")
