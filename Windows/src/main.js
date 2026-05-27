@@ -114,6 +114,7 @@ function createSettingsWindow() {
     minHeight: 560,
     title: "SlackerBuddy Settings",
     icon: assetPath("SlackerBuddy.ico"),
+    skipTaskbar: true,
     show: false,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),

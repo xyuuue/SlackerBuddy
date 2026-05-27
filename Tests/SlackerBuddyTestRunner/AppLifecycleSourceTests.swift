@@ -90,6 +90,10 @@ let appLifecycleSourceTests: [TestCase] = [
             contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/App/SlackerBuddyApp.swift"),
             encoding: .utf8
         )
+        let appDelegateSource = try String(
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/App/AppDelegate.swift"),
+            encoding: .utf8
+        )
         let notificationSource = try String(
             contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddyCore/Services/NotificationClient.swift"),
             encoding: .utf8
@@ -106,6 +110,7 @@ let appLifecycleSourceTests: [TestCase] = [
         try expect(buildScript.contains("BUILD_PRODUCT=\"SlackerBuddy\""), "Build script should copy the SwiftPM SlackerBuddy binary")
         try expect(buildScript.contains("CFBundleIconFile"), "Packaged app should declare an app icon")
         try expect(buildScript.contains("SlackerBuddy.icns"), "Packaged app should copy the SlackerBuddy app icon")
+        try expect(appDelegateSource.contains("setActivationPolicy(.accessory)"), "macOS app should run as a background menu bar app")
         try expect(FileManager.default.fileExists(atPath: "Assets/SlackerBuddyAppIcon.png"), "Expected generated app icon asset")
         try expect(FileManager.default.fileExists(atPath: "Assets/SlackerBuddyMenuBarIcon.png"), "Expected generated menu bar icon asset")
         try expect(FileManager.default.fileExists(atPath: "Assets/SlackerBuddy.icns"), "Expected generated icns asset")
@@ -150,6 +155,7 @@ let appLifecycleSourceTests: [TestCase] = [
         try expect(legacyPackage.contains(".macOS(.v10_13)"), "Legacy package should target macOS 10.13")
         try expect(legacyPackage.contains(".executable(name: \"SlackerBuddyLegacy\""), "Legacy package should expose an executable product")
         try expect(buildScript.contains("MIN_SYSTEM_VERSION=\"10.13.1\""), "Legacy bundle should declare macOS 10.13.1 as its minimum system version")
+        try expect(buildScript.contains("<key>LSUIElement</key>"), "Legacy bundle should hide from Dock")
         try expect(buildScript.contains("TARGET_TRIPLE=\"x86_64-apple-macosx10.13\""), "Legacy build should produce an Intel binary for High Sierra")
         try expect(buildScript.contains("MACOSX_DEPLOYMENT_TARGET=\"$MIN_SYSTEM_VERSION\""), "Legacy build should set the compiler deployment target")
         try expect(buildScript.contains("swift-stdlib-tool"), "Legacy bundle should embed Swift runtime libraries for older macOS releases")
@@ -194,7 +200,9 @@ let appLifecycleSourceTests: [TestCase] = [
         try expect(preferencesSource.contains("defaultSelectedPetID = \"fufu\""), "FuFu should be selected by default")
         try expect(catalogSource.contains("BuiltinPets"), "Petdex catalog should load bundled pets from app resources")
         try expect(buildScript.contains("Assets/BuiltinPets"), "macOS 14 bundle should copy built-in pets")
+        try expect(buildScript.contains("<key>LSUIElement</key>"), "macOS 14 bundle should hide from Dock")
         try expect(legacyBuildScript.contains("Assets/BuiltinPets"), "macOS 10.13.1 bundle should copy built-in pets")
+        try expect(legacyBuildScript.contains("<key>LSUIElement</key>"), "macOS 10.13.1 bundle should hide from Dock")
         try expect(legacySource.contains("fufu-idle.png"), "Legacy app should render bundled FuFu fallback art")
         try expect(FileManager.default.fileExists(atPath: "Assets/BuiltinPets/fufu/pet.json"), "Expected built-in FuFu metadata")
         try expect(FileManager.default.fileExists(atPath: "Assets/BuiltinPets/fufu/spritesheet.webp"), "Expected built-in FuFu spritesheet")
@@ -228,6 +236,7 @@ let appLifecycleSourceTests: [TestCase] = [
 
         try expect(mainSource.contains("transparent: true"), "Windows pet window should be transparent")
         try expect(mainSource.contains("alwaysOnTop: true"), "Windows pet window should stay above other windows")
+        try expect(mainSource.components(separatedBy: "skipTaskbar: true").count >= 3, "Windows pet and settings windows should stay out of the taskbar")
         try expect(mainSource.contains("Tray"), "Windows app should provide tray controls")
         try expect(mainSource.contains("Notification"), "Windows app should support system notifications")
         try expect(mainSource.contains(".codex\", \"pets\"") || mainSource.contains(".codex\", \"pets"), "Windows app should load PetDex pets from the user pet folder")
