@@ -90,11 +90,32 @@ DEVELOPER_DIR=/Library/Developer/CommandLineTools ./script/build_legacy_10_13.sh
 
 The generated app is written to `dist/legacy/SlackerBuddyLegacy.app` and declares `LSMinimumSystemVersion` as `10.13.1`. It uses AppKit-only APIs and includes a lightweight desktop pet, menu bar controls, blinking, drag direction feedback, click reactions, and a 25-minute rest reminder. Final runtime testing should still be done on a real macOS 10.13.1 machine before sharing it with High Sierra users.
 
+## Windows Build
+
+The Windows version lives in `Windows/` as a separate Electron app so the macOS Swift app and icons stay untouched. It reuses the existing SlackerBuddy paw icon assets and FuFu spritesheet, and includes PetDex loading, bilingual settings, reminders, automatic actions, automatic running, drag feedback, system notifications, and rest-blocking behavior.
+
+Run it locally on Windows:
+
+```powershell
+cd Windows
+npm install
+npm start
+```
+
+Build the Windows installer and portable app:
+
+```powershell
+cd Windows
+npm install
+npm run dist
+```
+
 ## Repository Layout
 
 - `Sources/SlackerBuddy` - macOS app, windows, SwiftUI views, and AppKit integration
 - `Sources/SlackerBuddyCore` - state machines, settings, scheduling, localization, and PetDex loading
 - `Legacy` - AppKit-only macOS 10.13.1 compatibility build
+- `Windows` - Electron Windows version and packaging configuration
 - `Tests/SlackerBuddyTestRunner` - lightweight custom test runner
 - `Assets` - app icon and menu bar icon assets
 - `docs/site` - static website and downloadable DMG

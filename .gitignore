@@ -2,6 +2,8 @@
 .worktrees/
 .build/
 Legacy/.build/
+Windows/dist/
+Windows/node_modules/
 dist/
 .DS_Store
 **/.DS_Store

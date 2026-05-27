@@ -182,6 +182,42 @@ let appLifecycleSourceTests: [TestCase] = [
         try expect(legacySource.contains("Time for a break"), "Legacy pet should show rest reminder copy")
         try expect(legacySource.contains("I'm back!"), "Legacy pet should include an early-dismiss bubble button")
     },
+    TestCase(name: "windows app is isolated in its own folder") {
+        try expect(FileManager.default.fileExists(atPath: "Windows/package.json"), "Expected Windows Electron package")
+        try expect(FileManager.default.fileExists(atPath: "Windows/src/main.js"), "Expected Windows main process source")
+        try expect(FileManager.default.fileExists(atPath: "Windows/src/renderer.js"), "Expected Windows renderer source")
+        try expect(FileManager.default.fileExists(atPath: "Windows/assets/SlackerBuddyAppIcon.png"), "Expected Windows app icon copy")
+        try expect(FileManager.default.fileExists(atPath: "Windows/assets/SlackerBuddyTrayIcon.png"), "Expected Windows tray icon copy")
+        try expect(FileManager.default.fileExists(atPath: "Windows/assets/SlackerBuddy.ico"), "Expected Windows ico packaging icon")
+        try expect(FileManager.default.fileExists(atPath: "Windows/assets/fufu-spritesheet.webp"), "Expected bundled FuFu spritesheet")
+    },
+    TestCase(name: "windows app keeps SlackerBuddy branding and icon assets") {
+        let packageSource = try String(contentsOf: URL(fileURLWithPath: "Windows/package.json"), encoding: .utf8)
+        let mainSource = try String(contentsOf: URL(fileURLWithPath: "Windows/src/main.js"), encoding: .utf8)
+        let readmeSource = try String(contentsOf: URL(fileURLWithPath: "Windows/README.md"), encoding: .utf8)
+
+        try expect(packageSource.contains("\"productName\": \"SlackerBuddy\""), "Windows package should keep SlackerBuddy product name")
+        try expect(packageSource.contains("\"icon\": \"assets/SlackerBuddy.ico\""), "Windows builder should use the converted existing paw icon")
+        try expect(mainSource.contains("SlackerBuddyAppIcon.png"), "Windows app should load the existing app icon artwork")
+        try expect(mainSource.contains("SlackerBuddyTrayIcon.png") || mainSource.contains("SlackerBuddy.ico"), "Windows app should load SlackerBuddy tray icon artwork")
+        try expect(readmeSource.contains("The `.ico` file is only a Windows packaging conversion"), "Windows docs should clarify the icon is not redesigned")
+    },
+    TestCase(name: "windows app preserves desktop pet features") {
+        let mainSource = try String(contentsOf: URL(fileURLWithPath: "Windows/src/main.js"), encoding: .utf8)
+        let rendererSource = try String(contentsOf: URL(fileURLWithPath: "Windows/src/renderer.js"), encoding: .utf8)
+
+        try expect(mainSource.contains("transparent: true"), "Windows pet window should be transparent")
+        try expect(mainSource.contains("alwaysOnTop: true"), "Windows pet window should stay above other windows")
+        try expect(mainSource.contains("Tray"), "Windows app should provide tray controls")
+        try expect(mainSource.contains("Notification"), "Windows app should support system notifications")
+        try expect(mainSource.contains(".codex\", \"pets\"") || mainSource.contains(".codex\", \"pets"), "Windows app should load PetDex pets from the user pet folder")
+        try expect(rendererSource.contains("automaticActionsEnabled"), "Windows app should preserve automatic actions setting")
+        try expect(rendererSource.contains("automaticRunningEnabled"), "Windows app should preserve automatic running setting")
+        try expect(rendererSource.contains("restBlockingEnabled"), "Windows app should preserve rest blocking setting")
+        try expect(rendererSource.contains("waterRemindersEnabled"), "Windows app should preserve water reminders setting")
+        try expect(rendererSource.contains("dragRunningLeft") && rendererSource.contains("dragRunningRight"), "Windows app should preserve directional drag feedback")
+        try expect(rendererSource.contains("language") && rendererSource.contains("chinese") && rendererSource.contains("english"), "Windows app should preserve Chinese and English settings")
+    },
     TestCase(name: "app uses provided SlackerBuddy icon assets") {
         let repoAppIcon = try Data(contentsOf: URL(fileURLWithPath: "Assets/SlackerBuddyAppIcon.png"))
         let providedAppIcon = try Data(contentsOf: URL(fileURLWithPath: "/Users/xyue/Pictures/SlackerBuddy App Icon.png"))
