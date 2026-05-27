@@ -150,6 +150,8 @@ let preferences = { ...defaults };
 let pets = [];
 let petdexRoot = "";
 let spriteURL = "";
+let fallbackSpriteURL = "";
+let spriteLoadFailed = false;
 let petState = "idle";
 let stateStartedAt = performance.now();
 let frameTimer;
@@ -211,13 +213,38 @@ function selectedPet() {
 
 function applySelectedPet() {
   const pet = selectedPet();
+  preferences.selectedPetID = pet.id;
   spriteURL = api.fileURL(pet.spritesheetPath);
+  spriteLoadFailed = false;
+  verifySpriteImage(spriteURL);
 }
 
 function drawPet() {
   const sprite = document.querySelector(".sprite");
   if (!sprite || !spriteURL) return;
+  if (spriteLoadFailed) {
+    drawFallbackPet();
+    return;
+  }
   Object.assign(sprite.style, spriteStyleFor(petState));
+}
+
+function drawFallbackPet() {
+  const sprite = document.querySelector(".sprite");
+  if (!sprite || !fallbackSpriteURL) return;
+  sprite.style.backgroundImage = `url("${fallbackSpriteURL}")`;
+  sprite.style.backgroundSize = "contain";
+  sprite.style.backgroundPosition = "center";
+  sprite.style.backgroundRepeat = "no-repeat";
+}
+
+function verifySpriteImage(url) {
+  const image = new Image();
+  image.onerror = () => {
+    spriteLoadFailed = true;
+    drawFallbackPet();
+  };
+  image.src = url;
 }
 
 function showBubble(message, button = false) {
@@ -354,6 +381,7 @@ async function renderPet() {
   preferences = { ...defaults, ...initial.preferences };
   pets = initial.pets;
   petdexRoot = initial.petdexRoot;
+  fallbackSpriteURL = api.fileURL(initial.assets.fufuIdle);
   applySelectedPet();
 
   document.body.innerHTML = `
@@ -373,6 +401,8 @@ async function renderPet() {
   frameTimer = window.setInterval(drawPet, 80);
   resetTimers();
   drawPet();
+  window.setTimeout(drawFallbackPet, 500);
+  api.petReady();
 }
 
 function row(label, control) {

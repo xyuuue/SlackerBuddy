@@ -10,7 +10,13 @@ let petWindow;
 let settingsWindow;
 let tray;
 
-const assetPath = (...parts) => path.join(__dirname, "..", "assets", ...parts);
+function assetPath(...parts) {
+  if (app.isPackaged) {
+    return path.join(process.resourcesPath, "assets", ...parts);
+  }
+
+  return path.join(__dirname, "..", "assets", ...parts);
+}
 
 const defaultPreferences = {
   language: "system",
@@ -34,7 +40,16 @@ const defaultPreferences = {
 };
 
 function preferences() {
-  return { ...defaultPreferences, ...(store.get("preferences") || {}) };
+  return normalizePreferences({ ...defaultPreferences, ...(store.get("preferences") || {}) });
+}
+
+function normalizePreferences(pref) {
+  const selectedPetID = pref.selectedPetID === "builtin.siamese-placeholder" ? "fufu" : (pref.selectedPetID || "fufu");
+  return {
+    ...pref,
+    selectedPetID,
+    showPetOnLaunch: pref.showPetOnLaunch !== false
+  };
 }
 
 function savePreferences(nextPreferences) {
@@ -70,6 +85,13 @@ function createPetWindow() {
   petWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
   petWindow.loadFile(path.join(__dirname, "renderer.html"), { query: { window: "pet" } });
   petWindow.once("ready-to-show", () => {
+    const pref = preferences();
+    restorePetBounds(pref);
+    if (pref.showPetOnLaunch) {
+      petWindow.showInactive();
+    }
+  });
+  petWindow.webContents.once("did-finish-load", () => {
     const pref = preferences();
     restorePetBounds(pref);
     if (pref.showPetOnLaunch) {
@@ -183,6 +205,7 @@ function rebuildTrayMenu() {
 
 function showPet() {
   if (!petWindow || petWindow.isDestroyed()) createPetWindow();
+  restorePetBounds(preferences());
   petWindow.showInactive();
 }
 
@@ -197,15 +220,16 @@ function petdexRoot() {
 function bundledPet() {
   return {
     id: "fufu",
-    displayName: "FuFu",
-    description: "A pixel-art Siamese kitten desktop pet with cream fur, dark points, blue eyes, and friendly compact proportions.",
+    displayName: "FuFu (Built-in)",
+    description: "Built-in pixel-art Siamese kitten desktop pet with cream fur, dark points, blue eyes, and friendly compact proportions.",
     spritesheetPath: assetPath("fufu-spritesheet.webp"),
     bundled: true
   };
 }
 
 function loadPetdexPets() {
-  const pets = [bundledPet()];
+  const builtInPet = bundledPet();
+  const pets = [builtInPet];
   const root = petdexRoot();
   if (!fs.existsSync(root)) return pets;
 
@@ -217,6 +241,7 @@ function loadPetdexPets() {
       const metadata = JSON.parse(fs.readFileSync(metadataPath, "utf8"));
       const spritesheetPath = path.join(folder, metadata.spritesheetPath || "");
       if (!metadata.id || !fs.existsSync(spritesheetPath)) continue;
+      if (metadata.id === builtInPet.id) continue;
       pets.push({
         id: metadata.id,
         displayName: metadata.displayName || metadata.id,
@@ -253,7 +278,8 @@ function registerIpc() {
     petdexRoot: petdexRoot(),
     assets: {
       appIcon: assetPath("SlackerBuddyAppIcon.png"),
-      trayIcon: assetPath("SlackerBuddyTrayIcon.png")
+      trayIcon: assetPath("SlackerBuddyTrayIcon.png"),
+      fufuIdle: assetPath("fufu-idle.png")
     }
   }));
 
@@ -281,6 +307,7 @@ function registerIpc() {
   });
   ipcMain.handle("screen:get-cursor-point", () => screen.getCursorScreenPoint());
   ipcMain.handle("notify", (_event, payload) => sendNotification(payload.title, payload.body));
+  ipcMain.on("pet:ready", () => showPet());
   ipcMain.on("settings:open", createSettingsWindow);
   ipcMain.on("pet:show", showPet);
   ipcMain.on("pet:hide", hidePet);

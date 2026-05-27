@@ -190,6 +190,7 @@ let appLifecycleSourceTests: [TestCase] = [
         try expect(FileManager.default.fileExists(atPath: "Windows/assets/SlackerBuddyTrayIcon.png"), "Expected Windows tray icon copy")
         try expect(FileManager.default.fileExists(atPath: "Windows/assets/SlackerBuddy.ico"), "Expected Windows ico packaging icon")
         try expect(FileManager.default.fileExists(atPath: "Windows/assets/fufu-spritesheet.webp"), "Expected bundled FuFu spritesheet")
+        try expect(FileManager.default.fileExists(atPath: "Windows/assets/fufu-idle.png"), "Expected bundled FuFu fallback image")
     },
     TestCase(name: "windows app keeps SlackerBuddy branding and icon assets") {
         let packageSource = try String(contentsOf: URL(fileURLWithPath: "Windows/package.json"), encoding: .utf8)
@@ -198,6 +199,7 @@ let appLifecycleSourceTests: [TestCase] = [
 
         try expect(packageSource.contains("\"productName\": \"SlackerBuddy\""), "Windows package should keep SlackerBuddy product name")
         try expect(packageSource.contains("\"icon\": \"assets/SlackerBuddy.ico\""), "Windows builder should use the converted existing paw icon")
+        try expect(packageSource.contains("\"extraResources\""), "Windows builder should copy runtime assets outside the app asar")
         try expect(mainSource.contains("SlackerBuddyAppIcon.png"), "Windows app should load the existing app icon artwork")
         try expect(mainSource.contains("SlackerBuddyTrayIcon.png") || mainSource.contains("SlackerBuddy.ico"), "Windows app should load SlackerBuddy tray icon artwork")
         try expect(readmeSource.contains("The `.ico` file is only a Windows packaging conversion"), "Windows docs should clarify the icon is not redesigned")
@@ -211,11 +213,15 @@ let appLifecycleSourceTests: [TestCase] = [
         try expect(mainSource.contains("Tray"), "Windows app should provide tray controls")
         try expect(mainSource.contains("Notification"), "Windows app should support system notifications")
         try expect(mainSource.contains(".codex\", \"pets\"") || mainSource.contains(".codex\", \"pets"), "Windows app should load PetDex pets from the user pet folder")
+        try expect(mainSource.contains("displayName: \"FuFu (Built-in)\""), "Windows app should ship FuFu as a built-in pet")
+        try expect(mainSource.contains("process.resourcesPath"), "Packaged Windows app should load assets from runtime resources")
+        try expect(mainSource.contains("pet:ready"), "Windows pet renderer should notify main when the pet is ready to show")
         try expect(rendererSource.contains("automaticActionsEnabled"), "Windows app should preserve automatic actions setting")
         try expect(rendererSource.contains("automaticRunningEnabled"), "Windows app should preserve automatic running setting")
         try expect(rendererSource.contains("restBlockingEnabled"), "Windows app should preserve rest blocking setting")
         try expect(rendererSource.contains("waterRemindersEnabled"), "Windows app should preserve water reminders setting")
         try expect(rendererSource.contains("dragRunningLeft") && rendererSource.contains("dragRunningRight"), "Windows app should preserve directional drag feedback")
+        try expect(rendererSource.contains("verifySpriteImage") && rendererSource.contains("drawFallbackPet"), "Windows pet should fall back to bundled FuFu if spritesheet loading fails")
         try expect(rendererSource.contains("language") && rendererSource.contains("chinese") && rendererSource.contains("english"), "Windows app should preserve Chinese and English settings")
     },
     TestCase(name: "app uses provided SlackerBuddy icon assets") {

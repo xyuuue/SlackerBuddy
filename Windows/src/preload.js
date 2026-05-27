@@ -11,6 +11,7 @@ contextBridge.exposeInMainWorld("slackerBuddy", {
   setBlockingBounds: (scalePercent) => ipcRenderer.invoke("pet:blocking-bounds", scalePercent),
   getCursorPoint: () => ipcRenderer.invoke("screen:get-cursor-point"),
   notify: (payload) => ipcRenderer.invoke("notify", payload),
+  petReady: () => ipcRenderer.send("pet:ready"),
   openSettings: () => ipcRenderer.send("settings:open"),
   showPet: () => ipcRenderer.send("pet:show"),
   hidePet: () => ipcRenderer.send("pet:hide"),
