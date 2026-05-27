@@ -134,6 +134,20 @@
       box-shadow: 0 14px 34px rgba(31, 28, 34, 0.2);
     }
 
+    .download-alt {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 52px;
+      padding: 0 18px;
+      border: 1px solid rgba(31, 28, 34, 0.16);
+      border-radius: 14px;
+      color: var(--ink);
+      background: rgba(255, 255, 255, 0.72);
+      text-decoration: none;
+      font-weight: 800;
+    }
+
     .secondary {
       color: var(--muted);
       font-size: 14px;
@@ -437,7 +451,8 @@
       <p class="lead" data-i18n="heroLead">FuFu is SlackerBuddy's Siamese desktop pet. It blinks, waves, jumps, waits, runs, hangs out near your workspace, and reminds you to rest or drink water on your schedule.</p>
       <div class="actions">
         <a class="download" href="downloads/SlackerBuddy.dmg" download data-i18n="downloadButton">Download SlackerBuddy.dmg</a>
-        <span class="secondary" data-i18n="macRequirement">For macOS 14 or later</span>
+        <a class="download-alt" href="downloads/SlackerBuddyLegacy-10.13.dmg" download data-i18n="legacyDownloadButton">Download macOS 10.13.1 Legacy</a>
+        <span class="secondary" data-i18n="macRequirement">Modern app for macOS 14 or later. Legacy build for macOS 10.13.1 High Sierra.</span>
       </div>
     </div>
     <div class="pet-stage" aria-label="FuFu pet preview" data-i18n-attr="aria-label:petPreviewLabel">
@@ -538,7 +553,8 @@
         heroTitle: "A tiny Mac cat that keeps you company and nudges you to rest.",
         heroLead: "FuFu is SlackerBuddy's Siamese desktop pet. It blinks, waves, jumps, waits, runs, hangs out near your workspace, and reminds you to rest or drink water on your schedule.",
         downloadButton: "Download SlackerBuddy.dmg",
-        macRequirement: "For macOS 14 or later",
+        legacyDownloadButton: "Download macOS 10.13.1 Legacy",
+        macRequirement: "Modern app for macOS 14 or later. Legacy build for macOS 10.13.1 High Sierra.",
         petPreviewLabel: "FuFu pet preview",
         fufuAlt: "FuFu Siamese desktop pet",
         statusBubble: "FuFu stays quiet while you focus, then waves when it is time for a reminder.",
@@ -558,9 +574,9 @@
         petdexStep3: "Open SlackerBuddy from the menu bar, go to settings, and choose your new PetDex pet from the Pet option.",
         petdexStep4: "If settings is already open, reopen it or switch the pet picker once so SlackerBuddy refreshes the available pets.",
         installTitle: "Download and install",
-        installIntro: "After downloading the DMG, drag SlackerBuddy into Applications. Because this lightweight build is not notarized yet, macOS may block the first launch. Follow these steps to open it.",
-        installStep1: "Click the download button above and save <strong>SlackerBuddy.dmg</strong>.",
-        installStep2: "Open the DMG and drag <strong>SlackerBuddy.app</strong> into Applications.",
+        installIntro: "After downloading the DMG, drag SlackerBuddy into Applications. Use the main download for macOS 14 or later, or the legacy download for macOS 10.13.1 High Sierra. Because these lightweight builds are not notarized yet, macOS may block the first launch. Follow these steps to open it.",
+        installStep1: "Click the download button above and save <strong>SlackerBuddy.dmg</strong>, or save <strong>SlackerBuddyLegacy-10.13.dmg</strong> on macOS 10.13.1.",
+        installStep2: "Open the DMG and drag <strong>SlackerBuddy.app</strong> or <strong>SlackerBuddyLegacy.app</strong> into Applications.",
         installStep3: "On first launch, right-click or Control-click <strong>SlackerBuddy.app</strong>, then choose Open.",
         installStep4: "If a security dialog appears, click the question mark in the upper-right corner, then click <strong>Privacy &amp; Security</strong> to open System Settings.",
         installStep5: "Close the original security dialog, click <strong>Open Anyway</strong> in System Settings, then confirm. After that, SlackerBuddy can launch normally.",
@@ -584,7 +600,8 @@
         heroTitle: "一只会陪你偷懒，也会提醒你休息的 Mac 小猫。",
         heroLead: "FuFu 是 SlackerBuddy 的暹罗猫桌面宠物。它会眨眼、挥手、跳跃、等待、奔跑，在你工作的时候陪在屏幕边上，并按你设置的节奏提醒休息和喝水。",
         downloadButton: "下载 SlackerBuddy.dmg",
-        macRequirement: "适用于 macOS 14 或更新版本",
+        legacyDownloadButton: "下载 macOS 10.13.1 兼容版",
+        macRequirement: "主版本适用于 macOS 14 或更新版本；兼容版适用于 macOS 10.13.1 High Sierra。",
         petPreviewLabel: "FuFu 宠物预览",
         fufuAlt: "FuFu 暹罗猫桌面宠物",
         statusBubble: "FuFu 会在你专注时安静待机，也会在提醒时间到时挥手出现。",
@@ -604,9 +621,9 @@
         petdexStep3: "打开 SlackerBuddy 菜单栏设置，在“宠物”选项里选择刚下载的 PetDex 宠物。",
         petdexStep4: "如果设置窗口已经打开，重新打开设置或切换一次宠物列表，SlackerBuddy 会刷新可用宠物。",
         installTitle: "下载与安装",
-        installIntro: "下载 DMG 后，把 SlackerBuddy 拖到 Applications。第一次打开未公证版本时，macOS 可能会阻止直接启动。按下面步骤操作即可完成打开。",
-        installStep1: "点击页面上方的下载按钮，保存 <strong>SlackerBuddy.dmg</strong>。",
-        installStep2: "打开 DMG，把 <strong>SlackerBuddy.app</strong> 拖入 Applications。",
+        installIntro: "下载 DMG 后，把 SlackerBuddy 拖到 Applications。macOS 14 或更新版本请使用主下载；macOS 10.13.1 High Sierra 请使用兼容版下载。第一次打开未公证版本时，macOS 可能会阻止直接启动。按下面步骤操作即可完成打开。",
+        installStep1: "点击页面上方的下载按钮，保存 <strong>SlackerBuddy.dmg</strong>；如果是 macOS 10.13.1，请保存 <strong>SlackerBuddyLegacy-10.13.dmg</strong>。",
+        installStep2: "打开 DMG，把 <strong>SlackerBuddy.app</strong> 或 <strong>SlackerBuddyLegacy.app</strong> 拖入 Applications。",
         installStep3: "第一次启动时右键或 Control-点击 <strong>SlackerBuddy.app</strong>，选择“打开”。",
         installStep4: "如果出现安全弹窗，点击右上角的问号，然后点击 <strong>Privacy &amp; Security</strong> 进入系统设置。",
         installStep5: "关闭原本的安全弹窗，在系统设置里点击 <strong>Open Anyway</strong>，再确认打开。之后就可以正常启动。",

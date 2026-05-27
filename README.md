@@ -28,6 +28,10 @@ Download the latest DMG from the website:
 
 [Download SlackerBuddy](https://slackerbuddy.vercel.app/downloads/SlackerBuddy.dmg)
 
+For macOS 10.13.1 High Sierra, use the legacy compatibility build:
+
+[Download SlackerBuddy Legacy 10.13](https://slackerbuddy.vercel.app/downloads/SlackerBuddyLegacy-10.13.dmg)
+
 This project currently ships as a lightweight ad-hoc signed build. On first launch, macOS may require you to right-click or Control-click `SlackerBuddy.app`, choose **Open**, then approve it in **Privacy & Security** with **Open Anyway**.
 
 ## PetDex Pets
