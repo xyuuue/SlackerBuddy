@@ -34,6 +34,7 @@ BUILD_BINARY="$BUILD_DIR/$BUILD_PRODUCT"
 rm -rf "$APP_BUNDLE"
 mkdir -p "$APP_MACOS" "$APP_RESOURCES" "$APP_FRAMEWORKS"
 cp "$BUILD_BINARY" "$APP_BINARY"
+cp -R "$ROOT_DIR/Assets/BuiltinPets" "$APP_RESOURCES/BuiltinPets"
 chmod +x "$APP_BINARY"
 install_name_tool -add_rpath "@executable_path/../Frameworks" "$APP_BINARY" 2>/dev/null || true
 

@@ -2,11 +2,17 @@ import Foundation
 
 public struct PetdexCatalog: Sendable {
     public let rootDirectory: URL
+    private let bundledPetsDirectory: URL?
 
-    public init(rootDirectory: URL = FileManager.default.homeDirectoryForCurrentUser
-        .appendingPathComponent(".codex", isDirectory: true)
-        .appendingPathComponent("pets", isDirectory: true)) {
+    public init(
+        rootDirectory: URL = FileManager.default.homeDirectoryForCurrentUser
+            .appendingPathComponent(".codex", isDirectory: true)
+            .appendingPathComponent("pets", isDirectory: true),
+        bundledPetsDirectory: URL? = Bundle.main.resourceURL?
+            .appendingPathComponent("BuiltinPets", isDirectory: true)
+    ) {
         self.rootDirectory = rootDirectory
+        self.bundledPetsDirectory = bundledPetsDirectory
     }
 
     public func loadPets() -> [PetAsset] {
@@ -19,11 +25,20 @@ public struct PetdexCatalog: Sendable {
         let pets = petDirectories
             .filter { $0.isDirectory }
             .compactMap(loadPet)
+            .filter { $0.id != PetAsset.builtinID }
             .sorted { lhs, rhs in
                 lhs.displayName.localizedStandardCompare(rhs.displayName) == .orderedAscending
             }
 
-        return [PetAsset.builtin] + pets
+        return [loadBundledPet() ?? PetAsset.builtin] + pets
+    }
+
+    private func loadBundledPet() -> PetAsset? {
+        guard let bundledPetsDirectory else {
+            return nil
+        }
+
+        return loadPet(from: bundledPetsDirectory.appendingPathComponent(PetAsset.builtinID, isDirectory: true))
     }
 
     private func loadPet(from packageDirectory: URL) -> PetAsset? {

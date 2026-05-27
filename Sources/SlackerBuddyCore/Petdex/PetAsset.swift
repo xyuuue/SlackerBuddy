@@ -1,11 +1,11 @@
 import Foundation
 
 public struct PetAsset: Identifiable, Equatable, Sendable {
-    public static let builtinID = "builtin.siamese-placeholder"
+    public static let builtinID = "fufu"
     public static let builtin = PetAsset(
         id: builtinID,
-        displayName: "Siamese Placeholder",
-        description: "Built-in drawn Siamese cat",
+        displayName: "FuFu",
+        description: "Built-in pixel-art Siamese kitten",
         spriteSheetURL: nil
     )
 

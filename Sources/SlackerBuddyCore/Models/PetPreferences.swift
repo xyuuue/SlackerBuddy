@@ -1,7 +1,7 @@
 import Foundation
 
 public struct PetPreferences: Equatable, Sendable {
-    public static let defaultSelectedPetID = "builtin.siamese-placeholder"
+    public static let defaultSelectedPetID = "fufu"
 
     public var reminderIntervalMinutes: Int
     public var restRemindersEnabled: Bool

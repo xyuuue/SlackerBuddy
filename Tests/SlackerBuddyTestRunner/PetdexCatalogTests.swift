@@ -8,6 +8,18 @@ let petdexCatalogTests: [TestCase] = [
         let pets = catalog.loadPets()
 
         try expect(pets.map(\.id).contains(PetAsset.builtinID), "Expected builtin pet")
+        try expect(PetAsset.builtinID == "fufu", "Expected FuFu to be the built-in pet id")
+        try expect(pets.first?.displayName == "FuFu", "Expected FuFu to be first")
+    },
+    TestCase(name: "catalog loads bundled FuFu from app resources") {
+        let root = try temporaryDirectory()
+        let bundledRoot = try temporaryDirectory()
+        try writePetPackage(root: bundledRoot, id: "fufu", displayName: "FuFu", createSprite: true)
+
+        let pets = PetdexCatalog(rootDirectory: root, bundledPetsDirectory: bundledRoot).loadPets()
+
+        try expect(pets.first?.id == "fufu", "Expected bundled FuFu to be first")
+        try expect(pets.first?.spriteSheetURL != nil, "Expected bundled FuFu to have a spritesheet")
     },
     TestCase(name: "catalog loads valid pet package") {
         let root = try temporaryDirectory()
@@ -38,6 +50,7 @@ let petdexCatalogTests: [TestCase] = [
         let root = try temporaryDirectory()
         try writePetPackage(root: root, id: "z-cat", displayName: "Z Cat", createSprite: true)
         try writePetPackage(root: root, id: "a-cat", displayName: "A Cat", createSprite: true)
+        try writePetPackage(root: root, id: "fufu", displayName: "External FuFu", createSprite: true)
 
         let pets = PetdexCatalog(rootDirectory: root).loadPets()
 

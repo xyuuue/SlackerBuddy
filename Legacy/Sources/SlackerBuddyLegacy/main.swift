@@ -23,6 +23,12 @@ private final class PetView: NSView {
     var onDragged: (() -> Void)?
 
     private var bubbleButtonRect: NSRect = .zero
+    private let fufuImage = NSImage(
+        contentsOf: Bundle.main.resourceURL?
+            .appendingPathComponent("BuiltinPets", isDirectory: true)
+            .appendingPathComponent("fufu", isDirectory: true)
+            .appendingPathComponent("fufu-idle.png") ?? URL(fileURLWithPath: "")
+    )
 
     override var isFlipped: Bool { true }
 
@@ -31,7 +37,11 @@ private final class PetView: NSView {
         dirtyRect.fill()
 
         let catRect = NSRect(x: 16, y: bounds.height - 132, width: 128, height: 118)
-        drawCat(in: catRect)
+        if action == .idle, let fufuImage {
+            drawFuFuImage(fufuImage, in: catRect)
+        } else {
+            drawCat(in: catRect)
+        }
 
         if let message = message {
             drawBubble(message, above: catRect)
@@ -88,6 +98,19 @@ private final class PetView: NSView {
             .paragraphStyle: paragraph
         ]
         NSString(string: "I'm back!").draw(in: NSRect(x: bubbleButtonRect.minX, y: bubbleButtonRect.minY + 3, width: bubbleButtonRect.width, height: 16), withAttributes: buttonAttributes)
+    }
+
+    private func drawFuFuImage(_ image: NSImage, in rect: NSRect) {
+        let aspect = image.size.width > 0 && image.size.height > 0 ? image.size.width / image.size.height : 1
+        let targetWidth = min(rect.width, rect.height * aspect)
+        let targetHeight = targetWidth / aspect
+        let targetRect = NSRect(
+            x: rect.midX - targetWidth / 2,
+            y: rect.maxY - targetHeight,
+            width: targetWidth,
+            height: targetHeight
+        )
+        image.draw(in: targetRect, from: .zero, operation: .sourceOver, fraction: 1)
     }
 
     private func drawCat(in rect: NSRect) {

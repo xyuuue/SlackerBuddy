@@ -34,6 +34,7 @@ mkdir -p "$APP_RESOURCES"
 cp "$BUILD_BINARY" "$APP_BINARY"
 cp "$ROOT_DIR/Assets/$ICON_FILE" "$APP_RESOURCES/$ICON_FILE"
 cp "$ROOT_DIR/Assets/SlackerBuddyMenuBarIcon.png" "$APP_RESOURCES/SlackerBuddyMenuBarIcon.png"
+cp -R "$ROOT_DIR/Assets/BuiltinPets" "$APP_RESOURCES/BuiltinPets"
 chmod +x "$APP_BINARY"
 
 cat >"$INFO_PLIST" <<PLIST

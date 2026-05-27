@@ -182,6 +182,24 @@ let appLifecycleSourceTests: [TestCase] = [
         try expect(legacySource.contains("Time for a break"), "Legacy pet should show rest reminder copy")
         try expect(legacySource.contains("I'm back!"), "Legacy pet should include an early-dismiss bubble button")
     },
+    TestCase(name: "macOS app bundles FuFu as built-in pet") {
+        let petAssetSource = try String(contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddyCore/Petdex/PetAsset.swift"), encoding: .utf8)
+        let catalogSource = try String(contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddyCore/Petdex/PetdexCatalog.swift"), encoding: .utf8)
+        let preferencesSource = try String(contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddyCore/Models/PetPreferences.swift"), encoding: .utf8)
+        let buildScript = try String(contentsOf: URL(fileURLWithPath: "script/build_and_run.sh"), encoding: .utf8)
+        let legacyBuildScript = try String(contentsOf: URL(fileURLWithPath: "script/build_legacy_10_13.sh"), encoding: .utf8)
+        let legacySource = try String(contentsOf: URL(fileURLWithPath: "Legacy/Sources/SlackerBuddyLegacy/main.swift"), encoding: .utf8)
+
+        try expect(petAssetSource.contains("public static let builtinID = \"fufu\""), "FuFu should be the built-in pet id")
+        try expect(preferencesSource.contains("defaultSelectedPetID = \"fufu\""), "FuFu should be selected by default")
+        try expect(catalogSource.contains("BuiltinPets"), "Petdex catalog should load bundled pets from app resources")
+        try expect(buildScript.contains("Assets/BuiltinPets"), "macOS 14 bundle should copy built-in pets")
+        try expect(legacyBuildScript.contains("Assets/BuiltinPets"), "macOS 10.13.1 bundle should copy built-in pets")
+        try expect(legacySource.contains("fufu-idle.png"), "Legacy app should render bundled FuFu fallback art")
+        try expect(FileManager.default.fileExists(atPath: "Assets/BuiltinPets/fufu/pet.json"), "Expected built-in FuFu metadata")
+        try expect(FileManager.default.fileExists(atPath: "Assets/BuiltinPets/fufu/spritesheet.webp"), "Expected built-in FuFu spritesheet")
+        try expect(FileManager.default.fileExists(atPath: "Assets/BuiltinPets/fufu/fufu-idle.png"), "Expected built-in FuFu static frame")
+    },
     TestCase(name: "windows app is isolated in its own folder") {
         try expect(FileManager.default.fileExists(atPath: "Windows/package.json"), "Expected Windows Electron package")
         try expect(FileManager.default.fileExists(atPath: "Windows/src/main.js"), "Expected Windows main process source")

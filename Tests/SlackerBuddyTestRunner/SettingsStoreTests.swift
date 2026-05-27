@@ -21,6 +21,7 @@ let settingsStoreTests: [TestCase] = [
         try expect(store.preferences.automaticActionIntervalMinutes == 8, "Expected automatic action interval to default to 8")
         try expect(store.preferences.automaticRunningEnabled == false, "Expected automatic running off by default")
         try expect(store.preferences.automaticRunDirectionMode == .random, "Expected automatic running direction to default to random")
+        try expect(store.preferences.selectedPetID == "fufu", "Expected FuFu to be the default selected pet")
         try expect(store.preferences.petScale == 1.0, "Expected pet scale to default to 1.0")
         try expect(store.preferences.showPetOnLaunch == true, "Expected pet to show on launch by default")
         try expect(store.preferences.systemNotificationsEnabled == false, "Expected system notifications to default off")
