@@ -242,9 +242,14 @@ let appLifecycleSourceTests: [TestCase] = [
         try expect(siteSource.contains("downloads/SlackerBuddy.dmg"), "Release page should link the distributable DMG")
         try expect(siteSource.contains("downloads/SlackerBuddyLegacy-10.13.dmg"), "Release page should link the macOS 10.13.1 legacy DMG")
         try expect(siteSource.contains("macOS 10.13.1") && siteSource.contains("High Sierra"), "Release page should explain the legacy High Sierra build")
+        try expect(siteSource.contains("downloads/SlackerBuddy-Windows-Setup-1.0.0.exe"), "Release page should link the Windows installer")
+        try expect(siteSource.contains("downloads/SlackerBuddy-Windows-Portable-1.0.0.exe"), "Release page should link the Windows portable build")
+        try expect(siteSource.contains("Windows 10") || siteSource.contains("Windows 安装器"), "Release page should explain the Windows build")
         try expect(siteSource.contains("docs/site/assets/fufu-idle.png") || FileManager.default.fileExists(atPath: "docs/site/assets/fufu-idle.png"), "Release page should have a pet preview asset")
         try expect(FileManager.default.fileExists(atPath: "docs/site/assets/slackerbuddy-app-icon.png"), "Release page should copy the app icon asset")
         try expect(FileManager.default.fileExists(atPath: "docs/site/downloads/SlackerBuddyLegacy-10.13.dmg"), "Release page should include the legacy DMG asset")
+        try expect(FileManager.default.fileExists(atPath: "docs/site/downloads/SlackerBuddy-Windows-Setup-1.0.0.exe"), "Release page should include the Windows installer asset")
+        try expect(FileManager.default.fileExists(atPath: "docs/site/downloads/SlackerBuddy-Windows-Portable-1.0.0.exe"), "Release page should include the Windows portable asset")
     },
     TestCase(name: "packaged app bundle is signed after resources are copied") {
         let buildScript = try String(

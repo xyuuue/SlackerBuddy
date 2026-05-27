@@ -32,6 +32,12 @@ For macOS 10.13.1 High Sierra, use the legacy compatibility build:
 
 [Download SlackerBuddy Legacy 10.13](https://slackerbuddy.vercel.app/downloads/SlackerBuddyLegacy-10.13.dmg)
 
+For Windows, use the installer or portable build:
+
+[Download SlackerBuddy Windows Setup](https://slackerbuddy.vercel.app/downloads/SlackerBuddy-Windows-Setup-1.0.0.exe)
+
+[Download SlackerBuddy Windows Portable](https://slackerbuddy.vercel.app/downloads/SlackerBuddy-Windows-Portable-1.0.0.exe)
+
 This project currently ships as a lightweight ad-hoc signed build. On first launch, macOS may require you to right-click or Control-click `SlackerBuddy.app`, choose **Open**, then approve it in **Privacy & Security** with **Open Anyway**.
 
 ## PetDex Pets
