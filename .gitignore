@@ -1,6 +1,7 @@
 .superpowers/
 .worktrees/
 .build/
+Legacy/.build/
 dist/
 .DS_Store
 **/.DS_Store

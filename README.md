@@ -68,14 +68,34 @@ Run tests:
 DEVELOPER_DIR=/Library/Developer/CommandLineTools swift run SlackerBuddyTestRunner
 ```
 
+## macOS 10.13.1 Legacy Build
+
+macOS 10.13.1 cannot run SwiftUI or Observation, so the modern SlackerBuddy app remains a macOS 14 build. For High Sierra machines, this repository includes a separate AppKit-only legacy companion in `Legacy/`.
+
+Build the compatibility app:
+
+```bash
+DEVELOPER_DIR=/Library/Developer/CommandLineTools ./script/build_legacy_10_13.sh --build-only
+```
+
+Verify that the legacy app bundle launches on this Mac:
+
+```bash
+DEVELOPER_DIR=/Library/Developer/CommandLineTools ./script/build_legacy_10_13.sh --verify
+```
+
+The generated app is written to `dist/legacy/SlackerBuddyLegacy.app` and declares `LSMinimumSystemVersion` as `10.13.1`. It uses AppKit-only APIs and includes a lightweight desktop pet, menu bar controls, blinking, drag direction feedback, click reactions, and a 25-minute rest reminder. Final runtime testing should still be done on a real macOS 10.13.1 machine before sharing it with High Sierra users.
+
 ## Repository Layout
 
 - `Sources/SlackerBuddy` - macOS app, windows, SwiftUI views, and AppKit integration
 - `Sources/SlackerBuddyCore` - state machines, settings, scheduling, localization, and PetDex loading
+- `Legacy` - AppKit-only macOS 10.13.1 compatibility build
 - `Tests/SlackerBuddyTestRunner` - lightweight custom test runner
 - `Assets` - app icon and menu bar icon assets
 - `docs/site` - static website and downloadable DMG
 - `script/build_and_run.sh` - local build, bundle, signing, and launch helper
+- `script/build_legacy_10_13.sh` - High Sierra compatibility build helper
 
 ## License
 

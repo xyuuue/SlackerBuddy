@@ -136,6 +136,52 @@ let appLifecycleSourceTests: [TestCase] = [
         try expect(FileManager.default.fileExists(atPath: "Sources/SlackerBuddyCore"), "Expected SlackerBuddyCore source directory")
         try expect(FileManager.default.fileExists(atPath: "Tests/SlackerBuddyTestRunner"), "Expected SlackerBuddyTestRunner directory")
     },
+    TestCase(name: "legacy package targets macOS 10.13") {
+        let legacyPackage = try String(
+            contentsOf: URL(fileURLWithPath: "Legacy/Package.swift"),
+            encoding: .utf8
+        )
+        let buildScript = try String(
+            contentsOf: URL(fileURLWithPath: "script/build_legacy_10_13.sh"),
+            encoding: .utf8
+        )
+
+        try expect(legacyPackage.contains("name: \"SlackerBuddyLegacy\""), "Legacy package should be named SlackerBuddyLegacy")
+        try expect(legacyPackage.contains(".macOS(.v10_13)"), "Legacy package should target macOS 10.13")
+        try expect(legacyPackage.contains(".executable(name: \"SlackerBuddyLegacy\""), "Legacy package should expose an executable product")
+        try expect(buildScript.contains("MIN_SYSTEM_VERSION=\"10.13.1\""), "Legacy bundle should declare macOS 10.13.1 as its minimum system version")
+        try expect(buildScript.contains("TARGET_TRIPLE=\"x86_64-apple-macosx10.13\""), "Legacy build should produce an Intel binary for High Sierra")
+        try expect(buildScript.contains("MACOSX_DEPLOYMENT_TARGET=\"$MIN_SYSTEM_VERSION\""), "Legacy build should set the compiler deployment target")
+        try expect(buildScript.contains("swift-stdlib-tool"), "Legacy bundle should embed Swift runtime libraries for older macOS releases")
+        try expect(buildScript.contains("@executable_path/../Frameworks"), "Legacy binary should search the app bundle for embedded Swift libraries")
+        try expect(buildScript.contains("dist/legacy"), "Legacy build should write to an isolated dist directory")
+    },
+    TestCase(name: "legacy app avoids modern macOS-only frameworks") {
+        let legacySource = try String(
+            contentsOf: URL(fileURLWithPath: "Legacy/Sources/SlackerBuddyLegacy/main.swift"),
+            encoding: .utf8
+        )
+
+        try expect(legacySource.contains("import AppKit"), "Legacy app should use AppKit")
+        try expect(!legacySource.contains("import SwiftUI"), "Legacy app should not depend on SwiftUI")
+        try expect(!legacySource.contains("import Observation"), "Legacy app should not depend on Observation")
+        try expect(!legacySource.contains("MenuBarExtra"), "Legacy app should avoid SwiftUI menu bar APIs")
+        try expect(!legacySource.contains("NSHostingView"), "Legacy app should avoid SwiftUI hosting views")
+        try expect(!legacySource.contains("UserNotifications"), "Legacy app should avoid newer notification APIs")
+    },
+    TestCase(name: "legacy app includes basic companion behavior") {
+        let legacySource = try String(
+            contentsOf: URL(fileURLWithPath: "Legacy/Sources/SlackerBuddyLegacy/main.swift"),
+            encoding: .utf8
+        )
+
+        try expect(legacySource.contains("startBlinking"), "Legacy pet should blink automatically")
+        try expect(legacySource.contains("randomClickAction"), "Legacy pet should react randomly to clicks")
+        try expect(legacySource.contains(".runLeft") && legacySource.contains(".runRight"), "Legacy pet should have directional running feedback")
+        try expect(legacySource.contains("startReminderTimer"), "Legacy pet should keep a rest reminder timer")
+        try expect(legacySource.contains("Time for a break"), "Legacy pet should show rest reminder copy")
+        try expect(legacySource.contains("I'm back!"), "Legacy pet should include an early-dismiss bubble button")
+    },
     TestCase(name: "app uses provided SlackerBuddy icon assets") {
         let repoAppIcon = try Data(contentsOf: URL(fileURLWithPath: "Assets/SlackerBuddyAppIcon.png"))
         let providedAppIcon = try Data(contentsOf: URL(fileURLWithPath: "/Users/xyue/Pictures/SlackerBuddy App Icon.png"))
