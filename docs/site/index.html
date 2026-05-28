@@ -342,6 +342,61 @@
       font-size: 0.92em;
     }
 
+    .more-fufu {
+      display: grid;
+      gap: 24px;
+      justify-items: center;
+      border-top: 1px solid var(--line);
+      padding-top: 42px;
+      text-align: center;
+    }
+
+    .pastepaw-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 16px;
+      min-height: 88px;
+      min-width: min(100%, 320px);
+      padding: 14px 20px 14px 14px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      color: var(--ink);
+      background: #fff;
+      text-decoration: none;
+      box-shadow: 0 14px 38px rgba(73, 58, 82, 0.08);
+      transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+    }
+
+    .pastepaw-button:hover {
+      transform: translateY(-2px);
+      border-color: rgba(73, 174, 232, 0.5);
+      box-shadow: 0 18px 46px rgba(73, 58, 82, 0.12);
+    }
+
+    .pastepaw-button img {
+      width: 64px;
+      height: 64px;
+      border-radius: 14px;
+      object-fit: contain;
+      flex: 0 0 auto;
+    }
+
+    .pastepaw-button span {
+      display: grid;
+      gap: 4px;
+      text-align: left;
+    }
+
+    .pastepaw-button strong {
+      font-size: 22px;
+    }
+
+    .pastepaw-button small {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.35;
+    }
+
     .install-cards {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -433,6 +488,10 @@
       .install-cards {
         grid-template-columns: 1fr;
       }
+
+      .pastepaw-button {
+        width: 100%;
+      }
     }
   </style>
 </head>
@@ -497,6 +556,24 @@
           <li data-i18n-html="petdexStep4">If settings is already open, reopen it or switch the pet picker once so SlackerBuddy refreshes the available pets.</li>
         </ol>
       </div>
+    </section>
+
+    <section class="more-fufu">
+      <h2 data-i18n="moreFufuTitle">Want more FuFu apps?</h2>
+      <a
+        class="pastepaw-button"
+        href="https://pastepaw.vercel.app"
+        target="_blank"
+        rel="noreferrer"
+        aria-label="Open PastePaw"
+        data-i18n-attr="aria-label:pastepawAria"
+      >
+        <img src="assets/pastepaw-icon.png" alt="PastePaw icon" data-i18n-attr="alt:pastepawIconAlt">
+        <span>
+          <strong>PastePaw</strong>
+          <small data-i18n="pastepawButtonText">FuFu clipboard helper for macOS</small>
+        </span>
+      </a>
     </section>
 
     <section class="steps">
@@ -575,6 +652,10 @@
         petdexStep2: "Put the downloaded pet folder into <code>~/.codex/pets</code>. Each pet usually includes <code>pet.json</code> and a spritesheet image.",
         petdexStep3: "Open SlackerBuddy from the menu bar, go to settings, and choose your new PetDex pet from the Pet option.",
         petdexStep4: "If settings is already open, reopen it or switch the pet picker once so SlackerBuddy refreshes the available pets.",
+        moreFufuTitle: "Want more FuFu apps?",
+        pastepawButtonText: "FuFu clipboard helper for macOS",
+        pastepawAria: "Open PastePaw",
+        pastepawIconAlt: "PastePaw app icon",
         installTitle: "Download and install",
         installIntro: "After downloading, install the build that matches your computer. Use the main DMG for macOS 14 or later, the legacy DMG for macOS 10.13.1 High Sierra, or the Windows installer for Windows 10 or later.",
         installStep1: "Click the download button above and save <strong>SlackerBuddy.dmg</strong>, <strong>SlackerBuddyLegacy-10.13.dmg</strong>, or <strong>SlackerBuddy-Windows-Setup-1.0.0.exe</strong>. Windows users can also use the <a href=\"downloads/SlackerBuddy-Windows-Portable-1.0.0.exe\" download>portable build</a>.",
@@ -588,7 +669,7 @@
         installCard1Title: "1. Right-click or Control-click Open",
         installCard1Body: "Find SlackerBuddy.app in Applications, right-click or Control-click it, then choose Open.",
         installImage2Alt: "Click the question mark in the security dialog and go to Privacy and Security",
-        installCard2Title: "2. Use the question mark to reach Privacy &amp; Security",
+        installCard2Title: "2. Use the question mark to reach Privacy & Security",
         installCard2Body: "If a security dialog appears, click the question mark in the upper-right corner, then choose Privacy &amp; Security from the help menu.",
         installImage3Alt: "Click Open Anyway in System Settings to finish opening",
         installCard3Title: "3. Click Open Anyway",
@@ -623,6 +704,10 @@
         petdexStep2: "把下载得到的宠物文件夹放入 <code>~/.codex/pets</code>。每只宠物通常包含 <code>pet.json</code> 和 spritesheet 图片。",
         petdexStep3: "打开 SlackerBuddy 菜单栏设置，在“宠物”选项里选择刚下载的 PetDex 宠物。",
         petdexStep4: "如果设置窗口已经打开，重新打开设置或切换一次宠物列表，SlackerBuddy 会刷新可用宠物。",
+        moreFufuTitle: "想看看更多 FuFu 应用？",
+        pastepawButtonText: "FuFu 的 macOS 剪贴板小工具",
+        pastepawAria: "打开 PastePaw",
+        pastepawIconAlt: "PastePaw 应用图标",
         installTitle: "下载与安装",
         installIntro: "下载后请选择适合你电脑的版本。macOS 14 或更新版本请使用主 DMG；macOS 10.13.1 High Sierra 请使用兼容版 DMG；Windows 10 或更新版本请使用 Windows 安装器。",
         installStep1: "点击页面上方的下载按钮，保存 <strong>SlackerBuddy.dmg</strong>、<strong>SlackerBuddyLegacy-10.13.dmg</strong> 或 <strong>SlackerBuddy-Windows-Setup-1.0.0.exe</strong>。Windows 用户也可以使用 <a href=\"downloads/SlackerBuddy-Windows-Portable-1.0.0.exe\" download>便携版</a>。",
@@ -636,7 +721,7 @@
         installCard1Title: "1. 右键或 Control-点击打开",
         installCard1Body: "在 Applications 里找到 SlackerBuddy.app，右键或 Control-点击它，然后选择“打开”。",
         installImage2Alt: "安全弹窗中点击问号并进入 Privacy and Security",
-        installCard2Title: "2. 从问号进入 Privacy &amp; Security",
+        installCard2Title: "2. 从问号进入 Privacy & Security",
         installCard2Body: "如果出现安全弹窗，点击右上角的问号，在帮助菜单里点击 Privacy &amp; Security。",
         installImage3Alt: "系统设置里点击 Open Anyway 完成打开",
         installCard3Title: "3. 点击 Open Anyway",

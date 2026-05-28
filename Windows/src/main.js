@@ -137,7 +137,7 @@ function createSettingsWindow() {
 function restorePetBounds(pref) {
   const savedBounds = store.get("petBounds");
   if (savedBounds) {
-    petWindow.setBounds(savedBounds);
+    setPetBounds(savedBounds);
     return;
   }
 
@@ -159,14 +159,24 @@ function petWindowSize(scale) {
 
 function setPetBounds(bounds) {
   if (!petWindow || petWindow.isDestroyed()) return;
-  const display = screen.getDisplayMatching(bounds).workArea;
-  const width = Math.max(120, Math.round(bounds.width));
-  const height = Math.max(120, Math.round(bounds.height));
-  const x = Math.min(Math.max(Math.round(bounds.x), display.x), display.x + display.width - width);
-  const y = Math.min(Math.max(Math.round(bounds.y), display.y), display.y + display.height - height);
-  const next = { x, y, width, height };
+  const next = clampedPetBounds(bounds);
   petWindow.setBounds(next);
   store.set("petBounds", next);
+}
+
+function clampedPetBounds(bounds) {
+  const fallbackBounds = petWindow && !petWindow.isDestroyed()
+    ? petWindow.getBounds()
+    : { x: 0, y: 0, width: 220, height: 220 };
+  const requested = { ...fallbackBounds, ...(bounds || {}) };
+  const display = screen.getDisplayMatching(requested).workArea;
+  const width = Math.min(display.width, Math.max(120, Math.round(requested.width)));
+  const height = Math.min(display.height, Math.max(120, Math.round(requested.height)));
+  const maxX = display.x + display.width - width;
+  const maxY = display.y + display.height - height;
+  const x = Math.min(Math.max(Math.round(requested.x), display.x), maxX);
+  const y = Math.min(Math.max(Math.round(requested.y), display.y), maxY);
+  return { x, y, width, height };
 }
 
 function createTray() {
@@ -221,7 +231,7 @@ function petdexRoot() {
 function bundledPet() {
   return {
     id: "fufu",
-    displayName: "FuFu (Built-in)",
+    displayName: "FuFu",
     description: "Built-in pixel-art Siamese kitten desktop pet with cream fur, dark points, blue eyes, and friendly compact proportions.",
     spritesheetPath: assetPath("fufu-spritesheet.webp"),
     bundled: true

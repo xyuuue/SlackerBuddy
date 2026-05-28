@@ -398,6 +398,8 @@ final class AppRuntime {
     }
 
     private func handleRestReminderDue() {
+        automaticRunTask?.cancel()
+        automaticRunTask = nil
         stateMachine.handle(.reminderFired(.rest))
         showRestBlockingOverlay()
         if settings.preferences.systemNotificationsEnabled {
@@ -406,6 +408,8 @@ final class AppRuntime {
     }
 
     private func handleWaterReminderDue() {
+        automaticRunTask?.cancel()
+        automaticRunTask = nil
         stateMachine.handle(.reminderFired(.water))
     }
 

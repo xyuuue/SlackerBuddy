@@ -240,7 +240,7 @@ let appLifecycleSourceTests: [TestCase] = [
         try expect(mainSource.contains("Tray"), "Windows app should provide tray controls")
         try expect(mainSource.contains("Notification"), "Windows app should support system notifications")
         try expect(mainSource.contains(".codex\", \"pets\"") || mainSource.contains(".codex\", \"pets"), "Windows app should load PetDex pets from the user pet folder")
-        try expect(mainSource.contains("displayName: \"FuFu (Built-in)\""), "Windows app should ship FuFu as a built-in pet")
+        try expect(mainSource.contains("displayName: \"FuFu\""), "Windows app should ship FuFu as a built-in pet")
         try expect(mainSource.contains("process.resourcesPath"), "Packaged Windows app should load assets from runtime resources")
         try expect(mainSource.contains("pet:ready"), "Windows pet renderer should notify main when the pet is ready to show")
         try expect(rendererSource.contains("automaticActionsEnabled"), "Windows app should preserve automatic actions setting")
@@ -328,6 +328,16 @@ let appLifecycleSourceTests: [TestCase] = [
         try expect(siteSource.contains("~/.codex/pets"), "Release page should show where PetDex pets are installed")
         try expect(siteSource.contains("设置") && siteSource.contains("宠物"), "Release page should tell users to choose pets in settings")
         try expect(siteSource.contains("下载宠物"), "Release page should explain downloading pets")
+    },
+    TestCase(name: "release website links to PastePaw FuFu app") {
+        let siteURL = URL(fileURLWithPath: "docs/site/index.html")
+        let siteSource = try String(contentsOf: siteURL, encoding: .utf8)
+
+        try expect(siteSource.contains("Want more FuFu apps?"), "Release page should promote more FuFu apps in English")
+        try expect(siteSource.contains("想看看更多 FuFu 应用？"), "Release page should promote more FuFu apps in Chinese")
+        try expect(siteSource.contains("https://pastepaw.vercel.app"), "Release page should link to PastePaw")
+        try expect(siteSource.contains("assets/pastepaw-icon.png"), "Release page should show the PastePaw icon")
+        try expect(FileManager.default.fileExists(atPath: "docs/site/assets/pastepaw-icon.png"), "Expected PastePaw app icon asset")
     },
     TestCase(name: "release website defaults to English and offers language switcher") {
         let siteURL = URL(fileURLWithPath: "docs/site/index.html")
@@ -603,6 +613,57 @@ let appLifecycleSourceTests: [TestCase] = [
         try expect(appRuntimeSource.contains("automaticRunDirectionMode"), "Runtime should honor automatic running direction mode")
         try expect(windowSource.contains("moveHorizontally(points:"), "Window controller should expose programmatic horizontal movement")
         try expect(windowSource.contains("performProgrammaticFrameChange"), "Automatic movement should be programmatic and not count as user drag")
+    },
+    TestCase(name: "reminders stop in-flight automatic running") {
+        let appRuntimeSource = try String(
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/App/AppRuntime.swift"),
+            encoding: .utf8
+        )
+
+        guard let restReminderRange = appRuntimeSource.range(of: "private func handleRestReminderDue()") else {
+            throw TestFailure.failed("Expected runtime to handle rest reminders")
+        }
+        guard appRuntimeSource.range(of: "private func handleWaterReminderDue()") != nil else {
+            throw TestFailure.failed("Expected runtime to handle water reminders")
+        }
+        guard let automaticActionRange = appRuntimeSource.range(of: "private func handleAutomaticActionDue()") else {
+            throw TestFailure.failed("Expected runtime to handle automatic actions")
+        }
+        let reminderHandlers = String(appRuntimeSource[restReminderRange.lowerBound..<automaticActionRange.lowerBound])
+
+        try expect(reminderHandlers.contains("automaticRunTask?.cancel()"), "Reminder handlers should cancel any in-flight automatic run before showing reminder UI")
+        try expect(reminderHandlers.contains("handleWaterReminderDue"), "Expected water reminder handler in reminder cancellation coverage")
+        try expect(reminderHandlers.contains("handleRestReminderDue"), "Expected rest reminder handler in reminder cancellation coverage")
+    },
+    TestCase(name: "pet windows stay within visible screen bounds") {
+        let windowSource = try String(
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/Windowing/PetWindowController.swift"),
+            encoding: .utf8
+        )
+        let windowsMainSource = try String(
+            contentsOf: URL(fileURLWithPath: "Windows/src/main.js"),
+            encoding: .utf8
+        )
+
+        try expect(windowSource.contains("private func clamped(frame:"), "macOS window controller should clamp frames to a visible screen")
+        try expect(windowSource.contains("visibleFrame"), "macOS clamping should use the screen visible frame")
+        try expect(windowSource.contains("next.origin.x = min(max(next.origin.x"), "macOS clamping should keep the pet horizontally on screen")
+        try expect(windowSource.contains("next.origin.y = min(max(next.origin.y"), "macOS clamping should keep the pet vertically on screen")
+        try expect(windowSource.contains("clamped(frame: window.frame"), "macOS user movement should be clamped after dragging")
+        try expect(windowsMainSource.contains("function clampedPetBounds"), "Windows main process should clamp pet bounds")
+        try expect(windowsMainSource.contains("screen.getDisplayMatching"), "Windows clamping should use the matching display work area")
+        try expect(windowsMainSource.contains("Math.min(display.width"), "Windows clamping should cap oversized pet width to the screen")
+        try expect(windowsMainSource.contains("Math.min(display.height"), "Windows clamping should cap oversized pet height to the screen")
+    },
+    TestCase(name: "windows automatic movement pauses during reminders") {
+        let rendererSource = try String(
+            contentsOf: URL(fileURLWithPath: "Windows/src/renderer.js"),
+            encoding: .utf8
+        )
+
+        try expect(rendererSource.contains("let activeReminderKind = null"), "Windows renderer should track active reminder state")
+        try expect(rendererSource.contains("activeReminderKind = \"water\""), "Windows water reminders should mark reminder state active")
+        try expect(rendererSource.contains("if (activeReminderKind) return"), "Windows automatic actions and runs should pause while a reminder is active")
     },
     TestCase(name: "pet tap delegates random expressive feedback to runtime") {
         let appRuntimeSource = try String(

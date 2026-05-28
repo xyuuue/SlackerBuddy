@@ -30,7 +30,7 @@ public final class PetWindowController {
             return
         }
 
-        let frame = restoredFrame() ?? defaultFrame(scale: scale)
+        let frame = clamped(frame: restoredFrame() ?? defaultFrame(scale: scale))
         let hostingView = NSHostingView(rootView: rootView)
         hostingView.frame = NSRect(origin: .zero, size: frame.size)
 
@@ -81,6 +81,7 @@ public final class PetWindowController {
         let size = Self.windowSize(scale: scale)
         var frame = window.frame
         frame.size = size
+        frame = clamped(frame: frame, screen: window.screen)
         window.setFrame(frame, display: true, animate: false)
         lastObservedFrame = frame
         saveFrame()
@@ -115,7 +116,7 @@ public final class PetWindowController {
             return
         }
 
-        let frame = preBlockingFrame ?? defaultFrame(scale: scale)
+        let frame = clamped(frame: preBlockingFrame ?? defaultFrame(scale: scale), screen: window.screen)
         performProgrammaticFrameChange {
             window.setFrame(frame, display: true, animate: false)
             lastObservedFrame = frame
@@ -126,7 +127,7 @@ public final class PetWindowController {
 
     public func resetPosition(scale: Double) {
         defaults.removeObject(forKey: frameDefaultsKey)
-        let frame = defaultFrame(scale: scale)
+        let frame = clamped(frame: defaultFrame(scale: scale))
 
         if let window {
             window.setFrame(frame, display: true, animate: false)
@@ -144,6 +145,7 @@ public final class PetWindowController {
         var frame = window.frame
         let proposedX = frame.origin.x + CGFloat(points)
         frame.origin.x = min(max(proposedX, screenFrame.minX), screenFrame.maxX - frame.width)
+        frame = clamped(frame: frame, screen: window.screen)
 
         performProgrammaticFrameChange {
             window.setFrame(frame, display: true, animate: false)
@@ -182,8 +184,15 @@ public final class PetWindowController {
                         return
                     }
 
-                    let direction = self.movementDirection(from: self.lastObservedFrame, to: window.frame)
-                    self.lastObservedFrame = window.frame
+                    let clampedFrame = self.clamped(frame: window.frame, screen: window.screen)
+                    if clampedFrame != window.frame {
+                        self.performProgrammaticFrameChange {
+                            window.setFrame(clampedFrame, display: true, animate: false)
+                        }
+                    }
+
+                    let direction = self.movementDirection(from: self.lastObservedFrame, to: clampedFrame)
+                    self.lastObservedFrame = clampedFrame
                     self.saveFrame()
                     self.onMoved?(direction)
                 }
@@ -260,7 +269,22 @@ public final class PetWindowController {
             return nil
         }
 
-        return frame
+        return clamped(frame: frame)
+    }
+
+    private func clamped(frame: NSRect, screen: NSScreen? = nil) -> NSRect {
+        guard frame.width > 0, frame.height > 0, !frame.isNull, !frame.isEmpty else {
+            return frame
+        }
+
+        let visibleFrame = (screen ?? NSScreen.screens.first { $0.visibleFrame.intersects(frame) } ?? NSScreen.main)?.visibleFrame
+            ?? NSRect(x: 0, y: 0, width: 800, height: 600)
+        var next = frame
+        next.size.width = min(next.width, visibleFrame.width)
+        next.size.height = min(next.height, visibleFrame.height)
+        next.origin.x = min(max(next.origin.x, visibleFrame.minX), visibleFrame.maxX - next.width)
+        next.origin.y = min(max(next.origin.y, visibleFrame.minY), visibleFrame.maxY - next.height)
+        return next
     }
 
     private func isValid(frame: NSRect) -> Bool {

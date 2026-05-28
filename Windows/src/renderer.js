@@ -163,8 +163,10 @@ let bubbleTimer;
 let autoActionTimer;
 let autoRunTimer;
 let blockingTimer;
+let reminderClearTimer;
 let dragContext = null;
 let previousBounds = null;
+let activeReminderKind = null;
 
 function languageKey() {
   if (preferences.language === "chinese") return "zh";
@@ -297,6 +299,7 @@ function resetTimers() {
 }
 
 function triggerRestReminder() {
+  activeReminderKind = "rest";
   setPetState("waving", 900);
   showBubble(t("restBubble"), preferences.restBlockingEnabled);
   api.notify({ title: "SlackerBuddy", body: t("restBubble") });
@@ -306,9 +309,14 @@ function triggerRestReminder() {
 }
 
 function triggerWaterReminder() {
+  activeReminderKind = "water";
+  window.clearTimeout(reminderClearTimer);
   setPetState("waving", 900);
   showBubble(t("waterBubble"), false);
   api.notify({ title: "SlackerBuddy", body: t("waterBubble") });
+  reminderClearTimer = window.setTimeout(() => {
+    if (activeReminderKind === "water") activeReminderKind = null;
+  }, clamp(preferences.bubbleDurationSeconds, 1, 60) * 1000);
 }
 
 async function startRestBlocking() {
@@ -320,6 +328,8 @@ async function startRestBlocking() {
 
 async function endRestBlocking() {
   window.clearTimeout(blockingTimer);
+  window.clearTimeout(reminderClearTimer);
+  activeReminderKind = null;
   hideBubble();
   if (previousBounds) {
     await api.setPetBounds(previousBounds);
@@ -329,12 +339,14 @@ async function endRestBlocking() {
 }
 
 function playRandomExpressiveAction() {
+  if (activeReminderKind) return;
   if (petState !== "idle") return;
   const states = ["reviewing", "jumping", "failed", "waiting", "running"];
   setPetState(states[Math.floor(Math.random() * states.length)], 1600);
 }
 
 async function playAutomaticRun() {
+  if (activeReminderKind) return;
   if (petState !== "idle") return;
   let direction = preferences.automaticRunDirectionMode;
   if (direction === "random") direction = Math.random() > 0.5 ? "right" : "left";
