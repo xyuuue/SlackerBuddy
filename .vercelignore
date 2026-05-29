@@ -1,0 +1,11 @@
+.build
+Legacy/.build
+dist
+Windows/dist
+Windows/node_modules
+public
+.codex
+.superpowers
+.worktrees
+.DS_Store
+**/.DS_Store
