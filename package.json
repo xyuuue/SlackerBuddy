@@ -1,6 +1,0 @@
-{
-  "private": true,
-  "scripts": {
-    "vercel-build": "rm -rf public && cp -R docs/site public"
-  }
-}
