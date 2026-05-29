@@ -41,6 +41,12 @@ public struct LocalizedStrings: Sendable {
         case notificationEnabled
         case notificationDenied
         case notificationFailed
+        case diskImageCleanupTitle
+        case diskImageCleanupMessage
+        case diskImageCleanupMoveToTrash
+        case diskImageCleanupKeep
+        case diskImageCleanupFailureTitle
+        case diskImageCleanupFailureMessage
     }
 
     private let language: AppLanguage
@@ -142,6 +148,18 @@ public struct LocalizedStrings: Sendable {
             return "Notifications denied"
         case .notificationFailed:
             return "Notification setup failed"
+        case .diskImageCleanupTitle:
+            return "Move SlackerBuddy.dmg to Trash?"
+        case .diskImageCleanupMessage:
+            return "SlackerBuddy has been copied to Applications. You can move the downloaded disk image to Trash now."
+        case .diskImageCleanupMoveToTrash:
+            return "Move to Trash"
+        case .diskImageCleanupKeep:
+            return "Keep"
+        case .diskImageCleanupFailureTitle:
+            return "Couldn’t move disk image"
+        case .diskImageCleanupFailureMessage:
+            return "Close any installer windows, then move SlackerBuddy.dmg to Trash manually."
         }
     }
 
@@ -229,6 +247,18 @@ public struct LocalizedStrings: Sendable {
             return "通知权限被拒绝"
         case .notificationFailed:
             return "通知设置失败"
+        case .diskImageCleanupTitle:
+            return "将 SlackerBuddy.dmg 移到废纸篓？"
+        case .diskImageCleanupMessage:
+            return "SlackerBuddy 已经复制到“应用程序”。现在可以把下载的磁盘映像移到废纸篓。"
+        case .diskImageCleanupMoveToTrash:
+            return "移到废纸篓"
+        case .diskImageCleanupKeep:
+            return "保留"
+        case .diskImageCleanupFailureTitle:
+            return "无法移动磁盘映像"
+        case .diskImageCleanupFailureMessage:
+            return "请关闭安装窗口，然后手动将 SlackerBuddy.dmg 移到废纸篓。"
         }
     }
 }

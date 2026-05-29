@@ -115,6 +115,24 @@ let appLifecycleSourceTests: [TestCase] = [
         try expect(FileManager.default.fileExists(atPath: "Assets/SlackerBuddyMenuBarIcon.png"), "Expected generated menu bar icon asset")
         try expect(FileManager.default.fileExists(atPath: "Assets/SlackerBuddy.icns"), "Expected generated icns asset")
     },
+    TestCase(name: "installed app offers to clean up mounted DMG") {
+        let appDelegateSource = try String(
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/App/AppDelegate.swift"),
+            encoding: .utf8
+        )
+        let prompterSource = try String(
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/App/DiskImageCleanupPrompter.swift"),
+            encoding: .utf8
+        )
+
+        try expect(appDelegateSource.contains("DiskImageCleanupPrompter.schedulePromptIfNeeded"), "AppDelegate should schedule the post-install DMG cleanup prompt")
+        try expect(prompterSource.contains("isInstalledInApplications"), "Cleanup prompt should only run after app is copied to Applications")
+        try expect(prompterSource.contains("[\"info\", \"-plist\"]"), "Cleanup prompt should inspect mounted disk images with hdiutil")
+        try expect(prompterSource.contains("trashItem(at:"), "Cleanup prompt should move the downloaded DMG to Trash when requested")
+        try expect(prompterSource.contains("[\"detach\", mountPoint, \"-quiet\"]"), "Cleanup prompt should detach the mounted installer volume after moving the DMG")
+        try expect(prompterSource.contains("diskImageCleanupMoveToTrash"), "Cleanup prompt should use localized Move to Trash copy")
+        try expect(prompterSource.contains("diskImageCleanupKeep"), "Cleanup prompt should use localized Keep copy")
+    },
     TestCase(name: "active SwiftPM project is renamed to SlackerBuddy") {
         let packageSource = try String(
             contentsOf: URL(fileURLWithPath: "Package.swift"),

@@ -60,5 +60,9 @@ let localizationTests: [TestCase] = [
         try expect(en.text(.notificationEnabled) == "Notifications enabled", "Expected English enabled notification status")
         try expect(zh.text(.notificationDenied) == "通知权限被拒绝", "Expected Chinese denied notification status")
         try expect(en.text(.notificationFailed) == "Notification setup failed", "Expected English failed notification status")
+        try expect(zh.text(.diskImageCleanupMoveToTrash) == "移到废纸篓", "Expected Chinese disk image cleanup button")
+        try expect(en.text(.diskImageCleanupMoveToTrash) == "Move to Trash", "Expected English disk image cleanup button")
+        try expect(zh.text(.diskImageCleanupKeep) == "保留", "Expected Chinese keep button")
+        try expect(en.text(.diskImageCleanupKeep) == "Keep", "Expected English keep button")
     }
 ]

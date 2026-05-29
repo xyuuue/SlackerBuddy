@@ -1,4 +1,5 @@
 import AppKit
+import SlackerBuddyCore
 
 extension Notification.Name {
     static let macPetWillTerminate = Notification.Name("macPetWillTerminate")
@@ -7,6 +8,7 @@ extension Notification.Name {
 final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
+        DiskImageCleanupPrompter.schedulePromptIfNeeded(strings: LocalizedStrings(language: .system))
     }
 
     func applicationWillTerminate(_ notification: Notification) {
