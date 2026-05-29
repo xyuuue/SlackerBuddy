@@ -183,11 +183,16 @@ function clamp(number, minimum, maximum) {
 }
 
 function spriteStyleFor(state) {
-  const frames = preferences.lowerDistractionMode && state.includes("Running") ? [0, 1] : (stateFrames[state] || stateFrames.idle);
-  const frameDuration = preferences.lowerDistractionMode && state === "idle" ? 2000 : state === "sleeping" ? 1000 : 250;
+  const lowerDistractionBlinkLoop = [0, 0, 0, 0, 4, 5];
+  const frames = preferences.lowerDistractionMode
+    ? (state === "blink" || state === "automaticBlink" ? [4, 5] : lowerDistractionBlinkLoop)
+    : (stateFrames[state] || stateFrames.idle);
+  const frameDuration = preferences.lowerDistractionMode
+    ? (state === "blink" || state === "automaticBlink" ? 250 : 1500)
+    : state === "sleeping" ? 1000 : 250;
   const elapsed = performance.now() - stateStartedAt;
   const frame = frames[Math.floor(elapsed / frameDuration) % frames.length];
-  const row = frameRows[state] ?? 0;
+  const row = preferences.lowerDistractionMode ? 0 : frameRows[state] ?? 0;
   const columns = 8;
   const rows = 9;
   return {
@@ -291,9 +296,12 @@ function resetTimers() {
     waterTimer = window.setInterval(triggerWaterReminder, clamp(preferences.waterIntervalMinutes, 1, 480) * 60 * 1000);
   }
   if (preferences.automaticActionsEnabled) {
-    autoActionTimer = window.setInterval(playRandomExpressiveAction, clamp(preferences.automaticActionIntervalMinutes, 1, 120) * 60 * 1000);
+    autoActionTimer = window.setInterval(
+      preferences.lowerDistractionMode ? playAutomaticBlink : playRandomExpressiveAction,
+      clamp(preferences.automaticActionIntervalMinutes, 1, 120) * 60 * 1000
+    );
   }
-  if (preferences.automaticRunningEnabled) {
+  if (preferences.automaticRunningEnabled && !preferences.lowerDistractionMode) {
     autoRunTimer = window.setInterval(playAutomaticRun, Math.max(12000, clamp(preferences.automaticActionIntervalMinutes, 1, 120) * 30000));
   }
 }
@@ -339,6 +347,10 @@ async function endRestBlocking() {
 }
 
 function playRandomExpressiveAction() {
+  if (preferences.lowerDistractionMode) {
+    playAutomaticBlink();
+    return;
+  }
   if (activeReminderKind) return;
   if (petState !== "idle") return;
   const states = ["reviewing", "jumping", "failed", "waiting", "running"];
@@ -346,6 +358,10 @@ function playRandomExpressiveAction() {
 }
 
 async function playAutomaticRun() {
+  if (preferences.lowerDistractionMode) {
+    playAutomaticBlink();
+    return;
+  }
   if (activeReminderKind) return;
   if (petState !== "idle") return;
   let direction = preferences.automaticRunDirectionMode;
@@ -354,6 +370,11 @@ async function playAutomaticRun() {
   const step = direction === "left" ? -120 : 120;
   setPetState(direction === "left" ? "automaticRunningLeft" : "automaticRunningRight", 1200);
   await api.setPetBounds({ ...bounds, x: bounds.x + step });
+}
+
+function playAutomaticBlink() {
+  if (activeReminderKind) return;
+  if (petState === "idle") setPetState("automaticBlink", 350);
 }
 
 async function beginDrag(event) {
@@ -368,7 +389,7 @@ async function continueDrag() {
   const cursor = await api.getCursorPoint();
   const dx = cursor.x - dragContext.cursor.x;
   const dy = cursor.y - dragContext.cursor.y;
-  if (Math.abs(dx) > 1) {
+  if (!preferences.lowerDistractionMode && Math.abs(dx) > 1) {
     setPetState(dx < 0 ? "dragRunningLeft" : "dragRunningRight");
   }
   await api.setPetBounds({
@@ -384,6 +405,11 @@ function endDrag() {
 }
 
 function clickPet() {
+  if (preferences.lowerDistractionMode) {
+    setPetState("automaticBlink", 350);
+    return;
+  }
+
   const states = ["reviewing", "jumping", "failed", "waiting", "running"];
   setPetState(states[Math.floor(Math.random() * states.length)], 1600);
 }

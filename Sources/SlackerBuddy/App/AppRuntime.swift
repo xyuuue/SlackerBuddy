@@ -417,6 +417,14 @@ final class AppRuntime {
         guard shouldTickAutomaticActionScheduler else {
             return
         }
+        defer {
+            automaticActionScheduler.dismissActive()
+        }
+
+        if settings.preferences.lowerDistractionMode {
+            stateMachine.handle(.automaticAction(.blink))
+            return
+        }
 
         let expressiveAction = randomExpressiveAction()
         if expressiveAction == .run,
@@ -428,11 +436,15 @@ final class AppRuntime {
         } else {
             stateMachine.handle(.automaticAction(.expressive(expressiveAction)))
         }
-        automaticActionScheduler.dismissActive()
     }
 
     private func triggerAutomaticActionFeedback(preferRunning: Bool = false) {
         guard shouldTickAutomaticActionScheduler else {
+            return
+        }
+
+        if settings.preferences.lowerDistractionMode {
+            stateMachine.handle(.automaticAction(.blink))
             return
         }
 
@@ -545,6 +557,8 @@ final class AppRuntime {
     private func handlePetTap() {
         if stateMachine.state == .sleeping {
             stateMachine.handle(.clicked)
+        } else if settings.preferences.lowerDistractionMode {
+            stateMachine.handle(.automaticAction(.blink))
         } else {
             stateMachine.handle(.expressiveAction(randomExpressiveAction()))
         }

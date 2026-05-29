@@ -16,7 +16,7 @@ public struct PetSpriteSheetView: View {
     public var body: some View {
         if let image = PetSpriteSheetFrameCache.shared.frame(
             spriteSheetURL: spriteSheetURL,
-            row: SpriteFrameMapping.row(for: state),
+            row: SpriteFrameMapping.row(forFrameName: frameName, fallbackState: state),
             column: frameColumn
         ) {
             Image(nsImage: image)

@@ -1,6 +1,8 @@
 import Foundation
 
 public struct SpriteAnimator: Sendable {
+    private static let lowerDistractionBlinkLoop = ["idle-0", "idle-0", "idle-0", "idle-0", "idle-4", "idle-5"]
+
     public init() {}
 
     public func frame(for state: PetState, elapsed: TimeInterval, lowerDistractionMode: Bool) -> String {
@@ -13,6 +15,15 @@ public struct SpriteAnimator: Sendable {
     }
 
     private func frames(for state: PetState, lowerDistractionMode: Bool) -> [String] {
+        if lowerDistractionMode {
+            switch state {
+            case .blink, .automaticBlink:
+                return ["idle-4", "idle-5"]
+            default:
+                return Self.lowerDistractionBlinkLoop
+            }
+        }
+
         switch state {
         case .idle:
             return ["idle-0", "idle-1", "idle-2", "idle-3", "idle-4", "idle-5"]
@@ -50,9 +61,16 @@ public struct SpriteAnimator: Sendable {
     }
 
     private func duration(for state: PetState, lowerDistractionMode: Bool) -> TimeInterval {
+        if lowerDistractionMode {
+            switch state {
+            case .blink, .automaticBlink:
+                return 0.25
+            default:
+                return 1.5
+            }
+        }
+
         switch state {
-        case .idle where lowerDistractionMode:
-            return 2.0
         case .idle:
             return 0.5
         case .blink,

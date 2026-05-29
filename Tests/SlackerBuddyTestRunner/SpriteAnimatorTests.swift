@@ -17,11 +17,13 @@ let spriteAnimatorTests: [TestCase] = [
         try expect(animator.frame(for: .sleeping, elapsed: 0, lowerDistractionMode: false) == "sleep-0", "expected first sleep frame")
         try expect(animator.frame(for: .sleeping, elapsed: 1.0, lowerDistractionMode: false) == "sleep-1", "expected second sleep frame")
     },
-    TestCase(name: "sprite animator slows idle frames in lower distraction mode") {
+    TestCase(name: "sprite animator only blinks in lower distraction mode") {
         let animator = SpriteAnimator()
 
         try expect(animator.frame(for: .idle, elapsed: 0.5, lowerDistractionMode: true) == "idle-0", "expected lower distraction to hold first idle frame")
-        try expect(animator.frame(for: .idle, elapsed: 2.0, lowerDistractionMode: true) == "idle-1", "expected lower distraction to advance after slower duration")
+        try expect(animator.frame(for: .idle, elapsed: 6.0, lowerDistractionMode: true) == "idle-4", "expected lower distraction to blink without other idle motion")
+        try expect(animator.frame(for: .idle, elapsed: 7.5, lowerDistractionMode: true) == "idle-5", "expected lower distraction blink recovery")
+        try expect(animator.frame(for: .reviewing, elapsed: 6.0, lowerDistractionMode: true) == "idle-4", "expected lower distraction to suppress expressive motion")
     },
     TestCase(name: "sprite animator advances reminder frames quickly") {
         let animator = SpriteAnimator()
@@ -35,6 +37,10 @@ let spriteAnimatorTests: [TestCase] = [
         let frame = animator.frame(for: .automaticRunningRight, elapsed: 0, lowerDistractionMode: true)
 
         try expect(frame.hasPrefix("idle"), "Expected lower distraction mode to suppress automatic running frames")
+    },
+    TestCase(name: "sprite row follows lower distraction idle frame override") {
+        try expect(SpriteFrameMapping.row(forFrameName: "idle-4", fallbackState: .automaticRunningRight) == 0, "Expected lower distraction idle blink to render from idle row")
+        try expect(SpriteFrameMapping.row(forFrameName: "run-left-0", fallbackState: .idle) == 2, "Expected run-left frame names to map to left run row")
     },
     TestCase(name: "sprite animator cycles frames instead of going out of range") {
         let animator = SpriteAnimator()
