@@ -70,6 +70,7 @@ struct SlackerBuddyApp: App {
                 onAutomaticActionIntervalChanged: { runtime.updateAutomaticActionInterval(minutes: $0) },
                 onAutomaticRunningEnabledChanged: { runtime.updateAutomaticRunningEnabled($0) },
                 onAutomaticRunDirectionModeChanged: { runtime.updateAutomaticRunDirectionMode($0) },
+                onLowerDistractionModeChanged: { runtime.updateLowerDistractionMode($0) },
                 onSystemNotificationsEnabledChanged: { runtime.updateSystemNotificationsEnabled($0) },
                 onLanguageChanged: { runtime.updateLanguage($0) },
                 onSelectedPetChanged: { runtime.updateSelectedPet($0) },
@@ -84,7 +85,7 @@ struct SlackerBuddyApp: App {
     private var lowerDistractionMode: Binding<Bool> {
         Binding(
             get: { runtime.settings.preferences.lowerDistractionMode },
-            set: { runtime.settings.updateLowerDistractionMode($0) }
+            set: { runtime.updateLowerDistractionMode($0) }
         )
     }
 

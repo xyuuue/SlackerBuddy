@@ -19,6 +19,7 @@ public struct SettingsView: View {
     private let onAutomaticActionIntervalChanged: ((Int) -> Void)?
     private let onAutomaticRunningEnabledChanged: ((Bool) -> Void)?
     private let onAutomaticRunDirectionModeChanged: ((AutomaticRunDirectionMode) -> Void)?
+    private let onLowerDistractionModeChanged: ((Bool) -> Void)?
     private let onSystemNotificationsEnabledChanged: ((Bool) -> Void)?
     private let onLanguageChanged: ((AppLanguage) -> Void)?
     private let onSelectedPetChanged: ((String) -> Void)?
@@ -41,6 +42,7 @@ public struct SettingsView: View {
         onAutomaticActionIntervalChanged: ((Int) -> Void)? = nil,
         onAutomaticRunningEnabledChanged: ((Bool) -> Void)? = nil,
         onAutomaticRunDirectionModeChanged: ((AutomaticRunDirectionMode) -> Void)? = nil,
+        onLowerDistractionModeChanged: ((Bool) -> Void)? = nil,
         onSystemNotificationsEnabledChanged: ((Bool) -> Void)? = nil,
         onLanguageChanged: ((AppLanguage) -> Void)? = nil,
         onSelectedPetChanged: ((String) -> Void)? = nil,
@@ -62,6 +64,7 @@ public struct SettingsView: View {
         self.onAutomaticActionIntervalChanged = onAutomaticActionIntervalChanged
         self.onAutomaticRunningEnabledChanged = onAutomaticRunningEnabledChanged
         self.onAutomaticRunDirectionModeChanged = onAutomaticRunDirectionModeChanged
+        self.onLowerDistractionModeChanged = onLowerDistractionModeChanged
         self.onSystemNotificationsEnabledChanged = onSystemNotificationsEnabledChanged
         self.onLanguageChanged = onLanguageChanged
         self.onSelectedPetChanged = onSelectedPetChanged
@@ -197,7 +200,13 @@ public struct SettingsView: View {
     private var lowerDistractionMode: Binding<Bool> {
         Binding(
             get: { settings.preferences.lowerDistractionMode },
-            set: { settings.updateLowerDistractionMode($0) }
+            set: { value in
+                if let onLowerDistractionModeChanged {
+                    onLowerDistractionModeChanged(value)
+                } else {
+                    settings.updateLowerDistractionMode(value)
+                }
+            }
         )
     }
 

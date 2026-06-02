@@ -7,9 +7,9 @@ let spriteAnimatorTests: [TestCase] = [
 
         try expect(animator.frame(for: .idle, elapsed: 0, lowerDistractionMode: false) == "idle-0", "expected first idle frame")
         try expect(animator.frame(for: .idle, elapsed: 0.5, lowerDistractionMode: false) == "idle-1", "expected second idle frame")
-        try expect(animator.frame(for: .idle, elapsed: 1.0, lowerDistractionMode: false) == "idle-2", "expected FuFu idle breathing frame")
-        try expect(animator.frame(for: .idle, elapsed: 2.0, lowerDistractionMode: false) == "idle-4", "expected FuFu idle blink frame")
-        try expect(animator.frame(for: .idle, elapsed: 2.5, lowerDistractionMode: false) == "idle-5", "expected FuFu idle blink recovery frame")
+        try expect(animator.frame(for: .idle, elapsed: 1.0, lowerDistractionMode: false) == "idle-2", "expected FuFu idle blink frame")
+        try expect(animator.frame(for: .idle, elapsed: 1.5, lowerDistractionMode: false) == "idle-3", "expected FuFu idle blink recovery frame")
+        try expect(animator.frame(for: .idle, elapsed: 2.0, lowerDistractionMode: false) == "idle-4", "expected FuFu idle frame to continue cycling")
     },
     TestCase(name: "sprite animator uses sleep frames while sleeping") {
         let animator = SpriteAnimator()
@@ -21,9 +21,9 @@ let spriteAnimatorTests: [TestCase] = [
         let animator = SpriteAnimator()
 
         try expect(animator.frame(for: .idle, elapsed: 0.5, lowerDistractionMode: true) == "idle-0", "expected lower distraction to hold first idle frame")
-        try expect(animator.frame(for: .idle, elapsed: 6.0, lowerDistractionMode: true) == "idle-4", "expected lower distraction to blink without other idle motion")
-        try expect(animator.frame(for: .idle, elapsed: 7.5, lowerDistractionMode: true) == "idle-5", "expected lower distraction blink recovery")
-        try expect(animator.frame(for: .reviewing, elapsed: 6.0, lowerDistractionMode: true) == "idle-4", "expected lower distraction to suppress expressive motion")
+        try expect(animator.frame(for: .idle, elapsed: 6.0, lowerDistractionMode: true) == "idle-2", "expected lower distraction to blink without other idle motion")
+        try expect(animator.frame(for: .idle, elapsed: 6.25, lowerDistractionMode: true) == "idle-0", "expected lower distraction blink to recover quickly")
+        try expect(animator.frame(for: .reviewing, elapsed: 6.0, lowerDistractionMode: true) == "idle-2", "expected lower distraction to suppress expressive motion while still blinking")
     },
     TestCase(name: "sprite animator advances reminder frames quickly") {
         let animator = SpriteAnimator()
@@ -59,8 +59,8 @@ let spriteAnimatorTests: [TestCase] = [
     TestCase(name: "blink feedback uses FuFu idle row frames") {
         let animator = SpriteAnimator()
 
-        try expect(animator.frame(for: .automaticBlink, elapsed: 0, lowerDistractionMode: false) == "idle-4", "expected automatic blink to use FuFu idle blink frame")
-        try expect(animator.frame(for: .blink, elapsed: 0.25, lowerDistractionMode: false) == "idle-5", "expected blink recovery to stay on FuFu idle row")
+        try expect(animator.frame(for: .automaticBlink, elapsed: 0, lowerDistractionMode: false) == "idle-2", "expected automatic blink to use FuFu closed-eye frame")
+        try expect(animator.frame(for: .blink, elapsed: 0.25, lowerDistractionMode: false) == "idle-0", "expected blink recovery to stay on FuFu idle row")
     },
     TestCase(name: "sprite animator exposes FuFu expressive action frames") {
         let animator = SpriteAnimator()

@@ -1,34 +1,37 @@
 import Foundation
 
 public struct SpriteAnimator: Sendable {
-    private static let lowerDistractionBlinkLoop = ["idle-0", "idle-0", "idle-0", "idle-0", "idle-4", "idle-5"]
+    private static let idleFrame = "idle-0"
+    private static let blinkFrame = "idle-2"
+    private static let blinkDuration: TimeInterval = 0.25
+    private static let lowerDistractionBlinkInterval: TimeInterval = 6.0
 
     public init() {}
 
     public func frame(for state: PetState, elapsed: TimeInterval, lowerDistractionMode: Bool) -> String {
-        let frames = frames(for: state, lowerDistractionMode: lowerDistractionMode)
-        let duration = duration(for: state, lowerDistractionMode: lowerDistractionMode)
         let elapsed = max(0, elapsed)
+
+        if state == .blink || state == .automaticBlink {
+            return blinkFrame(elapsed: elapsed)
+        }
+
+        if lowerDistractionMode {
+            return lowerDistractionFrame(elapsed: elapsed)
+        }
+
+        let frames = frames(for: state)
+        let duration = duration(for: state)
         let index = Int(elapsed / duration) % frames.count
 
         return frames[index]
     }
 
-    private func frames(for state: PetState, lowerDistractionMode: Bool) -> [String] {
-        if lowerDistractionMode {
-            switch state {
-            case .blink, .automaticBlink:
-                return ["idle-4", "idle-5"]
-            default:
-                return Self.lowerDistractionBlinkLoop
-            }
-        }
-
+    private func frames(for state: PetState) -> [String] {
         switch state {
         case .idle:
             return ["idle-0", "idle-1", "idle-2", "idle-3", "idle-4", "idle-5"]
         case .blink, .automaticBlink:
-            return ["idle-4", "idle-5"]
+            return [Self.blinkFrame, Self.idleFrame]
         case .sleeping:
             return ["sleep-0", "sleep-1"]
         case .waking:
@@ -47,29 +50,14 @@ public struct SpriteAnimator: Sendable {
             return ["waiting-0", "waiting-1", "waiting-2", "waiting-3", "waiting-4", "waiting-5"]
         case .running:
             return ["running-0", "running-1", "running-2", "running-3", "running-4", "running-5"]
-        case .dragRunningLeft where lowerDistractionMode,
-            .automaticRunningLeft where lowerDistractionMode:
-            return ["idle-0", "idle-1"]
         case .dragRunningLeft, .automaticRunningLeft:
             return ["run-left-0", "run-left-1", "run-left-2", "run-left-3", "run-left-4", "run-left-5", "run-left-6", "run-left-7"]
-        case .dragRunningRight where lowerDistractionMode,
-            .automaticRunningRight where lowerDistractionMode:
-            return ["idle-0", "idle-1"]
         case .dragRunningRight, .automaticRunningRight:
             return ["run-right-0", "run-right-1", "run-right-2", "run-right-3", "run-right-4", "run-right-5", "run-right-6", "run-right-7"]
         }
     }
 
-    private func duration(for state: PetState, lowerDistractionMode: Bool) -> TimeInterval {
-        if lowerDistractionMode {
-            switch state {
-            case .blink, .automaticBlink:
-                return 0.25
-            default:
-                return 1.5
-            }
-        }
-
+    private func duration(for state: PetState) -> TimeInterval {
         switch state {
         case .idle:
             return 0.5
@@ -92,5 +80,20 @@ public struct SpriteAnimator: Sendable {
         case .sleeping:
             return 1.0
         }
+    }
+
+    private func blinkFrame(elapsed: TimeInterval) -> String {
+        elapsed < Self.blinkDuration ? Self.blinkFrame : Self.idleFrame
+    }
+
+    private func lowerDistractionFrame(elapsed: TimeInterval) -> String {
+        let cycleDuration = Self.lowerDistractionBlinkInterval + Self.blinkDuration
+        let cyclePosition = elapsed.truncatingRemainder(dividingBy: cycleDuration)
+
+        if cyclePosition >= Self.lowerDistractionBlinkInterval {
+            return Self.blinkFrame
+        }
+
+        return Self.idleFrame
     }
 }

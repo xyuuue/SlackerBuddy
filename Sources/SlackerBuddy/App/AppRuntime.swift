@@ -104,7 +104,7 @@ final class AppRuntime {
         }
         automaticActionScheduler.start(
             intervalMinutes: automaticActionInterval(),
-            isEnabled: settings.preferences.automaticActionsEnabled
+            isEnabled: shouldEnableAutomaticActionScheduler
         ) { [weak self] in
             self?.handleAutomaticActionDue()
         }
@@ -243,7 +243,7 @@ final class AppRuntime {
         settings.updateAutomaticActionsEnabled(isEnabled)
         automaticActionScheduler.update(
             intervalMinutes: automaticActionInterval(),
-            isEnabled: settings.preferences.automaticActionsEnabled
+            isEnabled: shouldEnableAutomaticActionScheduler
         )
         if isEnabled {
             triggerAutomaticActionFeedback()
@@ -254,8 +254,19 @@ final class AppRuntime {
         settings.updateAutomaticActionInterval(minutes: minutes)
         automaticActionScheduler.update(
             intervalMinutes: automaticActionInterval(),
-            isEnabled: settings.preferences.automaticActionsEnabled
+            isEnabled: shouldEnableAutomaticActionScheduler
         )
+    }
+
+    func updateLowerDistractionMode(_ isEnabled: Bool) {
+        settings.updateLowerDistractionMode(isEnabled)
+        automaticActionScheduler.update(
+            intervalMinutes: automaticActionInterval(),
+            isEnabled: shouldEnableAutomaticActionScheduler
+        )
+        if isEnabled {
+            triggerAutomaticActionFeedback()
+        }
     }
 
     func updateAutomaticRunningEnabled(_ isEnabled: Bool) {
@@ -501,6 +512,10 @@ final class AppRuntime {
 
     private func automaticActionInterval() -> Int {
         settings.preferences.automaticActionIntervalMinutes
+    }
+
+    private var shouldEnableAutomaticActionScheduler: Bool {
+        settings.preferences.automaticActionsEnabled || settings.preferences.lowerDistractionMode
     }
 
     private func showRestBlockingOverlay() {

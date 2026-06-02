@@ -634,6 +634,26 @@ let appLifecycleSourceTests: [TestCase] = [
         try expect(windowSource.contains("moveHorizontally(points:"), "Window controller should expose programmatic horizontal movement")
         try expect(windowSource.contains("performProgrammaticFrameChange"), "Automatic movement should be programmatic and not count as user drag")
     },
+    TestCase(name: "lower distraction mode keeps blink scheduling routed through runtime") {
+        let appSource = try String(
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/App/SlackerBuddyApp.swift"),
+            encoding: .utf8
+        )
+        let runtimeSource = try String(
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/App/AppRuntime.swift"),
+            encoding: .utf8
+        )
+        let settingsSource = try String(
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/Views/SettingsView.swift"),
+            encoding: .utf8
+        )
+
+        try expect(runtimeSource.contains("func updateLowerDistractionMode(_ isEnabled: Bool)"), "Runtime should own lower distraction mode updates")
+        try expect(runtimeSource.contains("settings.preferences.automaticActionsEnabled || settings.preferences.lowerDistractionMode"), "Lower distraction blinking should keep the automatic scheduler enabled even when automatic actions are off")
+        try expect(runtimeSource.contains("triggerAutomaticActionFeedback()"), "Enabling lower distraction should give immediate blink feedback")
+        try expect(appSource.contains("set: { runtime.updateLowerDistractionMode($0) }"), "Menu bar lower distraction toggle should route through runtime")
+        try expect(settingsSource.contains("onLowerDistractionModeChanged"), "Settings lower distraction toggle should support a runtime callback")
+    },
     TestCase(name: "reminders stop in-flight automatic running") {
         let appRuntimeSource = try String(
             contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/App/AppRuntime.swift"),
