@@ -785,6 +785,28 @@ let appLifecycleSourceTests: [TestCase] = [
         try expect(petViewSource.contains("bubbleDurationSeconds"), "PetView should use configured bubble duration")
         try expect(petViewSource.contains("Task.sleep"), "PetView should auto-hide bubbles after a delay")
         try expect(petViewSource.contains("isBubbleVisible"), "PetView should hide bubble without dismissing reminder")
+    },
+    TestCase(name: "macOS app does not include Ask FuFu AI chat") {
+        let appSource = try String(
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/App/SlackerBuddyApp.swift"),
+            encoding: .utf8
+        )
+        let runtimeSource = try String(
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/App/AppRuntime.swift"),
+            encoding: .utf8
+        )
+        let localizedStringsSource = try String(
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddyCore/Localization/LocalizedStrings.swift"),
+            encoding: .utf8
+        )
+
+        try expect(!appSource.contains("askFuFu"), "Menu bar should not expose Ask FuFu")
+        try expect(!runtimeSource.contains("AskFuFu"), "Runtime should not own Ask FuFu chat state")
+        try expect(!localizedStringsSource.contains("askFuFu"), "Localized strings should not include Ask FuFu copy")
+        try expect(!FileManager.default.fileExists(atPath: "Sources/SlackerBuddy/Views/AskFuFuPanel.swift"), "Ask FuFu panel source should be removed")
+        try expect(!FileManager.default.fileExists(atPath: "Sources/SlackerBuddyCore/Services/AIChatService.swift"), "OpenAI chat service source should be removed")
+        try expect(!FileManager.default.fileExists(atPath: "Sources/SlackerBuddy/App/KeychainAPIKeyStore.swift"), "OpenAI API key store source should be removed")
+        try expect(!FileManager.default.fileExists(atPath: "Tests/SlackerBuddyTestRunner/AIChatServiceTests.swift"), "AI chat tests should be removed")
     }
 ]
 

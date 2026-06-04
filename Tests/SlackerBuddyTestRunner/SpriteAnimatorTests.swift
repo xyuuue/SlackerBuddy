@@ -38,6 +38,12 @@ let spriteAnimatorTests: [TestCase] = [
 
         try expect(frame.hasPrefix("idle"), "Expected lower distraction mode to suppress automatic running frames")
     },
+    TestCase(name: "drag running keeps directional frames in lower distraction mode") {
+        let animator = SpriteAnimator()
+
+        try expect(animator.frame(for: .dragRunningLeft, elapsed: 0, lowerDistractionMode: true) == "run-left-0", "Expected left drag running to stay visible in lower distraction mode")
+        try expect(animator.frame(for: .dragRunningRight, elapsed: 0, lowerDistractionMode: true) == "run-right-0", "Expected right drag running to stay visible in lower distraction mode")
+    },
     TestCase(name: "sprite row follows lower distraction idle frame override") {
         try expect(SpriteFrameMapping.row(forFrameName: "idle-4", fallbackState: .automaticRunningRight) == 0, "Expected lower distraction idle blink to render from idle row")
         try expect(SpriteFrameMapping.row(forFrameName: "run-left-0", fallbackState: .idle) == 2, "Expected run-left frame names to map to left run row")

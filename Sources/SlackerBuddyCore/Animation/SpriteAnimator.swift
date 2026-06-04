@@ -15,7 +15,9 @@ public struct SpriteAnimator: Sendable {
             return blinkFrame(elapsed: elapsed)
         }
 
-        if lowerDistractionMode {
+        if lowerDistractionMode,
+           state != .dragRunningLeft,
+           state != .dragRunningRight {
             return lowerDistractionFrame(elapsed: elapsed)
         }
 

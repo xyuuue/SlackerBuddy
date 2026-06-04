@@ -446,6 +446,27 @@
       font-size: 14px;
     }
 
+    .footer-inner {
+      max-width: 1120px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 24px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .portfolio-link {
+      color: var(--ink);
+      font-weight: 800;
+      text-decoration-color: rgba(31, 28, 34, 0.28);
+      text-underline-offset: 4px;
+    }
+
+    .portfolio-link:hover {
+      text-decoration-color: var(--blue);
+    }
+
     @media (max-width: 860px) {
       .hero,
       .steps,
@@ -622,7 +643,16 @@
   </main>
 
   <footer>
-    <span data-i18n="footerText">SlackerBuddy is a small macOS desktop pet app. Built for people who like soft reminders, tiny companions, and a little less lonely workday.</span>
+    <div class="footer-inner">
+      <span data-i18n="footerText">SlackerBuddy is a small macOS desktop pet app. Built for people who like soft reminders, tiny companions, and a little less lonely workday.</span>
+      <a
+        class="portfolio-link"
+        href="https://xyuuue.github.io/yueling-qiu/"
+        target="_blank"
+        rel="noreferrer"
+        data-i18n="portfolioLink"
+      >View Yueling Qiu's portfolio</a>
+    </div>
   </footer>
   <script>
     const translations = {
@@ -676,7 +706,8 @@
         installImage3Alt: "Click Open Anyway in System Settings to finish opening",
         installCard3Title: "3. Click Open Anyway",
         installCard3Body: "Close the original dialog, click Open Anyway in Privacy &amp; Security, then confirm the launch.",
-        footerText: "SlackerBuddy is a small macOS desktop pet app. Built for people who like soft reminders, tiny companions, and a little less lonely workday."
+        footerText: "SlackerBuddy is a small macOS desktop pet app. Built for people who like soft reminders, tiny companions, and a little less lonely workday.",
+        portfolioLink: "View Yueling Qiu's portfolio"
       },
       "zh-CN": {
         pageTitle: "SlackerBuddy - Mac 桌面宠物",
@@ -728,7 +759,8 @@
         installImage3Alt: "系统设置里点击 Open Anyway 完成打开",
         installCard3Title: "3. 点击 Open Anyway",
         installCard3Body: "关闭原本的弹窗，在系统设置的 Privacy &amp; Security 里点击 Open Anyway，再确认打开。",
-        footerText: "SlackerBuddy 是一个小小的 macOS 桌面宠物 app，适合喜欢轻柔提醒、可爱陪伴和没那么孤单工作日的人。"
+        footerText: "SlackerBuddy 是一个小小的 macOS 桌面宠物 app，适合喜欢轻柔提醒、可爱陪伴和没那么孤单工作日的人。",
+        portfolioLink: "查看 Yueling Qiu 的作品集"
       }
     };
 
