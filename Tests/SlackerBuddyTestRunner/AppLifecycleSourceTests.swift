@@ -1,4 +1,5 @@
 import Foundation
+import CoreGraphics
 import ImageIO
 
 let appLifecycleSourceTests: [TestCase] = [
@@ -285,6 +286,13 @@ let appLifecycleSourceTests: [TestCase] = [
         try expect(menuIconSize.width == menuIconSize.height && menuIconSize.width >= 512, "Expected menu bar icon to remain a square template-ready asset")
         try expect(Double(menuIconVisibleBounds.width) / Double(menuIconSize.width) >= 0.44, "Expected menu bar icon artwork to be widened while keeping its height")
         try expect(Double(menuIconVisibleBounds.height) / Double(menuIconSize.height) >= 0.92, "Expected menu bar icon artwork to keep the current readable height")
+    },
+    TestCase(name: "app icon is full bleed without a white canvas border") {
+        let hasWhiteCanvasBorder = try appIconHasWhiteCanvasBorder(at: "Assets/SlackerBuddyAppIcon.png")
+        try expect(
+            !hasWhiteCanvasBorder,
+            "App icon should crop out the white source canvas so the artwork reaches each edge"
+        )
     },
     TestCase(name: "menu bar icon renders at the requested compact size") {
         let appSource = try String(
@@ -862,6 +870,72 @@ private func fnv1a64Digest(of data: Data) -> UInt64 {
     data.reduce(14695981039346656037 as UInt64) { digest, byte in
         (digest ^ UInt64(byte)) &* 1099511628211
     }
+}
+
+private func appIconHasWhiteCanvasBorder(at path: String) throws -> Bool {
+    let pixels = try rgbaPixels(at: path)
+    let width = pixels.width
+    let height = pixels.height
+    let samplePoints = [
+        (0, 0),
+        (width / 4, 0),
+        (width / 2, 0),
+        (width * 3 / 4, 0),
+        (width - 1, 0),
+        (width / 4, height - 1),
+        (width / 2, height - 1),
+        (width * 3 / 4, height - 1),
+        (0, height - 1),
+        (0, height / 4),
+        (0, height / 2),
+        (0, height * 3 / 4),
+        (width - 1, height - 1),
+        (width - 1, height / 4),
+        (width - 1, height / 2),
+        (width - 1, height * 3 / 4)
+    ]
+
+    return samplePoints.contains { point in
+        let color = pixels.color(atX: point.0, y: point.1)
+        return color.red >= 245 && color.green >= 245 && color.blue >= 245 && color.alpha >= 250
+    }
+}
+
+private struct RGBAPixels {
+    let data: [UInt8]
+    let width: Int
+    let height: Int
+
+    func color(atX x: Int, y: Int) -> (red: UInt8, green: UInt8, blue: UInt8, alpha: UInt8) {
+        let offset = (y * width + x) * 4
+        return (data[offset], data[offset + 1], data[offset + 2], data[offset + 3])
+    }
+}
+
+private func rgbaPixels(at path: String) throws -> RGBAPixels {
+    let url = URL(fileURLWithPath: path)
+    guard let source = CGImageSourceCreateWithURL(url as CFURL, nil),
+          let image = CGImageSourceCreateImageAtIndex(source, 0, nil) else {
+        throw TestFailure.failed("Could not read image pixels for \(path)")
+    }
+
+    let width = image.width
+    let height = image.height
+    var data = [UInt8](repeating: 0, count: width * height * 4)
+    guard let context = CGContext(
+        data: &data,
+        width: width,
+        height: height,
+        bitsPerComponent: 8,
+        bytesPerRow: width * 4,
+        space: CGColorSpaceCreateDeviceRGB(),
+        bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+    ) else {
+        throw TestFailure.failed("Could not create RGBA context for \(path)")
+    }
+
+    context.draw(image, in: CGRect(x: 0, y: 0, width: width, height: height))
+    return RGBAPixels(data: data, width: width, height: height)
 }
 
 private func visibleImageBounds(at path: String) throws -> (width: Int, height: Int) {
