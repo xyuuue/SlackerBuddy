@@ -273,16 +273,26 @@ let appLifecycleSourceTests: [TestCase] = [
         let repoAppIcon = try Data(contentsOf: URL(fileURLWithPath: "Assets/SlackerBuddyAppIcon.png"))
         let providedAppIcon = try Data(contentsOf: URL(fileURLWithPath: "/Users/xyue/Pictures/SlackerBuddy App Icon.png"))
         let repoMenuIcon = try Data(contentsOf: URL(fileURLWithPath: "Assets/SlackerBuddyMenuBarIcon.png"))
-        let providedMenuIcon = try Data(contentsOf: URL(fileURLWithPath: "/Users/xyue/Pictures/SlackerBuddy Touch Bar Icon.png"))
         let appIconSize = try imagePixelSize(at: "Assets/SlackerBuddyAppIcon.png")
         let menuIconSize = try imagePixelSize(at: "Assets/SlackerBuddyMenuBarIcon.png")
         let appIconVisibleBounds = try visibleImageBounds(at: "Assets/SlackerBuddyAppIcon.png")
+        let menuIconVisibleBounds = try visibleImageBounds(at: "Assets/SlackerBuddyMenuBarIcon.png")
 
         try expect(repoAppIcon != providedAppIcon, "Expected app icon to be cropped/resized from the user-provided reference")
-        try expect(repoMenuIcon != providedMenuIcon, "Expected menu bar icon to be cropped/resized from the user-provided reference")
+        try expect(fnv1a64Digest(of: repoMenuIcon) == 0x2f6f0ef06c5d0198, "Expected menu bar icon to use the widened curved artwork")
         try expect(appIconSize.width == appIconSize.height && appIconSize.width >= 512, "Expected app icon to be a large square asset")
         try expect(Double(appIconVisibleBounds.width) / Double(appIconSize.width) >= 0.68, "Expected app icon paw to fill more horizontal space")
-        try expect(menuIconSize.width == menuIconSize.height && menuIconSize.width >= 128, "Expected menu bar icon to be a square template-ready asset")
+        try expect(menuIconSize.width == menuIconSize.height && menuIconSize.width >= 512, "Expected menu bar icon to remain a square template-ready asset")
+        try expect(Double(menuIconVisibleBounds.width) / Double(menuIconSize.width) >= 0.44, "Expected menu bar icon artwork to be widened while keeping its height")
+        try expect(Double(menuIconVisibleBounds.height) / Double(menuIconSize.height) >= 0.92, "Expected menu bar icon artwork to keep the current readable height")
+    },
+    TestCase(name: "menu bar icon renders at the requested compact size") {
+        let appSource = try String(
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/App/SlackerBuddyApp.swift"),
+            encoding: .utf8
+        )
+
+        try expect(appSource.contains("NSSize(width: 18, height: 18)"), "Menu bar icon should render at the requested 18 point size")
     },
     TestCase(name: "release website introduces SlackerBuddy and links the DMG") {
         let siteURL = URL(fileURLWithPath: "docs/site/index.html")
@@ -617,6 +627,32 @@ let appLifecycleSourceTests: [TestCase] = [
         try expect(appRuntimeSource.contains("stateMachine.state == .automaticRunningLeft"), "Runtime should complete automatic left running animations")
         try expect(appRuntimeSource.contains("stateMachine.state == .automaticRunningRight"), "Runtime should complete automatic right running animations")
     },
+    TestCase(name: "runtime keeps automatic running frames visible while the movement task is active") {
+        let appRuntimeSource = try String(
+            contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/App/AppRuntime.swift"),
+            encoding: .utf8
+        )
+
+        guard let completionRange = appRuntimeSource.range(of: "private func completeTransientAnimationIfNeeded()") else {
+            throw TestFailure.failed("Expected runtime to own transient animation completion")
+        }
+        guard let dueReminderRange = appRuntimeSource.range(of: "private func handleDueReminders()") else {
+            throw TestFailure.failed("Expected runtime to tick due reminders after transient animation completion")
+        }
+        guard let automaticRunRange = appRuntimeSource.range(of: "private func performAutomaticRun(direction: PetMovementDirection)") else {
+            throw TestFailure.failed("Expected runtime to perform automatic running")
+        }
+        guard let directionRange = appRuntimeSource.range(of: "private func nextAutomaticRunDirectionValue()") else {
+            throw TestFailure.failed("Expected runtime to choose automatic run direction after running")
+        }
+
+        let completionFunction = String(appRuntimeSource[completionRange.lowerBound..<dueReminderRange.lowerBound])
+        let automaticRunFunction = String(appRuntimeSource[automaticRunRange.lowerBound..<directionRange.lowerBound])
+
+        try expect(completionFunction.contains("automaticRunTask != nil"), "Runtime should not complete automatic running while the movement task is active")
+        try expect(automaticRunFunction.contains("stateMachine.handle(.animationCompleted)"), "Automatic run task should complete the running animation after movement ends")
+        try expect(automaticRunFunction.contains("automaticRunTask = nil"), "Automatic run task should clear its in-flight marker after movement ends")
+    },
     TestCase(name: "runtime gives immediate automatic action and running feedback") {
         let appRuntimeSource = try String(
             contentsOf: URL(fileURLWithPath: "Sources/SlackerBuddy/App/AppRuntime.swift"),
@@ -820,6 +856,12 @@ private func imagePixelSize(at path: String) throws -> (width: Int, height: Int)
     }
 
     return (width, height)
+}
+
+private func fnv1a64Digest(of data: Data) -> UInt64 {
+    data.reduce(14695981039346656037 as UInt64) { digest, byte in
+        (digest ^ UInt64(byte)) &* 1099511628211
+    }
 }
 
 private func visibleImageBounds(at path: String) throws -> (width: Int, height: Int) {

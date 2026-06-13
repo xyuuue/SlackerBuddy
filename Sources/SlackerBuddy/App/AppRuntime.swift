@@ -369,6 +369,12 @@ final class AppRuntime {
     }
 
     private func completeTransientAnimationIfNeeded() {
+        if automaticRunTask != nil,
+           stateMachine.state == .automaticRunningLeft ||
+           stateMachine.state == .automaticRunningRight {
+            return
+        }
+
         if stateMachine.state == .waking ||
             stateMachine.state == .petting ||
             stateMachine.state == .waving ||
@@ -472,6 +478,7 @@ final class AppRuntime {
 
     private func performAutomaticRun(direction: PetMovementDirection) {
         automaticRunTask?.cancel()
+        let runningState: PetState = direction == .left ? .automaticRunningLeft : .automaticRunningRight
         automaticRunTask = Task { @MainActor [weak self] in
             guard let self else {
                 return
@@ -486,6 +493,15 @@ final class AppRuntime {
                 petWindowController.moveHorizontally(points: step)
                 try? await Task.sleep(nanoseconds: 120_000_000)
             }
+
+            guard !Task.isCancelled else {
+                return
+            }
+
+            if stateMachine.state == runningState {
+                stateMachine.handle(.animationCompleted)
+            }
+            automaticRunTask = nil
         }
     }
 
