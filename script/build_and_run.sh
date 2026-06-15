@@ -5,6 +5,7 @@ MODE="${1:-run}"
 APP_NAME="SlackerBuddy"
 BUILD_PRODUCT="SlackerBuddy"
 BUNDLE_ID="com.xyue.SlackerBuddy"
+APP_VERSION="2.0.0"
 MIN_SYSTEM_VERSION="14.0"
 ICON_FILE="SlackerBuddy.icns"
 
@@ -50,6 +51,10 @@ cat >"$INFO_PLIST" <<PLIST
   <string>$APP_NAME</string>
   <key>CFBundleDisplayName</key>
   <string>$APP_NAME</string>
+  <key>CFBundleShortVersionString</key>
+  <string>$APP_VERSION</string>
+  <key>CFBundleVersion</key>
+  <string>$APP_VERSION</string>
   <key>CFBundleIconFile</key>
   <string>$ICON_FILE</string>
   <key>CFBundlePackageType</key>

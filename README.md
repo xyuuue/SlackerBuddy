@@ -28,6 +28,8 @@ Download the latest DMG from the website:
 
 [Download SlackerBuddy](https://slackerbuddy.vercel.app/downloads/SlackerBuddy.dmg)
 
+Latest macOS version: `2.0.0`.
+
 For macOS 10.13.1 High Sierra, use the legacy compatibility build:
 
 [Download SlackerBuddy Legacy 10.13](https://slackerbuddy.vercel.app/downloads/SlackerBuddyLegacy-10.13.dmg)

@@ -109,6 +109,9 @@ let appLifecycleSourceTests: [TestCase] = [
         try expect(notificationSource.contains("SlackerBuddy"), "Notification title should use SlackerBuddy")
         try expect(buildScript.contains("APP_NAME=\"SlackerBuddy\""), "Packaged app should be named SlackerBuddy")
         try expect(buildScript.contains("BUILD_PRODUCT=\"SlackerBuddy\""), "Build script should copy the SwiftPM SlackerBuddy binary")
+        try expect(buildScript.contains("APP_VERSION=\"2.0.0\""), "Packaged app should declare the current 2.0.0 version")
+        try expect(buildScript.contains("CFBundleShortVersionString"), "Packaged app should expose a user-facing version")
+        try expect(buildScript.contains("CFBundleVersion"), "Packaged app should expose a bundle build version")
         try expect(buildScript.contains("CFBundleIconFile"), "Packaged app should declare an app icon")
         try expect(buildScript.contains("SlackerBuddy.icns"), "Packaged app should copy the SlackerBuddy app icon")
         try expect(appDelegateSource.contains("setActivationPolicy(.accessory)"), "macOS app should run as a background menu bar app")
@@ -283,11 +286,19 @@ let appLifecycleSourceTests: [TestCase] = [
         try expect(repoAppIcon == siteAppIcon, "Release website should use the same SlackerBuddy app icon asset")
         try expect(repoAppIcon == windowsAppIcon, "Windows app should use the same SlackerBuddy app icon asset")
         try expect(fnv1a64Digest(of: repoMenuIcon) == 0x2f6f0ef06c5d0198, "Expected menu bar icon to use the widened curved artwork")
-        try expect(appIconSize.width == appIconSize.height && appIconSize.width >= 512, "Expected app icon to be a large square asset")
+        try expect(appIconSize.width == 1024 && appIconSize.height == 1024, "Expected app icon to be a standard 1024px square asset")
         try expect(Double(appIconVisibleBounds.width) / Double(appIconSize.width) >= 0.68, "Expected app icon paw to fill more horizontal space")
         try expect(menuIconSize.width == menuIconSize.height && menuIconSize.width >= 512, "Expected menu bar icon to remain a square template-ready asset")
         try expect(Double(menuIconVisibleBounds.width) / Double(menuIconSize.width) >= 0.44, "Expected menu bar icon artwork to be widened while keeping its height")
         try expect(Double(menuIconVisibleBounds.height) / Double(menuIconSize.height) >= 0.92, "Expected menu bar icon artwork to keep the current readable height")
+    },
+    TestCase(name: "app icon is full bleed without a white canvas border") {
+        let hasWhiteCanvasBorder = try appIconHasWhiteCanvasBorder(at: "Assets/SlackerBuddyAppIcon.png")
+
+        try expect(
+            !hasWhiteCanvasBorder,
+            "App icon should not include the white source canvas on its edges or corners"
+        )
     },
     TestCase(name: "menu bar icon renders at the requested compact size") {
         let appSource = try String(
@@ -310,8 +321,10 @@ let appLifecycleSourceTests: [TestCase] = [
         try expect(siteSource.contains("downloads/SlackerBuddy-Windows-Portable-1.0.0.exe"), "Release page should link the Windows portable build")
         try expect(siteSource.contains("Windows 10") || siteSource.contains("Windows 安装器"), "Release page should explain the Windows build")
         try expect(siteSource.contains("docs/site/assets/fufu-idle.png") || FileManager.default.fileExists(atPath: "docs/site/assets/fufu-idle.png"), "Release page should have a pet preview asset")
-        try expect(siteSource.contains("<link rel=\"icon\" type=\"image/png\" href=\"assets/slackerbuddy-app-icon.png?v=20260613-slackerbuddy-icon\">"), "Release page should use the SlackerBuddy app icon as its browser favicon")
-        try expect(siteSource.contains("<link rel=\"apple-touch-icon\" href=\"assets/slackerbuddy-app-icon.png?v=20260613-slackerbuddy-icon\">"), "Release page should use the SlackerBuddy app icon for saved site icons")
+        try expect(siteSource.contains("<link rel=\"icon\" type=\"image/png\" href=\"assets/slackerbuddy-app-icon.png?v=2.0.0\">"), "Release page should use the SlackerBuddy app icon as its browser favicon")
+        try expect(siteSource.contains("<link rel=\"apple-touch-icon\" href=\"assets/slackerbuddy-app-icon.png?v=2.0.0\">"), "Release page should use the SlackerBuddy app icon for saved site icons")
+        try expect(siteSource.contains("Latest macOS version: 2.0.0"), "Release page should mark 2.0.0 as the latest macOS version")
+        try expect(siteSource.contains("最新 macOS 版本：2.0.0"), "Chinese release copy should mark 2.0.0 as the latest macOS version")
         try expect(FileManager.default.fileExists(atPath: "docs/site/assets/slackerbuddy-app-icon.png"), "Release page should copy the app icon asset")
         try expect(FileManager.default.fileExists(atPath: "docs/site/downloads/SlackerBuddyLegacy-10.13.dmg"), "Release page should include the legacy DMG asset")
         try expect(FileManager.default.fileExists(atPath: "docs/site/downloads/SlackerBuddy-Windows-Setup-1.0.0.exe"), "Release page should include the Windows installer asset")
@@ -864,6 +877,35 @@ private func imagePixelSize(at path: String) throws -> (width: Int, height: Int)
 private func fnv1a64Digest(of data: Data) -> UInt64 {
     data.reduce(14695981039346656037 as UInt64) { digest, byte in
         (digest ^ UInt64(byte)) &* 1099511628211
+    }
+}
+
+private func appIconHasWhiteCanvasBorder(at path: String) throws -> Bool {
+    let pixels = try rgbaPixels(at: path)
+    let width = pixels.width
+    let height = pixels.height
+    let samplePoints = [
+        (0, 0),
+        (width / 4, 0),
+        (width / 2, 0),
+        (width * 3 / 4, 0),
+        (width - 1, 0),
+        (0, height / 4),
+        (0, height / 2),
+        (0, height * 3 / 4),
+        (width - 1, height / 4),
+        (width - 1, height / 2),
+        (width - 1, height * 3 / 4),
+        (0, height - 1),
+        (width / 4, height - 1),
+        (width / 2, height - 1),
+        (width * 3 / 4, height - 1),
+        (width - 1, height - 1)
+    ]
+
+    return samplePoints.contains { point in
+        let color = pixels.color(atX: point.0, y: point.1)
+        return color.alpha >= 250 && color.red >= 245 && color.green >= 245 && color.blue >= 245
     }
 }
 
